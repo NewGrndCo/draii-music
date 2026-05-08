@@ -8,7 +8,7 @@ import AudioController from './AudioController';
 const PlayerCore: React.FC = () => {
   const {
     currentSong, loading, horizontalMode, gradientColor,
-    lightPosition, playNextSong, playPreviousSong, openLibrary, hideEarnings,
+    lightPosition, playNextSong, playPreviousSong, openLibrary,
     playerState, albums, nextSongs, playSong, togglePlayPause,
     skipForward, skipBackward, setOnEndCallback
   } = usePlayer();
@@ -24,7 +24,6 @@ const PlayerCore: React.FC = () => {
         playNextSong={playNextSong}
         playPreviousSong={playPreviousSong}
         openLibrary={openLibrary}
-        hideEarnings={hideEarnings}
       >
         <PlayerContentView />
         <Footer />

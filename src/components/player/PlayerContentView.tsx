@@ -6,17 +6,12 @@ import PlayerControls from './PlayerControls';
 import ActionButtons from './ActionButtons';
 import VolumeControl from './VolumeControl';
 import NextUpSongs from './NextUpSongs';
-import SupportFund from './supportfund';
-import NetworkStats from './NetworkStats';
 
 const PlayerContentView: React.FC = () => {
   const {
     currentSong, playerState, playCount, likesCount, liked,
-    heartAnimation, showEarnings, currentEarnings, totalEarnings,
-    currentRate, networkUserCount, signalStrength, gradientColor,
-    horizontalMode, isBoosted, initialReserve, nextSongs,
-    formatTime, toggleLike, toggleEarnings, hideEarnings,
-    toggleMiningInfo, openTermsOfService, togglePlayPause,
+    heartAnimation, horizontalMode, nextSongs,
+    formatTime, toggleLike, togglePlayPause,
     toggleRepeat, playNextSong, playPreviousSong, skipForward,
     skipBackward, seekTo, handleVolumeChange, toggleLayout,
     handleSelectSong, openLibrary
@@ -25,10 +20,6 @@ const PlayerContentView: React.FC = () => {
   if (!currentSong) {
     return <div className="text-foreground text-center p-4">Loading music...</div>;
   }
-
-  const getNetworkSignalIcon = () => (
-    <NetworkStats signalStrength={signalStrength} networkUserCount={networkUserCount} />
-  );
 
   return (
     <div className="space-y-4">
@@ -48,30 +39,9 @@ const PlayerContentView: React.FC = () => {
         liked={liked}
         heartAnimation={heartAnimation}
         toggleLike={toggleLike}
-        toggleEarnings={toggleEarnings}
-        showEarnings={showEarnings}
         playCount={playCount}
         likesCount={likesCount}
-        isBoosted={isBoosted}
       />
-
-      {showEarnings && (
-        <SupportFund
-          showEarnings={showEarnings}
-          currentEarnings={currentEarnings}
-          totalEarnings={totalEarnings}
-          currentRate={currentRate}
-          signalStrength={signalStrength}
-          networkUserCount={networkUserCount}
-          toggleMiningInfo={toggleMiningInfo}
-          hideEarnings={hideEarnings}
-          openTermsOfService={openTermsOfService}
-          getNetworkSignalIcon={getNetworkSignalIcon}
-          isPlaying={playerState.isPlaying}
-          isBoosted={isBoosted}
-          initialReserve={initialReserve}
-        />
-      )}
 
       <ProgressBar
         currentTime={playerState.currentTime}
