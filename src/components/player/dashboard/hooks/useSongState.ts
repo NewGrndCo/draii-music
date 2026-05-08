@@ -15,14 +15,14 @@ export function useSongState(isOpen: boolean) {
       setLoading(true);
       setError(null);
       
-      const { data: songsData, error } = await supabase
+      const { data: songsData, error } = await (supabase as any)
         .from('songs')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      const formattedSongs: Song[] = songsData.map(song => ({
+      const formattedSongs: Song[] = (songsData ?? []).map((song: any) => ({
         id: song.id,
         title: song.title || 'Untitled',
         artist: song.artist || 'Unknown Artist',

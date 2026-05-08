@@ -25,7 +25,7 @@ const SongUploader = ({ onUploadComplete }: { onUploadComplete: () => void }) =>
       if (uploadError) throw uploadError;
 
       // Create song entry in the database
-      const { error: dbError } = await supabase
+      const { error: dbError } = await (supabase as any)
         .from('songs')
         .insert({
           title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension

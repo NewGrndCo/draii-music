@@ -433,7 +433,7 @@ export function useAdminDashboardData() {
     try {
       setLoading(true);
       
-      const { data: songsData, error } = await supabase
+      const { data: songsData, error } = await (supabase as any)
         .from('songs')
         .select('*')
         .order('created_at', { ascending: false });
@@ -441,7 +441,7 @@ export function useAdminDashboardData() {
       if (error) throw error;
       
       // Format the songs to match the Song interface
-      const formattedSongs: Song[] = songsData.map(song => ({
+      const formattedSongs: Song[] = (songsData ?? []).map((song: any) => ({
         id: song.id,
         title: song.title || 'Untitled',
         artist: song.artist || 'Unknown Artist',

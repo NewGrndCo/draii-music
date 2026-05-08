@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PlayerSwipeGestures from '../gestures/PlayerSwipeGestures';
 import ShineEffect from '../effects/ShineEffect';
@@ -17,7 +16,6 @@ interface PlayerWrapperProps {
   playNextSong: () => void;
   playPreviousSong: () => void;
   openLibrary: (showAllCovers: boolean) => void;
-  hideEarnings: () => void;
 }
 
 const PlayerWrapper: React.FC<PlayerWrapperProps> = ({
@@ -30,20 +28,16 @@ const PlayerWrapper: React.FC<PlayerWrapperProps> = ({
   playNextSong,
   playPreviousSong,
   openLibrary,
-  hideEarnings
 }) => {
   const { darkMode } = useDarkMode();
 
-  const openLibraryWithCovers = () => {
-    openLibrary(horizontalMode);
-  };
+  const openLibraryWithCovers = () => openLibrary(horizontalMode);
 
   return (
     <PlayerSwipeGestures
       playNextSong={playNextSong}
       playPreviousSong={playPreviousSong}
       openLibrary={openLibraryWithCovers}
-      hideEarnings={hideEarnings}
     >
       <PlayerBackground
         horizontalMode={horizontalMode}
@@ -51,7 +45,7 @@ const PlayerWrapper: React.FC<PlayerWrapperProps> = ({
         darkMode={darkMode}
       >
         <ShineEffect lightPosition={lightPosition}>
-          <PlayerLayout 
+          <PlayerLayout
             horizontalMode={horizontalMode}
             gradientColor={gradientColor}
             lightPosition={lightPosition}
