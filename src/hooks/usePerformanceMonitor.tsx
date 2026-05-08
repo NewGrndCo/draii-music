@@ -8,7 +8,7 @@ export const usePerformanceMonitor = (componentName: string) => {
 
   const logPerformance = useCallback(() => {
     // Only log in development and throttle heavily to reduce overhead
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       const now = Date.now();
       
       // Only log every 50 renders and not more than once every 10 seconds
