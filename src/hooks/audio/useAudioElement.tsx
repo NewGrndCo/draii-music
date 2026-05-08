@@ -1,0 +1,176 @@
+
+import { useRef, useEffect } from 'react';
+import { Song } from '../../data/musicData';
+import { AudioPlayerState } from './useAudioState';
+import { toast } from 'sonner';
+
+export const useAudioElement = (
+  currentSong: Song | null,
+  playerState: AudioPlayerState,
+  setPlayerState: (stateFn: (prev: AudioPlayerState) => AudioPlayerState) => void,
+  eventHandlers: any
+) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userInteractedRef = useRef<boolean>(false);
+  const currentSongRef = useRef<Song | null>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  // Create audio element and set up event listeners
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      
+      const audio = audioRef.current;
+      const progressHandler = () => eventHandlers.updateProgress(audio);
+      const durationHandler = () => eventHandlers.updateDuration(audio);
+      
+      audio.addEventListener('timeupdate', progressHandler, { passive: true });
+      audio.addEventListener('loadedmetadata', durationHandler, { passive: true });
+      audio.addEventListener('loadstart', eventHandlers.handleLoadStart, { passive: true });
+      audio.addEventListener('canplay', eventHandlers.handleCanPlay, { passive: true });
+      audio.addEventListener('canplaythrough', eventHandlers.handleCanPlay, { passive: true });
+      audio.addEventListener('ended', eventHandlers.handleSongEnd, { passive: true });
+      audio.addEventListener('playing', eventHandlers.handlePlaying, { passive: true });
+      audio.addEventListener('error', eventHandlers.handleError, { passive: true });
+      
+      const handleUserInteraction = () => {
+        userInteractedRef.current = true;
+        document.removeEventListener('click', handleUserInteraction);
+        document.removeEventListener('keydown', handleUserInteraction);
+        document.removeEventListener('touchstart', handleUserInteraction);
+      };
+      
+      document.addEventListener('click', handleUserInteraction, { passive: true });
+      document.addEventListener('keydown', handleUserInteraction, { passive: true });
+      document.addEventListener('touchstart', handleUserInteraction, { passive: true });
+    }
+    
+    if (audioRef.current) {
+      audioRef.current.volume = playerState.volume;
+      audioRef.current.loop = playerState.repeat;
+    }
+    
+    return () => {
+      if (eventHandlers.loadingTimeoutRef.current) {
+        window.clearTimeout(eventHandlers.loadingTimeoutRef.current);
+        eventHandlers.loadingTimeoutRef.current = null;
+      }
+    };
+  }, [playerState.repeat, eventHandlers]);
+
+  // Handle song changes
+  useEffect(() => {
+    if (audioRef.current && currentSong && currentSong.id !== currentSongRef.current?.id) {
+      currentSongRef.current = currentSong;
+      
+      // Cancel any pending play promise
+      if (playPromiseRef.current) {
+        playPromiseRef.current = null;
+      }
+      
+      const audioSrc = currentSong.audioSrc;
+      if (!audioSrc) {
+        console.error('Invalid audio source for song:', currentSong.title);
+        if (eventHandlers.hasPlayedSuccessfully.current) {
+          toast.error(`Can't play "${currentSong.title}"`, {
+            description: 'No audio file available',
+            duration: 1500
+          });
+        }
+        setPlayerState(prev => ({ ...prev, isReady: true }));
+        return;
+      }
+      
+      const fullAudioSrc = audioSrc.startsWith('http') 
+        ? audioSrc 
+        : `https://iextgszxpxeurbpncapv.supabase.co/storage/v1/object/public/songs/${audioSrc}`;
+      
+      console.log('Loading audio source:', fullAudioSrc);
+      audioRef.current.src = fullAudioSrc;
+      audioRef.current.preload = 'auto';
+      audioRef.current.load();
+      
+      // Update media session metadata
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentSong.title,
+          artist: currentSong.artist,
+          album: currentSong.album,
+          artwork: [
+            { src: currentSong.coverArt, sizes: '512x512', type: 'image/jpeg' }
+          ]
+        });
+      }
+      
+      // Dispatch color change event
+      const songChangeEvent = new CustomEvent('song-color-change', { 
+        detail: { coverArt: currentSong.coverArt }
+      });
+      document.dispatchEvent(songChangeEvent);
+    }
+  }, [currentSong, setPlayerState, eventHandlers]);
+
+  // Handle play state changes separately to avoid race conditions
+  useEffect(() => {
+    const handlePlayStateChange = async () => {
+      if (!audioRef.current || !currentSong) return;
+      
+      try {
+        if (playerState.isPlaying && userInteractedRef.current) {
+          // Cancel any existing play promise
+          if (playPromiseRef.current) {
+            await playPromiseRef.current.catch(() => {});
+          }
+          
+          // Create new play promise
+          playPromiseRef.current = audioRef.current.play();
+          await playPromiseRef.current;
+          playPromiseRef.current = null;
+        } else if (!playerState.isPlaying) {
+          // Cancel any pending play promise before pausing
+          if (playPromiseRef.current) {
+            await playPromiseRef.current.catch(() => {});
+            playPromiseRef.current = null;
+          }
+          audioRef.current.pause();
+        }
+      } catch (error) {
+        console.error('Error during audio playback:', error);
+        setPlayerState(prev => ({ ...prev, isPlaying: false }));
+        playPromiseRef.current = null;
+      }
+    };
+
+    handlePlayStateChange();
+  }, [playerState.isPlaying, currentSong, setPlayerState]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        // Cancel any pending play promise
+        if (playPromiseRef.current) {
+          playPromiseRef.current.catch(() => {});
+          playPromiseRef.current = null;
+        }
+        
+        audioRef.current.pause();
+        const audio = audioRef.current;
+        const progressHandler = () => eventHandlers.updateProgress(audio);
+        const durationHandler = () => eventHandlers.updateDuration(audio);
+        
+        audio.removeEventListener('timeupdate', progressHandler);
+        audio.removeEventListener('loadedmetadata', durationHandler);
+        audio.removeEventListener('loadstart', eventHandlers.handleLoadStart);
+        audio.removeEventListener('canplay', eventHandlers.handleCanPlay);
+        audio.removeEventListener('canplaythrough', eventHandlers.handleCanPlay);
+        audio.removeEventListener('ended', eventHandlers.handleSongEnd);
+        audio.removeEventListener('playing', eventHandlers.handlePlaying);
+        audio.removeEventListener('error', eventHandlers.handleError);
+        audioRef.current = null;
+      }
+    };
+  }, [eventHandlers]);
+
+  return { audioRef };
+};

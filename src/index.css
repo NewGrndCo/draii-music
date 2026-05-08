@@ -1,0 +1,335 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+    
+    --music-purple: 262 100% 75%;
+    --music-blue: 199 90% 67%;
+    --music-pink: 330 90% 70%;
+    
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+  code, pre {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+  /* Enhanced mobile text visibility */
+  .font-display {
+    font-family: var(--font-display);
+  }
+  
+  /* Better text contrast for mobile */
+  .text-mobile-contrast {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* Enhanced button touch targets for mobile */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Custom styles for music library scroll */
+  .music-library-scroll {
+    @apply pr-2;
+  }
+  
+  .music-library-scroll > div > div {
+    @apply space-y-1;
+  }
+  
+  /* Element animations */
+  .element-appear {
+    animation: scale-in 0.2s ease-out forwards;
+  }
+  
+  .element-exit {
+    animation: scale-out 0.2s ease-out forwards;
+  }
+  
+  /* Button animations */
+  .button-press {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  /* List item animations */
+  .list-item-appear {
+    animation: fade-in 0.3s ease-out forwards;
+    animation-delay: calc(var(--index) * 0.05s);
+    opacity: 0;
+  }
+}
+
+/* Animation keyframes for BackgroundGradientAnimation - keeping these as requested */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes first {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.2);
+  }
+}
+
+@keyframes second {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(-360deg) scale(1.3);
+  }
+}
+
+@keyframes third {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.25);
+  }
+}
+
+@keyframes fourth {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(-360deg) scale(1.2);
+  }
+}
+
+@keyframes fifth {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.3);
+  }
+}
+
+/* Background gradient animations - keeping these as requested */
+.animate-first {
+  animation: first 12s infinite linear;
+}
+
+.animate-second {
+  animation: second 18s infinite linear;
+}
+
+.animate-third {
+  animation: third 16s infinite linear;
+}
+
+.animate-fourth {
+  animation: fourth 19s infinite linear;
+}
+
+.animate-fifth {
+  animation: fifth 22s infinite linear;
+}
+
+/* Removing scale animation and replacing with a simpler static class */
+.static-scale {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Music library fullscreen styles */
+.music-library-fullscreen:fullscreen {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+}
+
+/* Custom scrollbar styles - updating for modern look */
+.scrollbar-hidden::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-hidden::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hidden::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+}
+
+.scrollbar-hidden::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Simplified hover styles - reducing transitions */
+.hover-scale {
+  transition: transform 0.1s ease-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+/* Improved mobile touch targets */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Enhanced mobile-specific styles */
+@media (max-width: 768px) {
+  /* Better text readability on mobile */
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Enhanced button touch targets */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Better dialog positioning on mobile */
+  [data-radix-popper-content-wrapper], 
+  [data-state="open"] {
+    z-index: 999 !important;
+  }
+
+  /* Improved text contrast for small screens */
+  h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Better spacing for mobile */
+  .space-y-1 > * + * {
+    margin-top: 0.5rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Modern button text styles */
+button, 
+.button {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Modern input styles */
+input, 
+textarea, 
+select {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+/* Performance optimized fullscreen mode styles */
+:fullscreen .max-w-3xl {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100vh !important;
+}
+
+:fullscreen .music-library-fullscreen {
+  max-width: 100% !important;
+  width: 100% !important;
+}
