@@ -47,7 +47,7 @@ const MailingListModal: React.FC = () => {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from('mailing_list').insert({
+    const { error } = await (supabase as any).from('mailing_list').insert({
       email: parsed.data.email,
       phone: parsed.data.phone ? parsed.data.phone : null,
     });
