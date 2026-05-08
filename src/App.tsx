@@ -8,7 +8,7 @@ import { AnimationProvider } from './hooks/useAnimationContext';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import AppBackground from './components/shared/AppBackground';
 import MusicPlayer from './components/MusicPlayer';
-import TermsOfServiceModal from './components/TermsOfServiceModal';
+import MailingListModal from './components/MailingListModal';
 import Admin from './pages/Admin';
 
 const App = () => {
@@ -23,7 +23,7 @@ const App = () => {
             <Route path="/admin" element={<Admin />} />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
-                <TermsOfServiceModal />
+                <MailingListModal />
                 
                 <Suspense fallback={
                   <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">

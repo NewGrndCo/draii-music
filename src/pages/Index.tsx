@@ -1,20 +1,19 @@
-
 import React, { Suspense } from 'react';
 import MusicPlayer from '../components/MusicPlayer';
 import { Toaster } from '../components/ui/sonner';
 import { useAudio } from '../hooks/useAudio';
 import { useIsMobile } from '../hooks/use-mobile';
 import AppBackground from '../components/shared/AppBackground';
-import TermsOfServiceModal from '../components/TermsOfServiceModal';
+import MailingListModal from '../components/MailingListModal';
 
 const Index = () => {
   const { currentSong } = useAudio();
   const isMobile = useIsMobile();
-  
+
   return (
     <AppBackground currentSong={currentSong} showDarkModeToggle={true}>
-      <TermsOfServiceModal />
-        
+      <MailingListModal />
+
       <Suspense fallback={
         <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">
           <div className="text-white">Loading music...</div>
@@ -26,7 +25,7 @@ const Index = () => {
           </div>
         </main>
       </Suspense>
-      
+
       <Toaster position={isMobile ? "bottom-center" : "bottom-right"} />
     </AppBackground>
   );
