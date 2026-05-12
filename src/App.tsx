@@ -10,6 +10,7 @@ import AppBackground from './components/shared/AppBackground';
 import MusicPlayer from './components/MusicPlayer';
 import MailingListModal from './components/MailingListModal';
 import Admin from './pages/Admin';
+import AdminGuard from './components/AdminGuard';
 
 const App = () => {
   const { currentSong } = useAudio();
@@ -20,7 +21,7 @@ const App = () => {
       <AnimationProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
                 <MailingListModal />
