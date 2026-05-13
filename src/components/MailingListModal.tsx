@@ -39,9 +39,12 @@ const MailingListModal: React.FC = () => {
   const modalEnabled = profile?.mailing_modal_enabled ?? true;
   const required = profile?.mailing_required ?? false;
   const hasSeen = typeof window !== 'undefined' && !!localStorage.getItem(STORAGE_KEY);
+  // Bypass the modal entirely when arriving via a shared song link, so the song plays immediately.
+  const isSharedLink = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('s');
 
   useEffect(() => {
     if (!profile) return;
+    if (isSharedLink) return; // never block shared-song visits
     if (required && !hasSeen) {
       setOpen(true);
       return;
@@ -49,10 +52,11 @@ const MailingListModal: React.FC = () => {
     if (modalEnabled && !hasSeen) {
       setOpen(true);
     }
-  }, [profile, required, modalEnabled, hasSeen]);
+  }, [profile, required, modalEnabled, hasSeen, isSharedLink]);
 
   // Block audio playback while a required signup is pending
   useEffect(() => {
+    if (isSharedLink) return;
     if (!required || hasSeen) return;
     const pauseAll = () => {
       document.querySelectorAll('audio').forEach((a) => {
@@ -62,7 +66,7 @@ const MailingListModal: React.FC = () => {
     pauseAll();
     const id = window.setInterval(pauseAll, 400);
     return () => window.clearInterval(id);
-  }, [required, hasSeen, open]);
+  }, [required, hasSeen, open, isSharedLink]);
 
   const dismiss = () => {
     if (required && !success) return; // cannot dismiss when required
