@@ -83,7 +83,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
       {/* Location with icon */}
       <div className="flex items-center justify-center mb-1">
         <MapPin size={inFullscreen ? 10 : 14} className="text-white/70 mr-1" />
-        <span className={cn("text-white/70", inFullscreen ? "text-[10px]" : "text-xs")}>Suffolk County, NY</span>
+        <span className={cn("text-white/70", inFullscreen ? "text-[10px]" : "text-xs")}>{profile?.location?.trim() || 'Suffolk County, NY'}</span>
       </div>
       
       {/* Bio from artist profile (admin-editable) */}
