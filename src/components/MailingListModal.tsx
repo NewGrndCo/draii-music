@@ -66,7 +66,7 @@ const MailingListModal: React.FC = () => {
     pauseAll();
     const id = window.setInterval(pauseAll, 400);
     return () => window.clearInterval(id);
-  }, [required, hasSeen, open]);
+  }, [required, hasSeen, open, isSharedLink]);
 
   const dismiss = () => {
     if (required && !success) return; // cannot dismiss when required
