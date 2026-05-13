@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Library, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
-  Music2, Wifi, ChevronLeft, Mail,
+  Music2, Wifi, ChevronLeft, Mail, DollarSign,
 } from 'lucide-react';
 import { ADMIN_TOKEN_KEY } from './lib/api';
 
@@ -14,13 +14,14 @@ interface Props {
 }
 
 const items = [
-  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { key: 'library',   label: 'Library',   icon: Library },
-  { key: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { key: 'events',    label: 'Events',    icon: CalendarDays },
-  { key: 'merch',     label: 'Merch',     icon: ShoppingBag },
-  { key: 'mailing',   label: 'Mailing',   icon: Mail },
-  { key: 'settings',  label: 'Settings',  icon: Settings },
+  { key: 'dashboard', label: 'Dashboard',    icon: LayoutDashboard },
+  { key: 'library',   label: 'Library',      icon: Library },
+  { key: 'analytics', label: 'Analytics',    icon: BarChart3 },
+  { key: 'events',    label: 'Events',       icon: CalendarDays },
+  { key: 'merch',     label: 'Merch',        icon: ShoppingBag },
+  { key: 'support',   label: 'Support Fund', icon: DollarSign },
+  { key: 'mailing',   label: 'Mailing',      icon: Mail },
+  { key: 'settings',  label: 'Settings',     icon: Settings },
 ];
 
 const StatusPill: React.FC<{ label: string; ok?: boolean; icon: React.ElementType }> = ({ label, ok = true, icon: Icon }) => (
