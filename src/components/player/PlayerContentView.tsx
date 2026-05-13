@@ -6,6 +6,7 @@ import PlayerControls from './PlayerControls';
 import ActionButtons from './ActionButtons';
 import VolumeControl from './VolumeControl';
 import NextUpSongs from './NextUpSongs';
+import UpcomingEvents from './UpcomingEvents';
 
 const PlayerContentView: React.FC = () => {
   const {
@@ -75,6 +76,8 @@ const PlayerContentView: React.FC = () => {
           openLibrary={() => openLibrary(true)}
         />
       )}
+
+      <UpcomingEvents />
     </div>
   );
 };
