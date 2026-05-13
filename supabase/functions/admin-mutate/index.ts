@@ -119,8 +119,21 @@ Deno.serve(async (req) => {
     if (!ALLOWED_TABLES.has(String(table))) return json({ error: "Bad table" }, 400);
 
     if (op === "list") {
-      const { data, error } = await sb.from(table).select("*").order("created_at", { ascending: false });
+      // artist_profile has no created_at column
+      const orderCol = table === "artist_profile" ? "updated_at" : "created_at";
+      const { data, error } = await sb.from(table).select("*").order(orderCol, { ascending: false });
       if (error) return json({ error: error.message }, 400);
+
+      // Auto-seed a default artist_profile row so the Settings page always works
+      if (table === "artist_profile" && (!data || data.length === 0)) {
+        const { data: created, error: insErr } = await sb
+          .from("artist_profile")
+          .insert({ bio: "", socials: {}, player_layout: "normal" })
+          .select()
+          .single();
+        if (insErr) return json({ error: insErr.message }, 400);
+        return json({ data: [created] });
+      }
       return json({ data });
     }
 
