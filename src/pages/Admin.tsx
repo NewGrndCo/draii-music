@@ -6,6 +6,7 @@ import Analytics from '@/admin/modules/Analytics';
 import Events from '@/admin/modules/Events';
 import Merch from '@/admin/modules/Merch';
 import Settings from '@/admin/modules/Settings';
+import MailingList from '@/admin/modules/MailingList';
 
 const Admin: React.FC = () => {
   const [tab, setTab] = useState<string>('dashboard');
@@ -17,6 +18,7 @@ const Admin: React.FC = () => {
       {tab === 'analytics' && <Analytics />}
       {tab === 'events'    && <Events />}
       {tab === 'merch'     && <Merch />}
+      {tab === 'mailing'   && <MailingList />}
       {tab === 'settings'  && <Settings />}
     </AdminLayout>
   );

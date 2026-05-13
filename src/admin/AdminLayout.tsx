@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Library, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
-  Music2, Wifi, ChevronLeft,
+  Music2, Wifi, ChevronLeft, Mail,
 } from 'lucide-react';
 import { ADMIN_TOKEN_KEY } from './lib/api';
 
@@ -19,6 +19,7 @@ const items = [
   { key: 'analytics', label: 'Analytics', icon: BarChart3 },
   { key: 'events',    label: 'Events',    icon: CalendarDays },
   { key: 'merch',     label: 'Merch',     icon: ShoppingBag },
+  { key: 'mailing',   label: 'Mailing',   icon: Mail },
   { key: 'settings',  label: 'Settings',  icon: Settings },
 ];
 
