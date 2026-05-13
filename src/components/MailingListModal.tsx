@@ -19,6 +19,12 @@ const schema = z.object({
     .max(32, { message: 'Phone number is too long' })
     .optional()
     .or(z.literal('')),
+  zip: z
+    .string()
+    .trim()
+    .max(16, { message: 'Zip code is too long' })
+    .optional()
+    .or(z.literal('')),
 });
 
 const MailingListModal: React.FC = () => {
