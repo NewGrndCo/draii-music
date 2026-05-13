@@ -1,9 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import { adminStats } from '../lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import StatCard from '../components/StatCard';
 import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// World topojson (lightweight, public CDN)
+const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
+// Approximate centroids for common ISO-3166 alpha-2 codes (longitude, latitude)
+const COUNTRY_COORDS: Record<string, [number, number]> = {
+  US: [-98, 39], CA: [-106, 56], MX: [-102, 23], BR: [-52, -10], AR: [-64, -34],
+  GB: [-2, 54], FR: [2, 46], DE: [10, 51], ES: [-4, 40], IT: [12, 42], NL: [5, 52],
+  SE: [15, 62], NO: [10, 62], FI: [26, 64], PL: [19, 52], UA: [32, 49], RU: [100, 61],
+  TR: [35, 39], EG: [30, 26], NG: [8, 9], ZA: [24, -29], KE: [37, -1], MA: [-7, 32],
+  IN: [78, 22], CN: [104, 35], JP: [138, 36], KR: [127, 36], ID: [113, -2], PH: [121, 12],
+  AU: [134, -25], NZ: [172, -41], SA: [45, 24], AE: [54, 24], IL: [35, 31],
+};
+
 
 type Stats = Awaited<ReturnType<typeof adminStats>>;
 
@@ -93,20 +108,51 @@ const Analytics: React.FC = () => {
           <h3 className="font-display text-base font-semibold flex items-center gap-2"><Globe2 className="h-4 w-4 text-purple-300" /> Geographic listenership</h3>
           <span className="text-xs text-white/45">{Object.keys(byCountry).length} countries</span>
         </div>
-        {topCountries.length === 0 ? (
-          <div className="text-sm text-white/45 py-8 text-center">No listens yet — once visitors play songs, their countries will appear here.</div>
-        ) : (
-          <div className="space-y-2">
-            {topCountries.map(([country, n]) => (
-              <div key={country} className="flex items-center gap-3">
-                <div className="w-12 text-xs text-white/55 tabular-nums">{country}</div>
-                <div className="flex-1 h-2.5 rounded-full bg-white/5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${(n / maxCountry) * 100}%`, background: 'var(--admin-gradient)' }}
+
+        <div className="rounded-xl overflow-hidden bg-[hsl(var(--admin-bg)/0.6)] border border-white/5">
+          <ComposableMap
+            projectionConfig={{ scale: 155 }}
+            width={980}
+            height={460}
+            style={{ width: '100%', height: 'auto', background: 'transparent' }}
+          >
+            <Geographies geography={GEO_URL}>
+              {({ geographies }: any) =>
+                geographies.map((geo: any) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    style={{
+                      default: { fill: 'hsl(var(--admin-glass) / 0.9)', stroke: 'hsl(var(--admin-glass-border) / 0.25)', strokeWidth: 0.4, outline: 'none' },
+                      hover:   { fill: 'hsl(var(--admin-purple) / 0.35)', outline: 'none' },
+                      pressed: { fill: 'hsl(var(--admin-purple) / 0.5)', outline: 'none' },
+                    }}
                   />
-                </div>
-                <div className="w-14 text-right text-xs tabular-nums text-white/70">{n.toLocaleString()}</div>
+                ))
+              }
+            </Geographies>
+            {topCountries.map(([code, n]) => {
+              const coords = COUNTRY_COORDS[code as string];
+              if (!coords) return null;
+              const r = 4 + ((n as number) / maxCountry) * 18;
+              return (
+                <Marker key={code} coordinates={coords}>
+                  <circle r={r} fill="hsl(var(--admin-purple))" fillOpacity={0.55} stroke="hsl(var(--admin-pink))" strokeWidth={1.2} />
+                  <circle r={2} fill="hsl(var(--admin-pink))" />
+                </Marker>
+              );
+            })}
+          </ComposableMap>
+        </div>
+
+        {topCountries.length === 0 ? (
+          <div className="text-sm text-white/45 py-4 text-center">No listens yet — once visitors play songs, their countries will appear on the map.</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+            {topCountries.map(([country, n]) => (
+              <div key={country} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2 text-xs">
+                <span className="text-white/70 font-medium">{country}</span>
+                <span className="tabular-nums text-white/85">{(n as number).toLocaleString()}</span>
               </div>
             ))}
           </div>
