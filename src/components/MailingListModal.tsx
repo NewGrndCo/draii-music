@@ -7,6 +7,7 @@ import { Mail } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 const STORAGE_KEY = 'mailingListPromptSeen';
 
