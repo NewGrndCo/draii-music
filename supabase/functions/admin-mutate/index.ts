@@ -143,26 +143,6 @@ Deno.serve(async (req) => {
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
     }
-
-    if (op === "stats") {
-      // Aggregated dashboard stats — service role bypasses RLS
-      const [songs, events, merch, donations, listens] = await Promise.all([
-        sb.from("songs").select("id, play_count, likes_count, support_fund_cents"),
-        sb.from("events").select("id, status, event_date"),
-        sb.from("merch").select("id, active, stock"),
-        sb.from("donations").select("amount_cents, source, created_at"),
-        sb.from("listens").select("country, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
-      ]);
-
-      return json({
-        songs: songs.data ?? [],
-        events: events.data ?? [],
-        merch: merch.data ?? [],
-        donations: donations.data ?? [],
-        listens: listens.data ?? [],
-      });
-    }
-
     return json({ error: "Unknown op" }, 400);
   } catch (e) {
     return json({ error: String(e) }, 500);
