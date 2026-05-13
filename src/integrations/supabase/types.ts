@@ -14,6 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_profile: {
+        Row: {
+          bio: string | null
+          id: string
+          player_layout: string
+          socials: Json
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          id?: string
+          player_layout?: string
+          socials?: Json
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          id?: string
+          player_layout?: string
+          socials?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      donations: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          donor_name: string | null
+          id: string
+          metadata: Json | null
+          song_id: string | null
+          source: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          donor_name?: string | null
+          id?: string
+          metadata?: Json | null
+          song_id?: string | null
+          source: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          donor_name?: string | null
+          id?: string
+          metadata?: Json | null
+          song_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          event_date: string
+          event_time: string | null
+          id: string
+          location: string | null
+          status: string
+          ticket_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          event_date: string
+          event_time?: string | null
+          id?: string
+          location?: string | null
+          status?: string
+          ticket_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          location?: string | null
+          status?: string
+          ticket_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      listens: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          id: string
+          song_id: string | null
+          source: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          song_id?: string | null
+          source?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          song_id?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listens_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mailing_list: {
         Row: {
           created_at: string
@@ -35,6 +174,48 @@ export type Database = {
         }
         Relationships: []
       }
+      merch: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          external_url: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price_cents: number
+          sort_order: number
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       songs: {
         Row: {
           album_id: string | null
@@ -46,12 +227,15 @@ export type Database = {
           duration: number | null
           file_path: string | null
           genre: string | null
+          guest_artists: string[]
           id: string
+          is_collaboration: boolean
           likes_count: number | null
           play_count: number | null
           preview_path: string | null
           release_date: string | null
           status: string | null
+          support_fund_cents: number
           tags: string[] | null
           thumbnail_path: string | null
           title: string | null
@@ -68,12 +252,15 @@ export type Database = {
           duration?: number | null
           file_path?: string | null
           genre?: string | null
+          guest_artists?: string[]
           id: string
+          is_collaboration?: boolean
           likes_count?: number | null
           play_count?: number | null
           preview_path?: string | null
           release_date?: string | null
           status?: string | null
+          support_fund_cents?: number
           tags?: string[] | null
           thumbnail_path?: string | null
           title?: string | null
@@ -90,12 +277,15 @@ export type Database = {
           duration?: number | null
           file_path?: string | null
           genre?: string | null
+          guest_artists?: string[]
           id?: string
+          is_collaboration?: boolean
           likes_count?: number | null
           play_count?: number | null
           preview_path?: string | null
           release_date?: string | null
           status?: string | null
+          support_fund_cents?: number
           tags?: string[] | null
           thumbnail_path?: string | null
           title?: string | null
