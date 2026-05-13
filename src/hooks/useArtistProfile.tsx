@@ -8,6 +8,7 @@ export interface ArtistProfile {
   player_layout: string;
   frontend_sections: string[];
   logo_url: string | null;
+  location: string;
 }
 
 const DEFAULT_SECTIONS = ['next_up', 'events', 'merch'];
