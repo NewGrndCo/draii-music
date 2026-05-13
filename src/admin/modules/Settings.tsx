@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { adminList, adminUpdate } from '../lib/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { adminList, adminUpdate, adminUploadFile } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -13,6 +13,7 @@ interface Profile {
   socials: Record<string, string>;
   player_layout: 'normal' | 'wide';
   frontend_sections: string[];
+  logo_url: string | null;
 }
 
 const SECTION_LABELS: Record<string, string> = {
