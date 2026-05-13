@@ -51,6 +51,8 @@ export const useArtistProfile = () => {
           artist_image_url: data.artist_image_url ?? null,
           support_fund_enabled: data.support_fund_enabled ?? true,
           stripe_payment_link: data.stripe_payment_link ?? null,
+          mailing_modal_enabled: data.mailing_modal_enabled ?? true,
+          mailing_required: data.mailing_required ?? false,
         });
       }
       setLoading(false);
