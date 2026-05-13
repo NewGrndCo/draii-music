@@ -15,6 +15,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
   const { profile } = useArtistProfile();
   const socials = profile?.socials ?? {};
   const bioText = profile?.bio?.trim();
+  const logoUrl = profile?.logo_url || '/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png';
   
   // Reset click count after timeout
   useEffect(() => {
@@ -69,10 +70,10 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
       {/* Logo image instead of text */}
       <div className="flex justify-center mb-2 relative">
         <img 
-          src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" 
-          alt="Draii Rynell Logo" 
+          src={logoUrl} 
+          alt="Artist Logo" 
           className={cn(
-            "relative z-10 animate-scale drop-shadow-lg cursor-pointer",
+            "relative z-10 animate-scale drop-shadow-lg cursor-pointer object-contain",
             inFullscreen ? "h-12" : "h-24"
           )}
           onClick={handleLogoClick}
@@ -96,36 +97,19 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
 
       {!inFullscreen && (
         <div className="flex items-center justify-center mt-3 gap-4 flex-wrap">
-          {(socials.instagram || 'https://instagram.com/draiirynell') && (
-            <a href={socials.instagram || 'https://instagram.com/draiirynell'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Instagram size={20} />
+          {[
+            { url: socials.instagram || 'https://instagram.com/draiirynell', Icon: Instagram },
+            { url: socials.twitter   || 'https://x.com/ruseriousdraii',     Icon: Twitter },
+            { url: socials.facebook,                                         Icon: Facebook },
+            { url: socials.youtube   || 'https://youtube.com/@draiirynell',  Icon: Youtube },
+            { url: socials.tiktok,                                           Icon: Music2 },
+            { url: socials.spotify,                                          Icon: Music2 },
+            { url: socials.apple,                                            Icon: Music2 },
+          ].filter(s => s.url && s.url.trim()).map(({ url, Icon }, i) => (
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Icon size={20} />
             </a>
-          )}
-          {(socials.twitter || 'https://x.com/ruseriousdraii') && (
-            <a href={socials.twitter || 'https://x.com/ruseriousdraii'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Twitter size={20} />
-            </a>
-          )}
-          {socials.facebook && (
-            <a href={socials.facebook} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Facebook size={20} />
-            </a>
-          )}
-          {(socials.youtube || 'https://youtube.com/@draiirynell') && (
-            <a href={socials.youtube || 'https://youtube.com/@draiirynell'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Youtube size={20} />
-            </a>
-          )}
-          {socials.tiktok && (
-            <a href={socials.tiktok} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Music2 size={20} />
-            </a>
-          )}
-          {socials.spotify && (
-            <a href={socials.spotify} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Music2 size={20} />
-            </a>
-          )}
+          ))}
         </div>
       )}
     </div>

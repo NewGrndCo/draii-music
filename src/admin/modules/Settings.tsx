@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { adminList, adminUpdate } from '../lib/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { adminList, adminUpdate, adminUploadFile } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -13,6 +13,7 @@ interface Profile {
   socials: Record<string, string>;
   player_layout: 'normal' | 'wide';
   frontend_sections: string[];
+  logo_url: string | null;
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -35,6 +36,8 @@ const Settings: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     adminList<Profile>('artist_profile')
@@ -52,12 +55,31 @@ const Settings: React.FC = () => {
         socials: profile.socials,
         player_layout: profile.player_layout,
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
+        logo_url: profile.logo_url,
       });
       toast.success('Settings saved');
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onLogoFile = async (file: File) => {
+    if (!profile) return;
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `logo-${profile.id}-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      const next = { ...profile, logo_url: url };
+      setProfile(next);
+      await adminUpdate('artist_profile', profile.id, { logo_url: url });
+      toast.success('Logo updated');
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -76,6 +98,43 @@ const Settings: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
+        <div className="admin-glass rounded-2xl p-5">
+          <h3 className="font-display text-base font-semibold mb-3">Logo (above the player)</h3>
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+              {profile.logo_url
+                ? <img src={profile.logo_url} alt="Logo" className="h-full w-full object-contain" />
+                : <ImageIcon className="h-6 w-6 text-white/40" />}
+            </div>
+            <div className="flex-1 flex flex-wrap items-center gap-2">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => e.target.files?.[0] && onLogoFile(e.target.files[0])}
+              />
+              <Button
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadingLogo}
+                className="admin-gradient-bg text-white border-0 hover:opacity-90"
+              >
+                {uploadingLogo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                {profile.logo_url ? 'Replace logo' : 'Upload logo'}
+              </Button>
+              {profile.logo_url && (
+                <Button variant="ghost" className="text-white/60 hover:text-white" onClick={async () => {
+                  setProfile({ ...profile, logo_url: null });
+                  await adminUpdate('artist_profile', profile.id, { logo_url: null });
+                  toast.success('Logo removed');
+                }}>
+                  Remove
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="admin-glass rounded-2xl p-5">
           <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
           <Textarea
