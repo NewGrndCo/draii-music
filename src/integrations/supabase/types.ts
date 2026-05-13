@@ -19,6 +19,7 @@ export type Database = {
           bio: string | null
           frontend_sections: Json
           id: string
+          logo_url: string | null
           player_layout: string
           socials: Json
           updated_at: string
@@ -27,6 +28,7 @@ export type Database = {
           bio?: string | null
           frontend_sections?: Json
           id?: string
+          logo_url?: string | null
           player_layout?: string
           socials?: Json
           updated_at?: string
@@ -35,6 +37,7 @@ export type Database = {
           bio?: string | null
           frontend_sections?: Json
           id?: string
+          logo_url?: string | null
           player_layout?: string
           socials?: Json
           updated_at?: string
