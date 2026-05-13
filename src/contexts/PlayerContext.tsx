@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useCallback } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAudio } from '../hooks/useAudio';
 import { useMusicLibrary } from '../hooks/useMusicLibrary';
 import { usePlaybackHandlers } from '../components/player/hooks/usePlaybackHandlers';
