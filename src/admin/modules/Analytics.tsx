@@ -1,40 +1,25 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import { adminStats } from '../lib/api';
-import { supabase } from '@/integrations/supabase/client';
 import StatCard from '../components/StatCard';
-import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
+import GeographicMap, { FocusTarget } from '../components/GeographicMap';
+import ListenLog from '../components/ListenLog';
+import { Globe2, PlayCircle, Heart, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLiveListeners } from '@/hooks/useLivePresence';
-
-// World topojson (lightweight, public CDN)
-const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
-
-// Approximate centroids for common ISO-3166 alpha-2 codes (longitude, latitude)
-const COUNTRY_COORDS: Record<string, [number, number]> = {
-  US: [-98, 39], CA: [-106, 56], MX: [-102, 23], BR: [-52, -10], AR: [-64, -34],
-  GB: [-2, 54], FR: [2, 46], DE: [10, 51], ES: [-4, 40], IT: [12, 42], NL: [5, 52],
-  SE: [15, 62], NO: [10, 62], FI: [26, 64], PL: [19, 52], UA: [32, 49], RU: [100, 61],
-  TR: [35, 39], EG: [30, 26], NG: [8, 9], ZA: [24, -29], KE: [37, -1], MA: [-7, 32],
-  IN: [78, 22], CN: [104, 35], JP: [138, 36], KR: [127, 36], ID: [113, -2], PH: [121, 12],
-  AU: [134, -25], NZ: [172, -41], SA: [45, 24], AE: [54, 24], IL: [35, 31],
-};
-
+import { COUNTRY_COORDS, flagEmoji, toCountryCode } from '../lib/countries';
 
 type Stats = Awaited<ReturnType<typeof adminStats>>;
 
 const Analytics: React.FC = () => {
   const [data, setData] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [focus, setFocus] = useState<FocusTarget>(null);
   const liveListeners = useLiveListeners();
   const liveCount = liveListeners.length;
 
   useEffect(() => {
     adminStats().then(setData).catch((e) => toast.error(e.message)).finally(() => setLoading(false));
   }, []);
-
-
-
 
   const totals = useMemo(() => {
     if (!data) return null;
@@ -47,14 +32,6 @@ const Analytics: React.FC = () => {
     return <div className="admin-glass rounded-2xl p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>;
   }
   if (!data || !totals) return null;
-
-  const byCountry: Record<string, number> = {};
-  data.listens.forEach((l: any) => {
-    const c = l.country || 'Unknown';
-    byCountry[c] = (byCountry[c] || 0) + 1;
-  });
-  const topCountries = Object.entries(byCountry).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const maxCountry = topCountries[0]?.[1] ?? 1;
 
   const devices = data.listens.reduce((acc: Record<string, number>, l: any) => {
     const k = l.device || 'unknown';
@@ -88,6 +65,22 @@ const Analytics: React.FC = () => {
   const trend = Object.values(days);
   const trendMax = Math.max(1, ...trend);
 
+  // Click a live listener → focus the map on their location
+  const focusOnListener = (l: any) => {
+    const code = toCountryCode(l.country);
+    const coords = code ? COUNTRY_COORDS[code] : null;
+    if (!coords) {
+      toast.info('No coordinates available for this listener.');
+      return;
+    }
+    const label = [l.city, l.region, code].filter(Boolean).join(', ');
+    setFocus({ coords, zoom: l.city ? 6 : 4, label: label || 'Listener' });
+    // Smooth scroll to the map
+    requestAnimationFrame(() => {
+      document.getElementById('analytics-geo-map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
@@ -104,16 +97,21 @@ const Analytics: React.FC = () => {
             Live listeners
             <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-pink-400 animate-pulse" />
           </h3>
-          <span className="text-xs text-white/45">{liveCount} connected</span>
+          <span className="text-xs text-white/45">{liveCount} connected · click to locate on map</span>
         </div>
         {liveCount === 0 ? (
           <div className="text-sm text-white/45 py-6 text-center">No active listeners right now.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {liveListeners.map((l) => {
-              const loc = [l.city, l.country].filter(Boolean).join(', ');
+              const code = toCountryCode(l.country);
+              const loc = [l.city, l.region, l.country].filter(Boolean).join(', ');
               return (
-                <div key={l.id} className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/5 px-3 py-2">
+                <button
+                  key={l.id}
+                  onClick={() => focusOnListener(l)}
+                  className="flex items-center gap-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/5 hover:border-white/15 px-3 py-2 text-left transition cursor-pointer"
+                >
                   {l.cover_art ? (
                     <img src={l.cover_art} alt="" loading="lazy" className="h-10 w-10 rounded-md object-cover flex-shrink-0" />
                   ) : (
@@ -126,7 +124,7 @@ const Analytics: React.FC = () => {
                     <div className="text-xs text-white/55 truncate">{l.song_artist || '—'}</div>
                     {loc && (
                       <div className="text-[10px] text-white/45 truncate flex items-center gap-1 mt-0.5">
-                        <Globe2 className="h-2.5 w-2.5" /> {loc}
+                        <span className="text-sm leading-none">{flagEmoji(code)}</span> {loc}
                       </div>
                     )}
                   </div>
@@ -134,68 +132,18 @@ const Analytics: React.FC = () => {
                     {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
                     <span className="hidden sm:inline">{l.device || 'web'}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
         )}
       </div>
 
-      <div className="admin-glass rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display text-base font-semibold flex items-center gap-2"><Globe2 className="h-4 w-4 text-purple-300" /> Geographic listenership</h3>
-          <span className="text-xs text-white/45">{Object.keys(byCountry).length} countries</span>
-        </div>
-
-        <div className="rounded-xl overflow-hidden bg-[hsl(var(--admin-bg)/0.6)] border border-white/5">
-          <ComposableMap
-            projectionConfig={{ scale: 155 }}
-            width={980}
-            height={460}
-            style={{ width: '100%', height: 'auto', background: 'transparent' }}
-          >
-            <Geographies geography={GEO_URL}>
-              {({ geographies }: any) =>
-                geographies.map((geo: any) => (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    style={{
-                      default: { fill: 'hsl(var(--admin-glass) / 0.9)', stroke: 'hsl(var(--admin-glass-border) / 0.25)', strokeWidth: 0.4, outline: 'none' },
-                      hover:   { fill: 'hsl(var(--admin-purple) / 0.35)', outline: 'none' },
-                      pressed: { fill: 'hsl(var(--admin-purple) / 0.5)', outline: 'none' },
-                    }}
-                  />
-                ))
-              }
-            </Geographies>
-            {topCountries.map(([code, n]) => {
-              const coords = COUNTRY_COORDS[code as string];
-              if (!coords) return null;
-              const r = 4 + ((n as number) / maxCountry) * 18;
-              return (
-                <Marker key={code} coordinates={coords}>
-                  <circle r={r} fill="hsl(var(--admin-purple))" fillOpacity={0.55} stroke="hsl(var(--admin-pink))" strokeWidth={1.2} />
-                  <circle r={2} fill="hsl(var(--admin-pink))" />
-                </Marker>
-              );
-            })}
-          </ComposableMap>
-        </div>
-
-        {topCountries.length === 0 ? (
-          <div className="text-sm text-white/45 py-4 text-center">No listens yet — once visitors play songs, their countries will appear on the map.</div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-            {topCountries.map(([country, n]) => (
-              <div key={country} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2 text-xs">
-                <span className="text-white/70 font-medium">{country}</span>
-                <span className="tabular-nums text-white/85">{(n as number).toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        )}
+      <div id="analytics-geo-map">
+        <GeographicMap listens={data.listens as any} focus={focus} onClearFocus={() => setFocus(null)} />
       </div>
+
+      <ListenLog listens={data.listens as any} songs={data.songs as any} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="admin-glass rounded-2xl p-5">
