@@ -3,8 +3,9 @@ import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps
 import { adminStats } from '../lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import StatCard from '../components/StatCard';
-import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2 } from 'lucide-react';
+import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLiveListeners } from '@/hooks/useLivePresence';
 
 // World topojson (lightweight, public CDN)
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
