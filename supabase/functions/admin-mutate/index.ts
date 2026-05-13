@@ -54,6 +54,9 @@ const ALLOWED_TABLES = new Set([
   "artist_profile",
   "listens",
   "mailing_list",
+  "releases",
+  "expenses",
+  "merch_clicks",
 ]);
 
 const ALLOWED_BUCKETS = new Set([
@@ -99,12 +102,16 @@ Deno.serve(async (req) => {
     }
 
     if (op === "stats") {
-      const [songs, events, merch, donations, listens] = await Promise.all([
+      const [songs, events, merch, donations, listens, mailing, releases, expenses, clicks] = await Promise.all([
         sb.from("songs").select("id, title, artist, thumbnail_path, play_count, likes_count, support_fund_cents"),
         sb.from("events").select("id, status, event_date"),
-        sb.from("merch").select("id, active, stock"),
+        sb.from("merch").select("id, name, image_url, price_cents, stock, active"),
         sb.from("donations").select("amount_cents, source, created_at"),
         sb.from("listens").select("song_id, country, region, city, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
+        sb.from("mailing_list").select("id, email, phone, country, region, city, created_at"),
+        sb.from("releases").select("*").order("sort_order", { ascending: true }),
+        sb.from("expenses").select("*").order("occurred_at", { ascending: false }),
+        sb.from("merch_clicks").select("merch_id, song_id, created_at"),
       ]);
       return json({
         songs: songs.data ?? [],
@@ -112,6 +119,10 @@ Deno.serve(async (req) => {
         merch: merch.data ?? [],
         donations: donations.data ?? [],
         listens: listens.data ?? [],
+        mailing: mailing.data ?? [],
+        releases: releases.data ?? [],
+        expenses: expenses.data ?? [],
+        merch_clicks: clicks.data ?? [],
       });
     }
 
