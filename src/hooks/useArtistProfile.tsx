@@ -22,7 +22,7 @@ export const useArtistProfile = () => {
     (async () => {
       const { data } = await (supabase as any)
         .from('artist_profile')
-        .select('id,bio,socials,player_layout,frontend_sections,logo_url')
+        .select('id,bio,socials,player_layout,frontend_sections,logo_url,location')
         .limit(1)
         .maybeSingle();
       if (!alive) return;
