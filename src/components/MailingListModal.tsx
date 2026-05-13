@@ -148,6 +148,20 @@ const MailingListModal: React.FC = () => {
                 className="bg-white/5 border-white/15 text-white placeholder:text-white/40"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="ml-zip" className="text-sm text-white/80">
+                Zip code <span className="text-white/40">(optional)</span>
+              </Label>
+              <Input
+                id="ml-zip"
+                type="text"
+                inputMode="text"
+                placeholder="Zip / postal code"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                className="bg-white/5 border-white/15 text-white placeholder:text-white/40"
+              />
+            </div>
 
             <DialogFooter className="flex-col gap-2 sm:flex-col">
               <Button
