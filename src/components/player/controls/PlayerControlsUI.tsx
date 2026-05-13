@@ -67,7 +67,7 @@ const PlayerControlsUI: React.FC<PlayerControlsUIProps> = ({
         variant="outline" 
         size="icon" 
         onClick={handleButtonClick(onTogglePlayPause)} 
-        disabled={!hasCurrentSong || isLoading} 
+        disabled={!hasCurrentSong} 
         className={cn(
           "rounded-full border border-white/20 w-12 h-12 transition-all active:scale-95 touch-manipulation", 
           isPlaying ? "bg-white text-black hover:bg-white/90" : "bg-transparent text-white hover:bg-white/10"

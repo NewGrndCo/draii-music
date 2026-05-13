@@ -79,8 +79,8 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   
   // Memoize loading state check
   const isAudioLoading = useMemo(() => {
-    return currentSong && playerState.isReady === false;
-  }, [currentSong, playerState.isReady]);
+    return Boolean(currentSong && playerState.isPlaying && playerState.isReady === false);
+  }, [currentSong, playerState.isPlaying, playerState.isReady]);
   
   // Memoize swipe animations with optimized performance
   const swipeAnimations = useMemo(() => (

@@ -26,10 +26,11 @@ export const usePlayerControls = (
   
   const playSong = useCallback((song: Song) => {
     console.log('Playing song:', song);
+    const canStartPlayback = navigator.userActivation?.hasBeenActive ?? true;
     setCurrentSong(song);
     setPlayerState(prev => ({
       ...prev,
-      isPlaying: true,
+      isPlaying: canStartPlayback,
       isReady: false // Reset ready state when starting new song
     }));
   }, [setCurrentSong, setPlayerState]);

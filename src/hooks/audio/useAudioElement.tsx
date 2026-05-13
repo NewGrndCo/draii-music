@@ -1,8 +1,27 @@
 
-import { useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Song } from '../../data/musicData';
 import { AudioPlayerState } from './useAudioState';
 import { toast } from 'sonner';
+
+const LEGACY_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
+
+const getAudioSourceCandidates = (audioSrc: string): string[] => {
+  if (!audioSrc) return [];
+  if (/^https?:\/\//i.test(audioSrc)) return [audioSrc];
+
+  const currentBase = import.meta.env.VITE_SUPABASE_URL;
+  const cleanPath = audioSrc.replace(/^\/+/, '');
+  const objectPath = cleanPath.replace(/^(song-audio|songs)\//, '');
+  const isBucketQualified = cleanPath !== objectPath;
+
+  return Array.from(new Set([
+    isBucketQualified && `${currentBase}/storage/v1/object/public/${cleanPath}`,
+    `${LEGACY_PUBLIC_BASE}/storage/v1/object/public/songs/${objectPath}`,
+    `${currentBase}/storage/v1/object/public/song-audio/${objectPath}`,
+    `${currentBase}/storage/v1/object/public/songs/${objectPath}`,
+  ].filter(Boolean) as string[]));
+};
 
 export const useAudioElement = (
   currentSong: Song | null,
@@ -14,6 +33,49 @@ export const useAudioElement = (
   const userInteractedRef = useRef<boolean>(false);
   const currentSongRef = useRef<Song | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+  const playRequestIdRef = useRef(0);
+  const isPlayingRef = useRef(playerState.isPlaying);
+  const audioSourceCandidatesRef = useRef<string[]>([]);
+  const audioSourceIndexRef = useRef(0);
+
+  useEffect(() => {
+    isPlayingRef.current = playerState.isPlaying;
+  }, [playerState.isPlaying]);
+
+  const attemptPlay = useCallback(async (requestId = playRequestIdRef.current) => {
+    const audio = audioRef.current;
+    if (!audio || !currentSongRef.current || !isPlayingRef.current) return;
+
+    try {
+      if (playPromiseRef.current) {
+        await playPromiseRef.current.catch(() => {});
+      }
+
+      const promise = audio.play();
+      playPromiseRef.current = promise;
+      await promise;
+
+      if (playRequestIdRef.current === requestId) {
+        playPromiseRef.current = null;
+      }
+    } catch (error: any) {
+      if (playRequestIdRef.current !== requestId) return;
+
+      playPromiseRef.current = null;
+
+      if (error?.name === 'AbortError') {
+        console.debug('Audio play request was superseded before it started');
+        return;
+      }
+
+      if (audioSourceIndexRef.current < audioSourceCandidatesRef.current.length - 1) {
+        return;
+      }
+
+      console.error('Error during audio playback:', error);
+      setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
+    }
+  }, [setPlayerState]);
 
   // Create audio element and set up event listeners
   useEffect(() => {
@@ -23,6 +85,22 @@ export const useAudioElement = (
       const audio = audioRef.current;
       const progressHandler = () => eventHandlers.updateProgress(audio);
       const durationHandler = () => eventHandlers.updateDuration(audio);
+      const errorHandler = (event: Event) => {
+        const candidates = audioSourceCandidatesRef.current;
+        const nextIndex = audioSourceIndexRef.current + 1;
+
+        if (nextIndex < candidates.length) {
+          audioSourceIndexRef.current = nextIndex;
+          audio.src = candidates[nextIndex];
+          audio.load();
+          if (isPlayingRef.current) {
+            window.setTimeout(() => attemptPlay(), 0);
+          }
+          return;
+        }
+
+        eventHandlers.handleError(event);
+      };
       
       audio.addEventListener('timeupdate', progressHandler, { passive: true });
       audio.addEventListener('loadedmetadata', durationHandler, { passive: true });
@@ -31,7 +109,8 @@ export const useAudioElement = (
       audio.addEventListener('canplaythrough', eventHandlers.handleCanPlay, { passive: true });
       audio.addEventListener('ended', eventHandlers.handleSongEnd, { passive: true });
       audio.addEventListener('playing', eventHandlers.handlePlaying, { passive: true });
-      audio.addEventListener('error', eventHandlers.handleError, { passive: true });
+      audio.addEventListener('error', errorHandler, { passive: true });
+      (audio as any).__playerHandlers = { progressHandler, durationHandler, errorHandler };
       
       const handleUserInteraction = () => {
         userInteractedRef.current = true;
@@ -56,7 +135,7 @@ export const useAudioElement = (
         eventHandlers.loadingTimeoutRef.current = null;
       }
     };
-  }, [playerState.repeat, eventHandlers]);
+  }, [playerState.repeat, eventHandlers, attemptPlay]);
 
   // Handle song changes
   useEffect(() => {
@@ -81,14 +160,18 @@ export const useAudioElement = (
         return;
       }
       
-      const fullAudioSrc = audioSrc.startsWith('http') 
-        ? audioSrc 
-        : `https://iextgszxpxeurbpncapv.supabase.co/storage/v1/object/public/songs/${audioSrc}`;
-      
-      console.log('Loading audio source:', fullAudioSrc);
-      audioRef.current.src = fullAudioSrc;
+      const candidates = getAudioSourceCandidates(audioSrc);
+      audioSourceCandidatesRef.current = candidates;
+      audioSourceIndexRef.current = 0;
+      playRequestIdRef.current += 1;
+
+      console.log('Loading audio source:', candidates[0]);
+      audioRef.current.src = candidates[0];
       audioRef.current.preload = 'auto';
       audioRef.current.load();
+      if (isPlayingRef.current) {
+        window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
+      }
       
       // Update media session metadata
       if ('mediaSession' in navigator) {
@@ -108,7 +191,7 @@ export const useAudioElement = (
       });
       document.dispatchEvent(songChangeEvent);
     }
-  }, [currentSong, setPlayerState, eventHandlers]);
+  }, [currentSong, setPlayerState, eventHandlers, attemptPlay]);
 
   // Handle play state changes separately to avoid race conditions
   useEffect(() => {
@@ -116,33 +199,27 @@ export const useAudioElement = (
       if (!audioRef.current || !currentSong) return;
       
       try {
-        if (playerState.isPlaying && userInteractedRef.current) {
-          // Cancel any existing play promise
-          if (playPromiseRef.current) {
-            await playPromiseRef.current.catch(() => {});
-          }
-          
-          // Create new play promise
-          playPromiseRef.current = audioRef.current.play();
-          await playPromiseRef.current;
-          playPromiseRef.current = null;
+        if (playerState.isPlaying) {
+          await attemptPlay(playRequestIdRef.current);
         } else if (!playerState.isPlaying) {
-          // Cancel any pending play promise before pausing
+          playRequestIdRef.current += 1;
           if (playPromiseRef.current) {
             await playPromiseRef.current.catch(() => {});
             playPromiseRef.current = null;
           }
           audioRef.current.pause();
         }
-      } catch (error) {
-        console.error('Error during audio playback:', error);
-        setPlayerState(prev => ({ ...prev, isPlaying: false }));
-        playPromiseRef.current = null;
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
+          console.error('Error during audio playback:', error);
+          setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
+          playPromiseRef.current = null;
+        }
       }
     };
 
     handlePlayStateChange();
-  }, [playerState.isPlaying, currentSong, setPlayerState]);
+  }, [playerState.isPlaying, currentSong, setPlayerState, attemptPlay]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -156,17 +233,18 @@ export const useAudioElement = (
         
         audioRef.current.pause();
         const audio = audioRef.current;
-        const progressHandler = () => eventHandlers.updateProgress(audio);
-        const durationHandler = () => eventHandlers.updateDuration(audio);
+        const handlers = (audio as any).__playerHandlers;
         
-        audio.removeEventListener('timeupdate', progressHandler);
-        audio.removeEventListener('loadedmetadata', durationHandler);
+        if (handlers) {
+          audio.removeEventListener('timeupdate', handlers.progressHandler);
+          audio.removeEventListener('loadedmetadata', handlers.durationHandler);
+          audio.removeEventListener('error', handlers.errorHandler);
+        }
         audio.removeEventListener('loadstart', eventHandlers.handleLoadStart);
         audio.removeEventListener('canplay', eventHandlers.handleCanPlay);
         audio.removeEventListener('canplaythrough', eventHandlers.handleCanPlay);
         audio.removeEventListener('ended', eventHandlers.handleSongEnd);
         audio.removeEventListener('playing', eventHandlers.handlePlaying);
-        audio.removeEventListener('error', eventHandlers.handleError);
         audioRef.current = null;
       }
     };
