@@ -26,6 +26,7 @@ export type Database = {
           logo_url: string | null
           player_layout: string
           socials: Json
+          support_fund_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           logo_url?: string | null
           player_layout?: string
           socials?: Json
+          support_fund_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           logo_url?: string | null
           player_layout?: string
           socials?: Json
+          support_fund_enabled?: boolean
           updated_at?: string
         }
         Relationships: []
