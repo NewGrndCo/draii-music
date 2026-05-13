@@ -73,6 +73,7 @@ const Settings: React.FC = () => {
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
         logo_url: profile.logo_url,
         location: profile.location,
+        footer_text: profile.footer_text,
       });
       toast.success('Settings saved');
     } catch (e: any) {
