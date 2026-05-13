@@ -9,7 +9,7 @@ interface RecentlyPlayedProps {
 
 const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ songs, onSelectSong }) => {
   if (!songs.length) return null;
-  const list = songs.slice(0, 5);
+  const list = songs.slice(0, 3);
 
   return (
     <div className="mt-2 mb-4">
