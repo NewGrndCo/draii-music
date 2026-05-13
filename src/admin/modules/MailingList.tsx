@@ -124,6 +124,42 @@ const MailingList: React.FC = () => {
         </button>
       </div>
 
+      <div className="admin-glass-strong rounded-2xl p-5 grid sm:grid-cols-2 gap-3">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07]">
+          <BellRing className="h-4 w-4 text-pink-400 mt-0.5" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium">Show signup popup</span>
+              <input
+                type="checkbox"
+                checked={modalEnabled}
+                disabled={!profileId || savingFlag === 'mailing_modal_enabled'}
+                onChange={(e) => updateFlag('mailing_modal_enabled', e.target.checked)}
+                className="h-4 w-4 accent-pink-500"
+              />
+            </div>
+            <p className="text-xs text-white/50 mt-1">Display the mailing list popup to new visitors.</p>
+          </div>
+        </label>
+
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07]">
+          <Lock className="h-4 w-4 text-purple-400 mt-0.5" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium">Require signup to listen</span>
+              <input
+                type="checkbox"
+                checked={required}
+                disabled={!profileId || savingFlag === 'mailing_required'}
+                onChange={(e) => updateFlag('mailing_required', e.target.checked)}
+                className="h-4 w-4 accent-purple-500"
+              />
+            </div>
+            <p className="text-xs text-white/50 mt-1">Visitors must enter their info before audio plays.</p>
+          </div>
+        </label>
+      </div>
+
       <div className="admin-glass-strong rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
