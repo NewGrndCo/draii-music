@@ -58,8 +58,8 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 shrink-0 admin-glass-strong m-3 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)]">
           <div className="flex items-center gap-2 px-2 py-3">
-            <div className="h-9 w-9 rounded-xl admin-gradient-bg flex items-center justify-center shadow-lg">
-              <Music2 className="h-5 w-5 text-white" />
+            <div className="h-9 w-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-lg">
+              <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain p-0.5" />
             </div>
             <div>
               <div className="font-display font-semibold text-base leading-none">Draii Rynell</div>
