@@ -29,22 +29,6 @@ const MusicLibraryScroll: React.FC<MusicLibraryScrollProps> = ({
   const [editingSong, setEditingSong] = useState<SongEditData | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // Helper function to check if a song is boosted
-  const isSongBoosted = (song: Song) => {
-    const boostedArtists = ['Arik Divine', 'Yardie', 'Danjha'];
-    const boostedSongs = ['Ononon', 'Southside', 'Arty', 'Curbside Shawty'];
-    
-    const isArtistBoosted = boostedArtists.some(artist => 
-      song.artist.toLowerCase().includes(artist.toLowerCase())
-    );
-    
-    const isSongBoosted = boostedSongs.some(songTitle => 
-      song.title.toLowerCase().includes(songTitle.toLowerCase())
-    );
-    
-    return isArtistBoosted || isSongBoosted;
-  };
-
   // Format numbers for display with k/M suffix
   const formatCount = (count: number) => {
     if (count >= 1_000_000) {
