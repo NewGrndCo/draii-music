@@ -32,6 +32,7 @@ const MailingListModal: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [zip, setZip] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
