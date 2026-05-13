@@ -15,6 +15,7 @@ interface Profile {
   frontend_sections: string[];
   logo_url: string | null;
   location: string;
+  footer_text: string;
 }
 
 const SECTION_LABELS: Record<string, string> = {
