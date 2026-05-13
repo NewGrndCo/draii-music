@@ -14,6 +14,7 @@ interface Profile {
   player_layout: 'normal' | 'wide';
   frontend_sections: string[];
   logo_url: string | null;
+  location: string;
 }
 
 const SECTION_LABELS: Record<string, string> = {
