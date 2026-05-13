@@ -167,6 +167,7 @@ const Settings: React.FC = () => {
             placeholder="App developed by New Ground Solutions"
             className="bg-white/5 border-white/10 text-white"
           />
+        </div>
 
         <div className="admin-glass rounded-2xl p-5 space-y-3">
           <div>
