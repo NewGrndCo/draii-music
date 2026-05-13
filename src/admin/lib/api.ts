@@ -10,7 +10,8 @@ type AdminOp =
 
 export type AdminTable =
   | 'songs' | 'events' | 'merch' | 'donations'
-  | 'artist_profile' | 'listens' | 'mailing_list';
+  | 'artist_profile' | 'listens' | 'mailing_list'
+  | 'releases' | 'expenses' | 'merch_clicks';
 
 interface AdminCallArgs {
   op: AdminOp;
@@ -44,7 +45,10 @@ export const adminDelete = (table: AdminTable, id: string) =>
   adminCall<{ ok: true }>({ op: 'delete', table, id });
 
 export const adminStats = () =>
-  adminCall<{ songs: any[]; events: any[]; merch: any[]; donations: any[]; listens: any[] }>({ op: 'stats' });
+  adminCall<{
+    songs: any[]; events: any[]; merch: any[]; donations: any[]; listens: any[];
+    mailing: any[]; releases: any[]; expenses: any[]; merch_clicks: any[];
+  }>({ op: 'stats' });
 
 export async function adminUploadFile(bucket: string, path: string, file: Blob) {
   const sig = await adminCall<{ signedUrl: string; token: string; path: string; publicUrl: string }>({
