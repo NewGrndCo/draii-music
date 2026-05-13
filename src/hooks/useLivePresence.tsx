@@ -6,8 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
  * how many listeners are connected in real time.
  */
 export const useLivePresence = (enabled = true) => {
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-
   useEffect(() => {
     if (!enabled) return;
     const id = `${Math.random().toString(36).slice(2)}-${Date.now()}`;
@@ -19,9 +17,7 @@ export const useLivePresence = (enabled = true) => {
         await channel.track({ joined_at: Date.now() });
       }
     });
-    channelRef.current = channel;
     return () => {
-      try { channel.unsubscribe(); } catch {}
       try { supabase.removeChannel(channel); } catch {}
     };
   }, [enabled]);
@@ -32,18 +28,18 @@ export const useLivePresence = (enabled = true) => {
  */
 export const useLiveListenerCount = () => {
   const [count, setCount] = useState(0);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     const channel = supabase.channel('listeners-live');
+    channelRef.current = channel;
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        const n = Object.keys(state).length;
-        setCount(n);
+        setCount(Object.keys(state).length);
       })
       .subscribe();
     return () => {
-      try { channel.unsubscribe(); } catch {}
       try { supabase.removeChannel(channel); } catch {}
     };
   }, []);
