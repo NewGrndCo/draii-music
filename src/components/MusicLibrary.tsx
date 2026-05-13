@@ -13,7 +13,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
 import MusicLibraryScroll from './player/MusicLibraryScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Disc, X } from 'lucide-react';
+import { Music, Disc, X, User, Users } from 'lucide-react';
+
+const isCollab = (artist: string) => {
+  const a = (artist || '').toLowerCase();
+  return a.includes('feat') || a.includes(' ft') || a.includes(' & ') || a.includes(',') || a.includes(' with ');
+};
+
 
 interface MusicLibraryProps {
   albums: Album[];
