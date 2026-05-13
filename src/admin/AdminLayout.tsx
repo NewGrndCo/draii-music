@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Library, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
-  Music2, Wifi, ChevronLeft, Mail, DollarSign,
+  Wifi, ChevronLeft, Mail, DollarSign,
   Sparkles, Megaphone, Kanban,
 } from 'lucide-react';
 import { ADMIN_TOKEN_KEY } from './lib/api';
