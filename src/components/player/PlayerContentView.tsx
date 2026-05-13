@@ -9,6 +9,7 @@ import NextUpSongs from './NextUpSongs';
 import UpcomingEvents from './UpcomingEvents';
 import UpcomingMerch from './UpcomingMerch';
 import RecentlyPlayed from './RecentlyPlayed';
+import ArtistAbout from './ArtistAbout';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 import { useLivePresence } from '@/hooks/useLivePresence';
 
@@ -37,7 +38,8 @@ const PlayerContentView: React.FC = () => {
 
   const sectionOrder = profile?.frontend_sections?.length
     ? profile.frontend_sections
-    : ['next_up', 'events', 'merch'];
+    : ['next_up', 'events', 'merch', 'about'];
+  const order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
 
   const renderSection = (key: string) => {
     switch (key) {
@@ -59,6 +61,8 @@ const PlayerContentView: React.FC = () => {
         return <UpcomingEvents key="events" />;
       case 'merch':
         return <UpcomingMerch key="merch" />;
+      case 'about':
+        return <ArtistAbout key="about" />;
       default:
         return null;
     }
@@ -110,7 +114,7 @@ const PlayerContentView: React.FC = () => {
         toggleLayout={toggleLayout}
       />
 
-      {sectionOrder.map(renderSection)}
+      {order.map(renderSection)}
     </div>
   );
 };

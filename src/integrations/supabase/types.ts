@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       artist_profile: {
         Row: {
+          artist_image_url: string | null
           bio: string | null
+          detailed_bio: string | null
           footer_text: string | null
           frontend_sections: Json
           id: string
@@ -27,7 +29,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          artist_image_url?: string | null
           bio?: string | null
+          detailed_bio?: string | null
           footer_text?: string | null
           frontend_sections?: Json
           id?: string
@@ -38,7 +42,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          artist_image_url?: string | null
           bio?: string | null
+          detailed_bio?: string | null
           footer_text?: string | null
           frontend_sections?: Json
           id?: string

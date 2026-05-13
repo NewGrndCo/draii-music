@@ -29,18 +29,26 @@ const SongInfo: React.FC<SongInfoProps> = ({
 }) => {
   const handleShare = async () => {
     if (!currentSong) return;
+    const shareLink = generateShareLink(currentSong, true);
+    const shareData: ShareData = {
+      title: currentSong.title,
+      text: `${currentSong.title} — ${currentSong.artist}`,
+      url: shareLink,
+    };
     try {
-      // Generate a shorter share link using just the song ID
-      const shareLink = generateShareLink(currentSong, true);
+      // Always copy first so the user has the link regardless
       await copyToClipboard(shareLink);
-      toast.success('Link copied!', {
-        description: 'Share with friends',
-        duration: 2000
-      });
-    } catch (error) {
-      toast.error('Failed to generate link', {
-        duration: 2000
-      });
+      if (typeof navigator !== 'undefined' && (navigator as any).share) {
+        try {
+          await (navigator as any).share(shareData);
+          return;
+        } catch (err: any) {
+          if (err?.name === 'AbortError') return;
+        }
+      }
+      toast.success('Link copied!', { description: 'Share with friends', duration: 2000 });
+    } catch {
+      toast.error('Failed to generate link', { duration: 2000 });
     }
   };
   return <div className="text-center relative">

@@ -16,14 +16,17 @@ interface Profile {
   logo_url: string | null;
   location: string;
   footer_text: string;
+  detailed_bio: string;
+  artist_image_url: string | null;
 }
 
 const SECTION_LABELS: Record<string, string> = {
   next_up: 'Next Up songs',
   events: 'Upcoming events',
   merch: 'Merch slider',
+  about: 'About the artist',
 };
-const ALL_SECTIONS = ['next_up', 'events', 'merch'];
+const ALL_SECTIONS = ['next_up', 'events', 'merch', 'about'];
 
 const socialFields: { key: string; label: string; icon: React.ElementType }[] = [
   { key: 'twitter',   label: 'Twitter / X',   icon: Twitter },
@@ -39,7 +42,9 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingArtist, setUploadingArtist] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const artistInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     adminList<Profile>('artist_profile')
@@ -56,6 +61,8 @@ const Settings: React.FC = () => {
           logo_url: r.logo_url ?? null,
           location: r.location ?? '',
           footer_text: r.footer_text ?? '',
+          detailed_bio: r.detailed_bio ?? '',
+          artist_image_url: r.artist_image_url ?? null,
         });
       })
       .catch((e) => toast.error(e.message))
@@ -74,6 +81,8 @@ const Settings: React.FC = () => {
         logo_url: profile.logo_url,
         location: profile.location,
         footer_text: profile.footer_text,
+        detailed_bio: profile.detailed_bio,
+        artist_image_url: profile.artist_image_url,
       });
       toast.success('Settings saved');
     } catch (e: any) {
@@ -101,6 +110,24 @@ const Settings: React.FC = () => {
     }
   };
 
+  const onArtistImageFile = async (file: File) => {
+    if (!profile) return;
+    setUploadingArtist(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `artist-${profile.id}-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      const next = { ...profile, artist_image_url: url };
+      setProfile(next);
+      await adminUpdate('artist_profile', profile.id, { artist_image_url: url });
+      toast.success('Artist image updated');
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploadingArtist(false);
+    }
+  };
+
   const moveSection = (idx: number, dir: -1 | 1) => {
     if (!profile) return;
     const list = [...(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS)];
@@ -119,10 +146,10 @@ const Settings: React.FC = () => {
         <div className="admin-glass rounded-2xl p-5">
           <h3 className="font-display text-base font-semibold mb-3">Logo (above the player)</h3>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="h-28 w-28 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="h-28 w-28 rounded-xl bg-white border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
               {profile.logo_url
-                ? <img src={profile.logo_url} alt="Current logo" className="h-full w-full object-contain p-2" />
-                : <ImageIcon className="h-7 w-7 text-white/40" />}
+                ? <img src={profile.logo_url} alt="Current logo" className="h-full w-full object-contain p-2" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                : <ImageIcon className="h-7 w-7 text-black/40" />}
             </div>
             <div className="flex-1 min-w-0">
               {profile.logo_url && (
@@ -186,6 +213,59 @@ const Settings: React.FC = () => {
               value={profile.location}
               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
               placeholder="City, Region"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+        </div>
+
+        <div className="admin-glass rounded-2xl p-5 space-y-4">
+          <div>
+            <h3 className="font-display text-base font-semibold">About the artist (detailed)</h3>
+            <p className="text-xs text-white/50 mt-1">Shown on the public player below Events &amp; Merch. The short bio above stays as the header tagline.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="h-32 w-32 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {profile.artist_image_url
+                ? <img src={profile.artist_image_url} alt="Artist" className="h-full w-full object-cover" />
+                : <ImageIcon className="h-7 w-7 text-white/40" />}
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <input
+                ref={artistInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => e.target.files?.[0] && onArtistImageFile(e.target.files[0])}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  onClick={() => artistInputRef.current?.click()}
+                  disabled={uploadingArtist}
+                  className="admin-gradient-bg text-white border-0 hover:opacity-90"
+                >
+                  {uploadingArtist ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                  {profile.artist_image_url ? 'Replace artist image' : 'Upload artist image'}
+                </Button>
+                {profile.artist_image_url && (
+                  <Button variant="ghost" className="text-white/60 hover:text-white" onClick={async () => {
+                    setProfile({ ...profile, artist_image_url: null });
+                    await adminUpdate('artist_profile', profile.id, { artist_image_url: null });
+                    toast.success('Image removed');
+                  }}>Remove</Button>
+                )}
+              </div>
+              {profile.artist_image_url && (
+                <div className="text-[11px] text-white/50 truncate">{profile.artist_image_url}</div>
+              )}
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs text-white/55 mb-1.5 block">Detailed bio</Label>
+            <Textarea
+              rows={8}
+              value={profile.detailed_bio}
+              onChange={(e) => setProfile({ ...profile, detailed_bio: e.target.value })}
+              placeholder="A longer story about the artist — career, sound, influences…"
               className="bg-white/5 border-white/10 text-white"
             />
           </div>

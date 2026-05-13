@@ -41,11 +41,12 @@ const ProgressBarUI: React.FC<ProgressBarUIProps> = ({
               boxShadow: '0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.3)'
             }}
           />
-          <div 
-            className="absolute h-4 w-4 bg-white rounded-full shadow-xl z-20 transform -translate-y-1/4"
+          <div
+            className="absolute h-4 w-4 bg-white rounded-full shadow-xl z-20"
             style={{
               left: `${progressPercentage}%`,
               top: '50%',
+              transform: 'translate(-50%, -50%)',
               boxShadow: '0 0 8px rgba(255, 255, 255, 1), 0 0 12px rgba(255, 255, 255, 0.5)'
             }}
           />
