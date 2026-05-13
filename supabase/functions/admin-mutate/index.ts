@@ -100,11 +100,11 @@ Deno.serve(async (req) => {
 
     if (op === "stats") {
       const [songs, events, merch, donations, listens] = await Promise.all([
-        sb.from("songs").select("id, play_count, likes_count, support_fund_cents"),
+        sb.from("songs").select("id, title, artist, thumbnail_path, play_count, likes_count, support_fund_cents"),
         sb.from("events").select("id, status, event_date"),
         sb.from("merch").select("id, active, stock"),
         sb.from("donations").select("amount_cents, source, created_at"),
-        sb.from("listens").select("country, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
+        sb.from("listens").select("song_id, country, region, city, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
       ]);
       return json({
         songs: songs.data ?? [],

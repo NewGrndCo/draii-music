@@ -146,6 +146,7 @@ export type Database = {
           created_at: string
           device: string | null
           id: string
+          region: string | null
           song_id: string | null
           source: string | null
         }
@@ -155,6 +156,7 @@ export type Database = {
           created_at?: string
           device?: string | null
           id?: string
+          region?: string | null
           song_id?: string | null
           source?: string | null
         }
@@ -164,6 +166,7 @@ export type Database = {
           created_at?: string
           device?: string | null
           id?: string
+          region?: string | null
           song_id?: string | null
           source?: string | null
         }
