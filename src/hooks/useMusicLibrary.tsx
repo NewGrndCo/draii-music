@@ -88,8 +88,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png',
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: song.play_count ?? 0,
+              likesCount: song.likes_count ?? 0,
             })),
           });
         }
@@ -113,8 +113,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: song.play_count ?? 0,
+              likesCount: song.likes_count ?? 0,
             })),
           });
         });
@@ -143,8 +143,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: song.play_count ?? 0,
+              likesCount: song.likes_count ?? 0,
             })),
           });
         }
