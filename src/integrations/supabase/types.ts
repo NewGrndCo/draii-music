@@ -230,6 +230,7 @@ export type Database = {
           phone: string | null
           region: string | null
           user_agent: string | null
+          zip_code: string | null
         }
         Insert: {
           city?: string | null
@@ -241,6 +242,7 @@ export type Database = {
           phone?: string | null
           region?: string | null
           user_agent?: string | null
+          zip_code?: string | null
         }
         Update: {
           city?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           phone?: string | null
           region?: string | null
           user_agent?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }

@@ -11,6 +11,7 @@ interface Entry {
   country: string | null;
   region: string | null;
   city: string | null;
+  zip_code: string | null;
   user_agent: string | null;
   created_at: string;
 }
@@ -83,7 +84,7 @@ const MailingList: React.FC = () => {
   };
 
   const exportCsv = () => {
-    const head = ['email','phone','country','region','city','ip_address','created_at'];
+    const head = ['email','phone','country','region','city','zip_code','ip_address','created_at'];
     const lines = [head.join(',')].concat(
       filtered.map(r => head.map(k => {
         const v = (r as any)[k] ?? '';
@@ -185,10 +186,10 @@ const MailingList: React.FC = () => {
                   <td className="px-4 py-3 font-medium text-white/90">{r.email}</td>
                   <td className="px-4 py-3 text-white/70">{r.phone || '—'}</td>
                   <td className="px-4 py-3 text-white/70">
-                    {(r.city || r.region || r.country) ? (
+                    {(r.city || r.region || r.country || r.zip_code) ? (
                       <span className="inline-flex items-center gap-1.5">
                         <MapPin className="h-3 w-3 text-white/40" />
-                        {[r.city, r.region, r.country].filter(Boolean).join(', ')}
+                        {[r.city, r.region, r.zip_code, r.country].filter(Boolean).join(', ')}
                       </span>
                     ) : '—'}
                   </td>

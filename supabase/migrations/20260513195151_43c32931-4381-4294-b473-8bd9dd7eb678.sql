@@ -1,0 +1,1 @@
+ALTER TABLE public.mailing_list ADD COLUMN IF NOT EXISTS zip_code text;

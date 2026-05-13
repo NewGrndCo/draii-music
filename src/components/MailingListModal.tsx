@@ -19,6 +19,12 @@ const schema = z.object({
     .max(32, { message: 'Phone number is too long' })
     .optional()
     .or(z.literal('')),
+  zip: z
+    .string()
+    .trim()
+    .max(16, { message: 'Zip code is too long' })
+    .optional()
+    .or(z.literal('')),
 });
 
 const MailingListModal: React.FC = () => {
@@ -26,6 +32,7 @@ const MailingListModal: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [zip, setZip] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -65,7 +72,7 @@ const MailingListModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ email, phone });
+    const parsed = schema.safeParse({ email, phone, zip });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? 'Invalid input');
       return;
@@ -76,6 +83,7 @@ const MailingListModal: React.FC = () => {
       body: {
         email: parsed.data.email,
         phone: parsed.data.phone ? parsed.data.phone : null,
+        zip_code: parsed.data.zip ? parsed.data.zip : null,
       },
     });
     setSubmitting(false);
@@ -137,6 +145,20 @@ const MailingListModal: React.FC = () => {
                 placeholder="Phone number (optional)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                className="bg-white/5 border-white/15 text-white placeholder:text-white/40"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="ml-zip" className="text-sm text-white/80">
+                Zip code <span className="text-white/40">(optional)</span>
+              </Label>
+              <Input
+                id="ml-zip"
+                type="text"
+                inputMode="text"
+                placeholder="Zip / postal code"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
                 className="bg-white/5 border-white/15 text-white placeholder:text-white/40"
               />
             </div>
