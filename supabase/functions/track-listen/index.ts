@@ -31,6 +31,14 @@ Deno.serve(async (req) => {
       song_id: songId, country, city, device, source,
     });
     if (error) return json({ error: error.message }, 400);
+
+    // Tally a play immediately so totals reflect every started listen,
+    // not only songs that play through to the end.
+    if (songId) {
+      const { data: cur } = await sb.from("songs").select("play_count").eq("id", songId).single();
+      const next = (cur?.play_count ?? 0) + 1;
+      await sb.from("songs").update({ play_count: next }).eq("id", songId);
+    }
     return json({ ok: true });
   } catch (e) {
     return json({ error: String(e) }, 500);
