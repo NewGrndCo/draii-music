@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Volume2, VolumeX, Square, DollarSign } from 'lucide-react';
 import { Slider } from '../ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import DonateDialog from './DonateDialog';
+const DonateDialog = lazy(() => import('./DonateDialog'));
 import { usePlayer } from '../../contexts/PlayerContext';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
