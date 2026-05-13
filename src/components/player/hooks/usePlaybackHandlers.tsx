@@ -71,8 +71,20 @@ export const usePlaybackHandlers = (
 
   const handleVolumeChange = useCallback((value: number[]) => value, []);
 
+  const recentSongs = useMemo(() => {
+    if (!playHistory.length) return [];
+    const currentId = currentSong?.id;
+    return playHistory
+      .slice()
+      .reverse()
+      .filter((id) => id !== currentId)
+      .map((id) => allSongs.find((s) => s.id === id))
+      .filter(Boolean) as Song[];
+  }, [playHistory, allSongs, currentSong]);
+
   return useMemo(() => ({
     nextSongs,
+    recentSongs,
     liked,
     horizontalMode,
     playCount,
@@ -90,7 +102,7 @@ export const usePlaybackHandlers = (
     closeLibrary,
     handleVolumeChange,
   }), [
-    nextSongs, liked, horizontalMode, playCount, likesCount, gradientColor,
+    nextSongs, recentSongs, liked, horizontalMode, playCount, likesCount, gradientColor,
     showLibrary, showAllCovers, heartAnimation, playNextSong, playPreviousSong,
     toggleLike, handleSelectSong, toggleLayout, openLibrary, closeLibrary, handleVolumeChange,
   ]);

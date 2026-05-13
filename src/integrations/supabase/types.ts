@@ -19,6 +19,7 @@ export type Database = {
           bio: string | null
           frontend_sections: Json
           id: string
+          location: string | null
           logo_url: string | null
           player_layout: string
           socials: Json
@@ -28,6 +29,7 @@ export type Database = {
           bio?: string | null
           frontend_sections?: Json
           id?: string
+          location?: string | null
           logo_url?: string | null
           player_layout?: string
           socials?: Json
@@ -37,6 +39,7 @@ export type Database = {
           bio?: string | null
           frontend_sections?: Json
           id?: string
+          location?: string | null
           logo_url?: string | null
           player_layout?: string
           socials?: Json

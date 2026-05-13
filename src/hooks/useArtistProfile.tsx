@@ -8,6 +8,7 @@ export interface ArtistProfile {
   player_layout: string;
   frontend_sections: string[];
   logo_url: string | null;
+  location: string;
 }
 
 const DEFAULT_SECTIONS = ['next_up', 'events', 'merch'];
@@ -21,7 +22,7 @@ export const useArtistProfile = () => {
     (async () => {
       const { data } = await (supabase as any)
         .from('artist_profile')
-        .select('id,bio,socials,player_layout,frontend_sections,logo_url')
+        .select('id,bio,socials,player_layout,frontend_sections,logo_url,location')
         .limit(1)
         .maybeSingle();
       if (!alive) return;
@@ -35,6 +36,7 @@ export const useArtistProfile = () => {
             ? data.frontend_sections
             : DEFAULT_SECTIONS,
           logo_url: data.logo_url ?? null,
+          location: data.location ?? '',
         });
       }
       setLoading(false);

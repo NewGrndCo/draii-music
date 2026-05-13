@@ -14,6 +14,7 @@ interface Profile {
   player_layout: 'normal' | 'wide';
   frontend_sections: string[];
   logo_url: string | null;
+  location: string;
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -41,7 +42,20 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     adminList<Profile>('artist_profile')
-      .then((rows) => setProfile(rows[0] ?? null))
+      .then((rows) => {
+        const r: any = rows[0];
+        if (!r) { setProfile(null); return; }
+        setProfile({
+          id: r.id,
+          bio: r.bio ?? '',
+          socials: r.socials ?? {},
+          player_layout: (r.player_layout ?? 'normal') as any,
+          frontend_sections: Array.isArray(r.frontend_sections) && r.frontend_sections.length
+            ? r.frontend_sections : ALL_SECTIONS,
+          logo_url: r.logo_url ?? null,
+          location: r.location ?? '',
+        });
+      })
       .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -56,6 +70,7 @@ const Settings: React.FC = () => {
         player_layout: profile.player_layout,
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
         logo_url: profile.logo_url,
+        location: profile.location,
       });
       toast.success('Settings saved');
     } catch (e: any) {
@@ -135,15 +150,26 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5">
-          <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
-          <Textarea
-            rows={6}
-            value={profile.bio}
-            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-            placeholder="Tell your story…"
-            className="bg-white/5 border-white/10 text-white"
-          />
+        <div className="admin-glass rounded-2xl p-5 space-y-3">
+          <div>
+            <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
+            <Textarea
+              rows={6}
+              value={profile.bio}
+              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+              placeholder="Tell your story…"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-white/55 mb-1.5 block">Location</Label>
+            <Input
+              value={profile.location}
+              onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+              placeholder="City, Region"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
         </div>
 
         <div className="admin-glass rounded-2xl p-5">

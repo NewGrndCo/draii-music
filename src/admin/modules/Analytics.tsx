@@ -3,8 +3,9 @@ import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps
 import { adminStats } from '../lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import StatCard from '../components/StatCard';
-import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2 } from 'lucide-react';
+import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLiveListeners } from '@/hooks/useLivePresence';
 
 // World topojson (lightweight, public CDN)
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
@@ -25,22 +26,15 @@ type Stats = Awaited<ReturnType<typeof adminStats>>;
 const Analytics: React.FC = () => {
   const [data, setData] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeNow, setActiveNow] = useState(0);
+  const liveListeners = useLiveListeners();
+  const liveCount = liveListeners.length;
 
   useEffect(() => {
     adminStats().then(setData).catch((e) => toast.error(e.message)).finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('admin-listens')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'listens' }, () => {
-        setActiveNow((n) => n + 1);
-        setTimeout(() => setActiveNow((n) => Math.max(0, n - 1)), 60_000);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+
+
 
   const totals = useMemo(() => {
     if (!data) return null;
@@ -99,8 +93,44 @@ const Analytics: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard label="Total Plays" value={totals.totalPlays.toLocaleString()} icon={PlayCircle} accent="blue" />
         <StatCard label="Total Likes" value={totals.totalLikes.toLocaleString()} icon={Heart} accent="pink" />
-        <StatCard label="Active Now" value={activeNow} hint="last 60s" icon={Users} accent="purple" />
+        <StatCard label="Live Now" value={liveCount} hint="connected" icon={Radio} accent="purple" />
         <StatCard label="Listens (5k cap)" value={data.listens.length.toLocaleString()} icon={Globe2} accent="blue" />
+      </div>
+
+      <div className="admin-glass rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-base font-semibold flex items-center gap-2">
+            <Radio className="h-4 w-4 text-purple-300" />
+            Live listeners
+            <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-pink-400 animate-pulse" />
+          </h3>
+          <span className="text-xs text-white/45">{liveCount} connected</span>
+        </div>
+        {liveCount === 0 ? (
+          <div className="text-sm text-white/45 py-6 text-center">No active listeners right now.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {liveListeners.map((l) => (
+              <div key={l.id} className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/5 px-3 py-2">
+                {l.cover_art ? (
+                  <img src={l.cover_art} alt="" className="h-10 w-10 rounded-md object-cover" />
+                ) : (
+                  <div className="h-10 w-10 rounded-md bg-white/10 flex items-center justify-center">
+                    <PlayCircle className="h-4 w-4 text-white/40" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-white truncate">{l.song_title || 'Idle'}</div>
+                  <div className="text-xs text-white/55 truncate">{l.song_artist || '—'}</div>
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-white/45 flex items-center gap-1">
+                  {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                  {l.device || 'web'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="admin-glass rounded-2xl p-5">
