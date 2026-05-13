@@ -15,6 +15,7 @@ interface Profile {
   frontend_sections: string[];
   logo_url: string | null;
   location: string;
+  footer_text: string;
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -54,6 +55,7 @@ const Settings: React.FC = () => {
             ? r.frontend_sections : ALL_SECTIONS,
           logo_url: r.logo_url ?? null,
           location: r.location ?? '',
+          footer_text: r.footer_text ?? '',
         });
       })
       .catch((e) => toast.error(e.message))
@@ -71,6 +73,7 @@ const Settings: React.FC = () => {
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
         logo_url: profile.logo_url,
         location: profile.location,
+        footer_text: profile.footer_text,
       });
       toast.success('Settings saved');
     } catch (e: any) {
@@ -115,39 +118,55 @@ const Settings: React.FC = () => {
       <div className="lg:col-span-2 space-y-5">
         <div className="admin-glass rounded-2xl p-5">
           <h3 className="font-display text-base font-semibold mb-3">Logo (above the player)</h3>
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-20 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="h-28 w-28 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
               {profile.logo_url
-                ? <img src={profile.logo_url} alt="Logo" className="h-full w-full object-contain" />
-                : <ImageIcon className="h-6 w-6 text-white/40" />}
+                ? <img src={profile.logo_url} alt="Current logo" className="h-full w-full object-contain p-2" />
+                : <ImageIcon className="h-7 w-7 text-white/40" />}
             </div>
-            <div className="flex-1 flex flex-wrap items-center gap-2">
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => e.target.files?.[0] && onLogoFile(e.target.files[0])}
-              />
-              <Button
-                onClick={() => logoInputRef.current?.click()}
-                disabled={uploadingLogo}
-                className="admin-gradient-bg text-white border-0 hover:opacity-90"
-              >
-                {uploadingLogo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-                {profile.logo_url ? 'Replace logo' : 'Upload logo'}
-              </Button>
+            <div className="flex-1 min-w-0">
               {profile.logo_url && (
-                <Button variant="ghost" className="text-white/60 hover:text-white" onClick={async () => {
-                  setProfile({ ...profile, logo_url: null });
-                  await adminUpdate('artist_profile', profile.id, { logo_url: null });
-                  toast.success('Logo removed');
-                }}>
-                  Remove
-                </Button>
+                <div className="text-[11px] text-white/50 truncate mb-2">{profile.logo_url}</div>
               )}
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => e.target.files?.[0] && onLogoFile(e.target.files[0])}
+                />
+                <Button
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploadingLogo}
+                  className="admin-gradient-bg text-white border-0 hover:opacity-90"
+                >
+                  {uploadingLogo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                  {profile.logo_url ? 'Replace logo' : 'Upload logo'}
+                </Button>
+                {profile.logo_url && (
+                  <Button variant="ghost" className="text-white/60 hover:text-white" onClick={async () => {
+                    setProfile({ ...profile, logo_url: null });
+                    await adminUpdate('artist_profile', profile.id, { logo_url: null });
+                    toast.success('Logo removed');
+                  }}>
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className="admin-glass rounded-2xl p-5">
+          <h3 className="font-display text-base font-semibold mb-1">Footer text</h3>
+          <p className="text-xs text-white/50 mb-3">Shown at the bottom of the public player. The current year is appended automatically.</p>
+          <Input
+            value={profile.footer_text}
+            onChange={(e) => setProfile({ ...profile, footer_text: e.target.value })}
+            placeholder="App developed by New Ground Solutions"
+            className="bg-white/5 border-white/10 text-white"
+          />
         </div>
 
         <div className="admin-glass rounded-2xl p-5 space-y-3">

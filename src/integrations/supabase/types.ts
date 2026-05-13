@@ -17,6 +17,7 @@ export type Database = {
       artist_profile: {
         Row: {
           bio: string | null
+          footer_text: string | null
           frontend_sections: Json
           id: string
           location: string | null
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          footer_text?: string | null
           frontend_sections?: Json
           id?: string
           location?: string | null
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          footer_text?: string | null
           frontend_sections?: Json
           id?: string
           location?: string | null
