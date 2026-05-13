@@ -88,7 +88,7 @@ const MusicLibraryScroll: React.FC<MusicLibraryScrollProps> = ({
                 <SongListItem
                   key={song.id}
                   song={song}
-                  boosted={false}
+                  
                   onSelect={onSelectSong}
                   onEdit={showEditButton ? () => onEditSong?.(song) : undefined}
                   formatCount={formatCount}
