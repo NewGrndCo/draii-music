@@ -1,8 +1,26 @@
 
-import { useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Song } from '../../data/musicData';
 import { AudioPlayerState } from './useAudioState';
 import { toast } from 'sonner';
+
+const LEGACY_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
+
+const getAudioSourceCandidates = (audioSrc: string): string[] => {
+  if (!audioSrc) return [];
+  if (/^https?:\/\//i.test(audioSrc)) return [audioSrc];
+
+  const currentBase = import.meta.env.VITE_SUPABASE_URL;
+  const cleanPath = audioSrc.replace(/^\/+/, '');
+  const objectPath = cleanPath.replace(/^(song-audio|songs)\//, '');
+
+  return Array.from(new Set([
+    cleanPath !== objectPath && `${currentBase}/storage/v1/object/public/${cleanPath}`,
+    `${currentBase}/storage/v1/object/public/song-audio/${objectPath}`,
+    `${currentBase}/storage/v1/object/public/songs/${objectPath}`,
+    `${LEGACY_PUBLIC_BASE}/storage/v1/object/public/songs/${objectPath}`,
+  ].filter(Boolean) as string[]));
+};
 
 export const useAudioElement = (
   currentSong: Song | null,
@@ -14,6 +32,45 @@ export const useAudioElement = (
   const userInteractedRef = useRef<boolean>(false);
   const currentSongRef = useRef<Song | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+  const playRequestIdRef = useRef(0);
+  const isPlayingRef = useRef(playerState.isPlaying);
+  const audioSourceCandidatesRef = useRef<string[]>([]);
+  const audioSourceIndexRef = useRef(0);
+
+  useEffect(() => {
+    isPlayingRef.current = playerState.isPlaying;
+  }, [playerState.isPlaying]);
+
+  const attemptPlay = useCallback(async (requestId = playRequestIdRef.current) => {
+    const audio = audioRef.current;
+    if (!audio || !currentSongRef.current || !isPlayingRef.current) return;
+
+    try {
+      if (playPromiseRef.current) {
+        await playPromiseRef.current.catch(() => {});
+      }
+
+      const promise = audio.play();
+      playPromiseRef.current = promise;
+      await promise;
+
+      if (playRequestIdRef.current === requestId) {
+        playPromiseRef.current = null;
+      }
+    } catch (error: any) {
+      if (playRequestIdRef.current !== requestId) return;
+
+      playPromiseRef.current = null;
+
+      if (error?.name === 'AbortError') {
+        console.debug('Audio play request was superseded before it started');
+        return;
+      }
+
+      console.error('Error during audio playback:', error);
+      setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
+    }
+  }, [setPlayerState]);
 
   // Create audio element and set up event listeners
   useEffect(() => {
