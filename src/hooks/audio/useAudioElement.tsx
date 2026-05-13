@@ -213,14 +213,14 @@ export const useAudioElement = (
           audioRef.current.pause();
         }
       } catch (error) {
-        console.error('Error during audio playback:', error);
-        setPlayerState(prev => ({ ...prev, isPlaying: false }));
-        playPromiseRef.current = null;
+          console.error('Error during audio playback:', error);
+          setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
+          playPromiseRef.current = null;
       }
     };
 
     handlePlayStateChange();
-  }, [playerState.isPlaying, currentSong, setPlayerState]);
+  }, [playerState.isPlaying, currentSong, setPlayerState, attemptPlay]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -234,17 +234,18 @@ export const useAudioElement = (
         
         audioRef.current.pause();
         const audio = audioRef.current;
-        const progressHandler = () => eventHandlers.updateProgress(audio);
-        const durationHandler = () => eventHandlers.updateDuration(audio);
+        const handlers = (audio as any).__playerHandlers;
         
-        audio.removeEventListener('timeupdate', progressHandler);
-        audio.removeEventListener('loadedmetadata', durationHandler);
+        if (handlers) {
+          audio.removeEventListener('timeupdate', handlers.progressHandler);
+          audio.removeEventListener('loadedmetadata', handlers.durationHandler);
+          audio.removeEventListener('error', handlers.errorHandler);
+        }
         audio.removeEventListener('loadstart', eventHandlers.handleLoadStart);
         audio.removeEventListener('canplay', eventHandlers.handleCanPlay);
         audio.removeEventListener('canplaythrough', eventHandlers.handleCanPlay);
         audio.removeEventListener('ended', eventHandlers.handleSongEnd);
         audio.removeEventListener('playing', eventHandlers.handlePlaying);
-        audio.removeEventListener('error', eventHandlers.handleError);
         audioRef.current = null;
       }
     };
