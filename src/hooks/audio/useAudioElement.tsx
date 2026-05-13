@@ -278,6 +278,10 @@ export const useAudioElement = (
           audio.removeEventListener('timeupdate', handlers.progressHandler);
           audio.removeEventListener('loadedmetadata', handlers.durationHandler);
           audio.removeEventListener('error', handlers.errorHandler);
+          if (handlers.stallHandler) {
+            audio.removeEventListener('stalled', handlers.stallHandler);
+            audio.removeEventListener('waiting', handlers.stallHandler);
+          }
         }
         audio.removeEventListener('loadstart', eventHandlers.handleLoadStart);
         audio.removeEventListener('canplay', eventHandlers.handleCanPlay);
