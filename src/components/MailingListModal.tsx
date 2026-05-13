@@ -44,6 +44,7 @@ const MailingListModal: React.FC = () => {
 
   useEffect(() => {
     if (!profile) return;
+    if (isSharedLink) return; // never block shared-song visits
     if (required && !hasSeen) {
       setOpen(true);
       return;
@@ -51,10 +52,11 @@ const MailingListModal: React.FC = () => {
     if (modalEnabled && !hasSeen) {
       setOpen(true);
     }
-  }, [profile, required, modalEnabled, hasSeen]);
+  }, [profile, required, modalEnabled, hasSeen, isSharedLink]);
 
   // Block audio playback while a required signup is pending
   useEffect(() => {
+    if (isSharedLink) return;
     if (!required || hasSeen) return;
     const pauseAll = () => {
       document.querySelectorAll('audio').forEach((a) => {
