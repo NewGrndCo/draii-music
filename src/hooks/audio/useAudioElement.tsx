@@ -63,10 +63,7 @@ export const useAudioElement = (
 
       playPromiseRef.current = null;
 
-      if (error?.name === 'AbortError') {
-        console.debug('Audio play request was superseded before it started');
-        return;
-      }
+      if (error?.name === 'AbortError') return;
 
       if (audioSourceIndexRef.current < audioSourceCandidatesRef.current.length - 1) {
         return;
@@ -165,7 +162,6 @@ export const useAudioElement = (
       audioSourceIndexRef.current = 0;
       playRequestIdRef.current += 1;
 
-      console.log('Loading audio source:', candidates[0]);
       audioRef.current.src = candidates[0];
       audioRef.current.preload = 'auto';
       audioRef.current.load();
