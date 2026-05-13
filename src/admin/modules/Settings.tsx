@@ -218,6 +218,59 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
+        <div className="admin-glass rounded-2xl p-5 space-y-4">
+          <div>
+            <h3 className="font-display text-base font-semibold">About the artist (detailed)</h3>
+            <p className="text-xs text-white/50 mt-1">Shown on the public player below Events &amp; Merch. The short bio above stays as the header tagline.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="h-32 w-32 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {profile.artist_image_url
+                ? <img src={profile.artist_image_url} alt="Artist" className="h-full w-full object-cover" />
+                : <ImageIcon className="h-7 w-7 text-white/40" />}
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <input
+                ref={artistInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => e.target.files?.[0] && onArtistImageFile(e.target.files[0])}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  onClick={() => artistInputRef.current?.click()}
+                  disabled={uploadingArtist}
+                  className="admin-gradient-bg text-white border-0 hover:opacity-90"
+                >
+                  {uploadingArtist ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                  {profile.artist_image_url ? 'Replace artist image' : 'Upload artist image'}
+                </Button>
+                {profile.artist_image_url && (
+                  <Button variant="ghost" className="text-white/60 hover:text-white" onClick={async () => {
+                    setProfile({ ...profile, artist_image_url: null });
+                    await adminUpdate('artist_profile', profile.id, { artist_image_url: null });
+                    toast.success('Image removed');
+                  }}>Remove</Button>
+                )}
+              </div>
+              {profile.artist_image_url && (
+                <div className="text-[11px] text-white/50 truncate">{profile.artist_image_url}</div>
+              )}
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs text-white/55 mb-1.5 block">Detailed bio</Label>
+            <Textarea
+              rows={8}
+              value={profile.detailed_bio}
+              onChange={(e) => setProfile({ ...profile, detailed_bio: e.target.value })}
+              placeholder="A longer story about the artist — career, sound, influences…"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+        </div>
+
         <div className="admin-glass rounded-2xl p-5">
           <h3 className="font-display text-base font-semibold mb-3">Social links</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
