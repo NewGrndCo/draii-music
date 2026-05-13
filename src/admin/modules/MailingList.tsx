@@ -11,6 +11,7 @@ interface Entry {
   country: string | null;
   region: string | null;
   city: string | null;
+  zip_code: string | null;
   user_agent: string | null;
   created_at: string;
 }
