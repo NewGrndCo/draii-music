@@ -39,6 +39,8 @@ const MailingListModal: React.FC = () => {
   const modalEnabled = profile?.mailing_modal_enabled ?? true;
   const required = profile?.mailing_required ?? false;
   const hasSeen = typeof window !== 'undefined' && !!localStorage.getItem(STORAGE_KEY);
+  // Bypass the modal entirely when arriving via a shared song link, so the song plays immediately.
+  const isSharedLink = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('s');
 
   useEffect(() => {
     if (!profile) return;
