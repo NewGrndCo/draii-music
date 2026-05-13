@@ -36,6 +36,8 @@ const Settings: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     adminList<Profile>('artist_profile')
@@ -53,12 +55,31 @@ const Settings: React.FC = () => {
         socials: profile.socials,
         player_layout: profile.player_layout,
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
+        logo_url: profile.logo_url,
       });
       toast.success('Settings saved');
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onLogoFile = async (file: File) => {
+    if (!profile) return;
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `logo-${profile.id}-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      const next = { ...profile, logo_url: url };
+      setProfile(next);
+      await adminUpdate('artist_profile', profile.id, { logo_url: url });
+      toast.success('Logo updated');
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
