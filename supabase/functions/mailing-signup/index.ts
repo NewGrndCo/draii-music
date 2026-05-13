@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email ?? "").trim().toLowerCase();
     const phone = body?.phone ? String(body.phone).trim() : null;
+    const userZip = body?.zip_code ? String(body.zip_code).trim().slice(0, 16) : null;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
       return json({ error: "Invalid email" }, 400);
     }
@@ -47,6 +48,7 @@ Deno.serve(async (req) => {
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
     const { error } = await sb.from("mailing_list").insert({
       email, phone, ip_address: ip, user_agent: ua, ...location,
+      zip_code: userZip || (location as any).zip_code || null,
     });
     if (error) return json({ error: error.message }, 400);
     return json({ ok: true });
