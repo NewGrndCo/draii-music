@@ -70,6 +70,22 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (value.length > 0) setVolume(value[0]);
   }, [setVolume]);
 
+  // Analytics: track listen on song change, increment play count on song end
+  const lastTrackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!currentSong || lastTrackedRef.current === currentSong.id) return;
+    lastTrackedRef.current = currentSong.id;
+    const source = document.referrer ? new URL(document.referrer).hostname : 'direct';
+    supabase.functions.invoke('track-listen', { body: { songId: currentSong.id, source } }).catch(() => {});
+  }, [currentSong]);
+
+  useEffect(() => {
+    setOnEndCallback(() => {
+      const id = currentSong?.id;
+      if (id) supabase.functions.invoke('increment-play-count', { body: { songId: id } }).catch(() => {});
+    });
+  }, [currentSong, setOnEndCallback]);
+
   const value: PlayerContextValue = {
     currentSong, playerState, albums, loading,
     playSong, togglePlayPause, seekTo, setVolume,
