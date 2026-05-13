@@ -194,28 +194,22 @@ export const useAudioElement = (
       if (!audioRef.current || !currentSong) return;
       
       try {
-        if (playerState.isPlaying && userInteractedRef.current) {
-          // Cancel any existing play promise
-          if (playPromiseRef.current) {
-            await playPromiseRef.current.catch(() => {});
-          }
-          
-          // Create new play promise
-          playPromiseRef.current = audioRef.current.play();
-          await playPromiseRef.current;
-          playPromiseRef.current = null;
+        if (playerState.isPlaying) {
+          await attemptPlay(playRequestIdRef.current);
         } else if (!playerState.isPlaying) {
-          // Cancel any pending play promise before pausing
+          playRequestIdRef.current += 1;
           if (playPromiseRef.current) {
             await playPromiseRef.current.catch(() => {});
             playPromiseRef.current = null;
           }
           audioRef.current.pause();
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
           console.error('Error during audio playback:', error);
           setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
           playPromiseRef.current = null;
+        }
       }
     };
 
