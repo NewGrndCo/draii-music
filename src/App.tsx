@@ -22,7 +22,11 @@ const App = () => {
       <AnimationProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+            <Route path="/admin" element={
+              <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <AdminGuard><Admin /></AdminGuard>
+              </Suspense>
+            } />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
                 <MailingListModal />
