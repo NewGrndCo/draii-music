@@ -149,13 +149,20 @@ const MailingListModal: React.FC = () => {
               >
                 {submitting ? 'Joining…' : 'Join the list'}
               </Button>
-              <button
-                type="button"
-                onClick={dismiss}
-                className="text-xs text-white/50 hover:text-white/80 transition-colors"
-              >
-                Maybe later
-              </button>
+              {!required && (
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors"
+                >
+                  Maybe later
+                </button>
+              )}
+              {required && (
+                <p className="text-xs text-white/50 text-center">
+                  Join the list to start listening.
+                </p>
+              )}
             </DialogFooter>
           </form>
         )}
