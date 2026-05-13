@@ -1,9 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import { adminStats } from '../lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import StatCard from '../components/StatCard';
 import { Globe2, PlayCircle, Heart, Users, Smartphone, Monitor, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// World topojson (lightweight, public CDN)
+const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
+// Approximate centroids for common ISO-3166 alpha-2 codes (longitude, latitude)
+const COUNTRY_COORDS: Record<string, [number, number]> = {
+  US: [-98, 39], CA: [-106, 56], MX: [-102, 23], BR: [-52, -10], AR: [-64, -34],
+  GB: [-2, 54], FR: [2, 46], DE: [10, 51], ES: [-4, 40], IT: [12, 42], NL: [5, 52],
+  SE: [15, 62], NO: [10, 62], FI: [26, 64], PL: [19, 52], UA: [32, 49], RU: [100, 61],
+  TR: [35, 39], EG: [30, 26], NG: [8, 9], ZA: [24, -29], KE: [37, -1], MA: [-7, 32],
+  IN: [78, 22], CN: [104, 35], JP: [138, 36], KR: [127, 36], ID: [113, -2], PH: [121, 12],
+  AU: [134, -25], NZ: [172, -41], SA: [45, 24], AE: [54, 24], IL: [35, 31],
+};
+
 
 type Stats = Awaited<ReturnType<typeof adminStats>>;
 
