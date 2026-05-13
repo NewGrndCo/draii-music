@@ -1,5 +1,5 @@
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { AudioPlayerState } from './useAudioState';
 
@@ -10,39 +10,40 @@ export const useAudioEvents = (
   const onEndCallback = useRef<() => void>(() => {});
   const hasPlayedSuccessfully = useRef<boolean>(false);
   const loadingTimeoutRef = useRef<number | null>(null);
+  const repeatRef = useRef(playerState.repeat);
 
-  const updateProgress = useCallback(() => {
-    return (audioElement: HTMLAudioElement) => {
-      const currentTime = audioElement.currentTime;
-      setPlayerState(prev => 
-        prev.currentTime !== currentTime 
-          ? { ...prev, currentTime }
-          : prev
-      );
-    };
+  useEffect(() => {
+    repeatRef.current = playerState.repeat;
+  }, [playerState.repeat]);
+
+  const updateProgress = useCallback((audioElement: HTMLAudioElement) => {
+    const currentTime = audioElement.currentTime;
+    setPlayerState(prev => 
+      prev.currentTime !== currentTime 
+        ? { ...prev, currentTime }
+        : prev
+    );
   }, [setPlayerState]);
 
-  const updateDuration = useCallback(() => {
-    return (audioElement: HTMLAudioElement) => {
-      if (audioElement.duration && !isNaN(audioElement.duration)) {
-        const duration = audioElement.duration;
-        setPlayerState(prev => ({
-          ...prev,
-          duration,
-          isReady: true
-        }));
-        
-        if (loadingTimeoutRef.current) {
-          window.clearTimeout(loadingTimeoutRef.current);
-          loadingTimeoutRef.current = null;
-        }
-        console.log('Audio ready - duration loaded:', duration);
+  const updateDuration = useCallback((audioElement: HTMLAudioElement) => {
+    if (audioElement.duration && !isNaN(audioElement.duration)) {
+      const duration = audioElement.duration;
+      setPlayerState(prev => ({
+        ...prev,
+        duration,
+        isReady: true
+      }));
+      
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
       }
-    };
+      console.log('Audio ready - duration loaded:', duration);
+    }
   }, [setPlayerState]);
 
   const handleSongEnd = useCallback(() => {
-    if (playerState.repeat) return;
+    if (repeatRef.current) return;
     
     setPlayerState(prev => ({
       ...prev,
@@ -51,7 +52,7 @@ export const useAudioEvents = (
     }));
     
     onEndCallback.current();
-  }, [playerState.repeat, setPlayerState]);
+  }, [setPlayerState]);
 
   const handlePlaying = useCallback(() => {
     hasPlayedSuccessfully.current = true;
@@ -111,7 +112,7 @@ export const useAudioEvents = (
     onEndCallback.current = callback;
   }, []);
 
-  return {
+  return useMemo(() => ({
     updateProgress,
     updateDuration,
     handleSongEnd,
@@ -122,5 +123,14 @@ export const useAudioEvents = (
     setOnEndCallback,
     loadingTimeoutRef,
     hasPlayedSuccessfully
-  };
+  }), [
+    updateProgress,
+    updateDuration,
+    handleSongEnd,
+    handlePlaying,
+    handleCanPlay,
+    handleLoadStart,
+    handleError,
+    setOnEndCallback,
+  ]);
 };
