@@ -7,6 +7,7 @@ export interface ArtistProfile {
   socials: Record<string, string>;
   player_layout: string;
   frontend_sections: string[];
+  logo_url: string | null;
 }
 
 const DEFAULT_SECTIONS = ['next_up', 'events', 'merch'];
