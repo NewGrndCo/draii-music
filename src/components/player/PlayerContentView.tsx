@@ -42,15 +42,19 @@ const PlayerContentView: React.FC = () => {
   const renderSection = (key: string) => {
     switch (key) {
       case 'next_up':
-        return nextSongs.length > 0 ? (
-          <NextUpSongs
-            key="next_up"
-            nextSongs={nextSongs}
-            onSelectSong={handleSelectSong}
-            horizontalMode={horizontalMode}
-            openLibrary={() => openLibrary(true)}
-          />
-        ) : null;
+        return (
+          <React.Fragment key="next_up">
+            {nextSongs.length > 0 && (
+              <NextUpSongs
+                nextSongs={nextSongs}
+                onSelectSong={handleSelectSong}
+                horizontalMode={horizontalMode}
+                openLibrary={() => openLibrary(true)}
+              />
+            )}
+            <RecentlyPlayed songs={recentSongs} onSelectSong={handleSelectSong} />
+          </React.Fragment>
+        );
       case 'events':
         return <UpcomingEvents key="events" />;
       case 'merch':
