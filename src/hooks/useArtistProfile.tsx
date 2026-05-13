@@ -36,6 +36,7 @@ export const useArtistProfile = () => {
             ? data.frontend_sections
             : DEFAULT_SECTIONS,
           logo_url: data.logo_url ?? null,
+          location: data.location ?? '',
         });
       }
       setLoading(false);
