@@ -26,7 +26,8 @@ type Stats = Awaited<ReturnType<typeof adminStats>>;
 const Analytics: React.FC = () => {
   const [data, setData] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeNow, setActiveNow] = useState(0);
+  const liveListeners = useLiveListeners();
+  const liveCount = liveListeners.length;
 
   useEffect(() => {
     adminStats().then(setData).catch((e) => toast.error(e.message)).finally(() => setLoading(false));
