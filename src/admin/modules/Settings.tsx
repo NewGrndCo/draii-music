@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe } from 'lucide-react';
+import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -12,7 +12,15 @@ interface Profile {
   bio: string;
   socials: Record<string, string>;
   player_layout: 'normal' | 'wide';
+  frontend_sections: string[];
 }
+
+const SECTION_LABELS: Record<string, string> = {
+  next_up: 'Next Up songs',
+  events: 'Upcoming events',
+  merch: 'Merch slider',
+};
+const ALL_SECTIONS = ['next_up', 'events', 'merch'];
 
 const socialFields: { key: string; label: string; icon: React.ElementType }[] = [
   { key: 'twitter',   label: 'Twitter / X',   icon: Twitter },
@@ -43,6 +51,7 @@ const Settings: React.FC = () => {
         bio: profile.bio,
         socials: profile.socials,
         player_layout: profile.player_layout,
+        frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
       });
       toast.success('Settings saved');
     } catch (e: any) {
@@ -50,6 +59,15 @@ const Settings: React.FC = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const moveSection = (idx: number, dir: -1 | 1) => {
+    if (!profile) return;
+    const list = [...(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS)];
+    const target = idx + dir;
+    if (target < 0 || target >= list.length) return;
+    [list[idx], list[target]] = [list[target], list[idx]];
+    setProfile({ ...profile, frontend_sections: list });
   };
 
   if (loading) return <div className="admin-glass rounded-2xl p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>;
