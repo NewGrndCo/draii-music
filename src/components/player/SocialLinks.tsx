@@ -15,6 +15,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
   const { profile } = useArtistProfile();
   const socials = profile?.socials ?? {};
   const bioText = profile?.bio?.trim();
+  const logoUrl = profile?.logo_url || '/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png';
   
   // Reset click count after timeout
   useEffect(() => {
