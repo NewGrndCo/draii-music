@@ -29,7 +29,7 @@ const App = () => {
             } />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
-                <MailingListModal />
+                <Suspense fallback={null}><MailingListModal /></Suspense>
                 
                 <Suspense fallback={
                   <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">
