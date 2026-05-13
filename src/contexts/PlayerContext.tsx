@@ -24,6 +24,7 @@ interface PlayerContextValue {
   setOnEndCallback: (callback: () => void) => void;
 
   nextSongs: Song[];
+  recentSongs: Song[];
   liked: boolean;
   horizontalMode: boolean;
   playCount: number;
