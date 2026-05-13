@@ -109,28 +109,48 @@ const Settings: React.FC = () => {
         </Button>
       </div>
 
-      <div className="admin-glass-strong rounded-2xl p-5 space-y-4">
-        <div>
-          <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
-          <h3 className="font-display text-base font-semibold mt-0.5 flex items-center gap-2"><Globe className="h-4 w-4 text-purple-300" /> Player layout</h3>
+      <div className="space-y-5">
+        <div className="admin-glass-strong rounded-2xl p-5 space-y-4">
+          <div>
+            <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
+            <h3 className="font-display text-base font-semibold mt-0.5 flex items-center gap-2"><Globe className="h-4 w-4 text-purple-300" /> Player layout</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {(['normal', 'wide'] as const).map((opt) => (
+              <button
+                key={opt}
+                onClick={() => setProfile({ ...profile, player_layout: opt })}
+                className={`rounded-xl border p-4 text-left transition-all
+                  ${profile.player_layout === opt
+                    ? 'admin-gradient-soft-bg border-white/20 shadow-[0_0_24px_-8px_hsl(var(--admin-purple)/0.6)]'
+                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'}`}
+              >
+                <div className="text-sm font-medium capitalize">{opt}</div>
+                <div className="text-xs text-white/50 mt-0.5">
+                  {opt === 'normal' ? 'Standard player layout' : 'Wide for Smart TV / tablet'}
+                </div>
+                <div className={`mt-3 rounded-md ${opt === 'wide' ? 'aspect-[16/6]' : 'aspect-[3/4]'} bg-white/[0.05] border border-white/10`} />
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          {(['normal', 'wide'] as const).map((opt) => (
-            <button
-              key={opt}
-              onClick={() => setProfile({ ...profile, player_layout: opt })}
-              className={`rounded-xl border p-4 text-left transition-all
-                ${profile.player_layout === opt
-                  ? 'admin-gradient-soft-bg border-white/20 shadow-[0_0_24px_-8px_hsl(var(--admin-purple)/0.6)]'
-                  : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'}`}
-            >
-              <div className="text-sm font-medium capitalize">{opt}</div>
-              <div className="text-xs text-white/50 mt-0.5">
-                {opt === 'normal' ? 'Standard player layout' : 'Wide for Smart TV / tablet'}
+
+        <div className="admin-glass-strong rounded-2xl p-5 space-y-3">
+          <div>
+            <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
+            <h3 className="font-display text-base font-semibold mt-0.5">Section order</h3>
+            <p className="text-xs text-white/50 mt-1">Reorder how Next Up, Events and Merch appear on the public player.</p>
+          </div>
+          <div className="space-y-2">
+            {(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS).map((key, idx, arr) => (
+              <div key={key} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                <GripVertical className="h-4 w-4 text-white/40" />
+                <div className="flex-1 text-sm">{SECTION_LABELS[key] ?? key}</div>
+                <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => moveSection(idx, -1)} className="h-7 w-7 text-white/70"><ArrowUp className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" disabled={idx === arr.length - 1} onClick={() => moveSection(idx, 1)} className="h-7 w-7 text-white/70"><ArrowDown className="h-4 w-4" /></Button>
               </div>
-              <div className={`mt-3 rounded-md ${opt === 'wide' ? 'aspect-[16/6]' : 'aspect-[3/4]'} bg-white/[0.05] border border-white/10`} />
-            </button>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
