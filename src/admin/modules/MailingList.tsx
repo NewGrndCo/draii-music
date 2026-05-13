@@ -19,12 +19,25 @@ const MailingList: React.FC = () => {
   const [rows, setRows] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [modalEnabled, setModalEnabled] = useState(true);
+  const [required, setRequired] = useState(false);
+  const [savingFlag, setSavingFlag] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await adminList<Entry>('mailing_list');
+      const [data, profiles] = await Promise.all([
+        adminList<Entry>('mailing_list'),
+        adminList<any>('artist_profile'),
+      ]);
       setRows(data || []);
+      const p = profiles?.[0];
+      if (p) {
+        setProfileId(p.id);
+        setModalEnabled(p.mailing_modal_enabled ?? true);
+        setRequired(p.mailing_required ?? false);
+      }
     } catch (e: any) {
       toast.error(e.message || 'Failed to load');
     } finally {
@@ -33,6 +46,22 @@ const MailingList: React.FC = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const updateFlag = async (key: 'mailing_modal_enabled' | 'mailing_required', value: boolean) => {
+    if (!profileId) return;
+    const prev = key === 'mailing_modal_enabled' ? modalEnabled : required;
+    if (key === 'mailing_modal_enabled') setModalEnabled(value); else setRequired(value);
+    setSavingFlag(key);
+    try {
+      await adminUpdate('artist_profile', profileId, { [key]: value });
+      toast.success('Setting saved');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to save');
+      if (key === 'mailing_modal_enabled') setModalEnabled(prev); else setRequired(prev);
+    } finally {
+      setSavingFlag(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
