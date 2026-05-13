@@ -51,13 +51,15 @@ const Settings: React.FC = () => {
       .then((rows) => {
         const r: any = rows[0];
         if (!r) { setProfile(null); return; }
+        const sections = Array.isArray(r.frontend_sections) && r.frontend_sections.length
+          ? [...r.frontend_sections] : [...ALL_SECTIONS];
+        if (!sections.includes('about')) sections.push('about');
         setProfile({
           id: r.id,
           bio: r.bio ?? '',
           socials: r.socials ?? {},
           player_layout: (r.player_layout ?? 'normal') as any,
-          frontend_sections: Array.isArray(r.frontend_sections) && r.frontend_sections.length
-            ? r.frontend_sections : ALL_SECTIONS,
+          frontend_sections: sections,
           logo_url: r.logo_url ?? null,
           location: r.location ?? '',
           footer_text: r.footer_text ?? '',

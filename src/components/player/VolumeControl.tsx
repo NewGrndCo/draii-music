@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Square, Heart } from 'lucide-react';
+import { Volume2, VolumeX, Square, DollarSign } from 'lucide-react';
 import { Slider } from '../ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import DonateDialog from './DonateDialog';
 import { usePlayer } from '../../contexts/PlayerContext';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface VolumeControlProps {
   volume: number;
@@ -14,6 +15,18 @@ interface VolumeControlProps {
 const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, toggleLayout }) => {
   const [donateOpen, setDonateOpen] = useState(false);
   const { currentSong } = usePlayer();
+  const { profile } = useArtistProfile();
+
+  const supportEnabled = profile?.support_fund_enabled !== false;
+
+  const handleSupport = () => {
+    const link = profile?.stripe_payment_link?.trim();
+    if (link) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      setDonateOpen(true);
+    }
+  };
 
   return (
     <div className="flex items-center justify-between py-2">
@@ -39,23 +52,25 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, t
       </div>
 
       <div className="flex items-center gap-3">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setDonateOpen(true)}
-                aria-label="Support the artist"
-                className="text-pink-400/90 hover:text-pink-300 transition-colors p-2 touch-manipulation"
-                style={{ minHeight: '44px', minWidth: '44px' }}
-              >
-                <Heart size={18} fill="currentColor" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="bg-black/90 border-white/10 text-white text-xs">
-              Support fund
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {supportEnabled && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleSupport}
+                  aria-label="Support the artist"
+                  className="text-emerald-400/90 hover:text-emerald-300 transition-colors p-2 touch-manipulation"
+                  style={{ minHeight: '44px', minWidth: '44px' }}
+                >
+                  <DollarSign size={20} strokeWidth={2.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-black/90 border-white/10 text-white text-xs">
+                Support fund
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
 
         <TooltipProvider>
           <Tooltip>

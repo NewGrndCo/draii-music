@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Song {
   id: string;
@@ -48,6 +49,23 @@ const Library: React.FC = () => {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  // Live updates: when play_count or likes_count change in DB, reflect immediately
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-songs-live')
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'songs' },
+        (payload: any) => {
+          const n = payload.new;
+          if (!n?.id) return;
+          setSongs((prev) => prev.map((s) => s.id === n.id
+            ? { ...s, play_count: n.play_count ?? s.play_count, likes_count: n.likes_count ?? s.likes_count }
+            : s));
+        })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const [groupBy, setGroupBy] = useState<'all' | 'category'>('category');
 

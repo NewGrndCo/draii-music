@@ -26,6 +26,7 @@ export type Database = {
           logo_url: string | null
           player_layout: string
           socials: Json
+          stripe_payment_link: string | null
           support_fund_enabled: boolean
           updated_at: string
         }
@@ -40,6 +41,7 @@ export type Database = {
           logo_url?: string | null
           player_layout?: string
           socials?: Json
+          stripe_payment_link?: string | null
           support_fund_enabled?: boolean
           updated_at?: string
         }
@@ -54,6 +56,7 @@ export type Database = {
           logo_url?: string | null
           player_layout?: string
           socials?: Json
+          stripe_payment_link?: string | null
           support_fund_enabled?: boolean
           updated_at?: string
         }
