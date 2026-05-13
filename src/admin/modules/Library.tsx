@@ -20,7 +20,17 @@ interface Song {
   file_path: string | null;
   thumbnail_path: string | null;
   genre: string | null;
+  category: string | null;
+  album_id: string | null;
 }
+
+const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
+const coverUrl = (path: string | null | undefined) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/lovable-uploads')) return path;
+  return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/songs/${path}`;
+};
 
 const Library: React.FC = () => {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -39,11 +49,16 @@ const Library: React.FC = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const [groupBy, setGroupBy] = useState<'all' | 'category'>('category');
+
   const filtered = songs.filter((s) => {
     if (!q) return true;
     const n = q.toLowerCase();
     return (s.title || '').toLowerCase().includes(n) || (s.artist || '').toLowerCase().includes(n);
   });
+
+  const singles = filtered.filter((s) => (s.category || 'single').toLowerCase() === 'single');
+  const projects = filtered.filter((s) => (s.category || 'single').toLowerCase() !== 'single');
 
   const startEdit = (s: Song) => { setEditing(s.id); setDraft({ ...s }); };
   const cancelEdit = () => { setEditing(null); setDraft({}); };
@@ -59,6 +74,7 @@ const Library: React.FC = () => {
         support_fund_cents: draft.support_fund_cents ? Number(draft.support_fund_cents) : 0,
         is_collaboration: !!draft.is_collaboration,
         guest_artists: draft.guest_artists ?? [],
+        category: draft.category || 'single',
       };
       const updated = await adminUpdate<Song>('songs', editing, payload);
       setSongs((prev) => prev.map((s) => (s.id === editing ? { ...s, ...updated } : s)));
