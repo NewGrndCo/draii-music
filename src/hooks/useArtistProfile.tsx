@@ -21,7 +21,7 @@ export const useArtistProfile = () => {
     (async () => {
       const { data } = await (supabase as any)
         .from('artist_profile')
-        .select('id,bio,socials,player_layout,frontend_sections')
+        .select('id,bio,socials,player_layout,frontend_sections,logo_url')
         .limit(1)
         .maybeSingle();
       if (!alive) return;
@@ -34,6 +34,7 @@ export const useArtistProfile = () => {
           frontend_sections: Array.isArray(data.frontend_sections) && data.frontend_sections.length
             ? data.frontend_sections
             : DEFAULT_SECTIONS,
+          logo_url: data.logo_url ?? null,
         });
       }
       setLoading(false);
