@@ -62,7 +62,7 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
               <Music2 className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="font-display font-semibold text-base leading-none">Draii.io</div>
+              <div className="font-display font-semibold text-base leading-none">Draii Rynell</div>
               <div className="text-[10px] uppercase tracking-widest text-white/50 mt-1">Admin</div>
             </div>
           </div>
@@ -110,7 +110,7 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
                 <span className="admin-gradient-text">DR Admin</span>
                 <span className="text-white/85"> Control Center</span>
               </h1>
-              <p className="text-xs text-white/50 mt-0.5">Manage every surface of Draii.io in real time.</p>
+              <p className="text-xs text-white/50 mt-0.5">Manage every surface of draiirynell.com in real time.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StatusPill label="Database" ok icon={Database} />
