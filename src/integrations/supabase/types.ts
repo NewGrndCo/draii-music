@@ -35,6 +35,75 @@ export type Database = {
         }
         Relationships: []
       }
+      songs: {
+        Row: {
+          album_id: string | null
+          artist: string | null
+          bpm: number | null
+          category: string | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          file_path: string | null
+          genre: string | null
+          id: string
+          likes_count: number | null
+          play_count: number | null
+          preview_path: string | null
+          release_date: string | null
+          status: string | null
+          tags: string[] | null
+          thumbnail_path: string | null
+          title: string | null
+          updated_at: string
+          visibility: string | null
+        }
+        Insert: {
+          album_id?: string | null
+          artist?: string | null
+          bpm?: number | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path?: string | null
+          genre?: string | null
+          id: string
+          likes_count?: number | null
+          play_count?: number | null
+          preview_path?: string | null
+          release_date?: string | null
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+          visibility?: string | null
+        }
+        Update: {
+          album_id?: string | null
+          artist?: string | null
+          bpm?: number | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path?: string | null
+          genre?: string | null
+          id?: string
+          likes_count?: number | null
+          play_count?: number | null
+          preview_path?: string | null
+          release_date?: string | null
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+          visibility?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
