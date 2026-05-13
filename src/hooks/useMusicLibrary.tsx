@@ -3,17 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Song, Album } from '../data/musicData';
 import { toast } from 'sonner';
 
-// Deterministic hash → integer for stable per-song counts
-const hashString = (input: string): number => {
-  let hash = 5381;
-  for (let i = 0; i < input.length; i++) {
-    hash = ((hash << 5) + hash) ^ input.charCodeAt(i);
-  }
-  return Math.abs(hash);
-};
-
-const stablePlayCount = (id: string) => 50 + (hashString(`plays:${id}`) % 1000);
-const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
+// Real per-song counts come straight from the DB
+const stablePlayCount = (song: any) => song?.play_count ?? 0;
+const stableLikesCount = (song: any) => song?.likes_count ?? 0;
 
 // Audio + thumbnail files live in the legacy storage bucket
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
@@ -87,8 +79,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png',
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: stablePlayCount(song),
+              likesCount: stableLikesCount(song),
             })),
           });
         }
@@ -111,8 +103,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: stablePlayCount(song),
+              likesCount: stableLikesCount(song),
             })),
           });
         });
@@ -140,8 +132,8 @@ export const useMusicLibrary = () => {
               duration: formatDuration(song.duration || 180),
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
-              playCount: stablePlayCount(song.id),
-              likesCount: stableLikesCount(song.id),
+              playCount: stablePlayCount(song),
+              likesCount: stableLikesCount(song),
             })),
           });
         }
