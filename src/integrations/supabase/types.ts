@@ -164,22 +164,37 @@ export type Database = {
       }
       mailing_list: {
         Row: {
+          city: string | null
+          country: string | null
           created_at: string
           email: string
           id: string
+          ip_address: string | null
           phone: string | null
+          region: string | null
+          user_agent: string | null
         }
         Insert: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           email: string
           id?: string
+          ip_address?: string | null
           phone?: string | null
+          region?: string | null
+          user_agent?: string | null
         }
         Update: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           email?: string
           id?: string
+          ip_address?: string | null
           phone?: string | null
+          region?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
