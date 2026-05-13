@@ -7,6 +7,9 @@ import ActionButtons from './ActionButtons';
 import VolumeControl from './VolumeControl';
 import NextUpSongs from './NextUpSongs';
 import UpcomingEvents from './UpcomingEvents';
+import UpcomingMerch from './UpcomingMerch';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
+import { useLivePresence } from '@/hooks/useLivePresence';
 
 const PlayerContentView: React.FC = () => {
   const {
@@ -18,9 +21,38 @@ const PlayerContentView: React.FC = () => {
     handleSelectSong, openLibrary
   } = usePlayer();
 
+  const { profile } = useArtistProfile();
+  // Track this listener as live for the admin dashboard
+  useLivePresence(!!currentSong);
+
   if (!currentSong) {
     return <div className="text-foreground text-center p-4">Loading music...</div>;
   }
+
+  const sectionOrder = profile?.frontend_sections?.length
+    ? profile.frontend_sections
+    : ['next_up', 'events', 'merch'];
+
+  const renderSection = (key: string) => {
+    switch (key) {
+      case 'next_up':
+        return nextSongs.length > 0 ? (
+          <NextUpSongs
+            key="next_up"
+            nextSongs={nextSongs}
+            onSelectSong={handleSelectSong}
+            horizontalMode={horizontalMode}
+            openLibrary={() => openLibrary(true)}
+          />
+        ) : null;
+      case 'events':
+        return <UpcomingEvents key="events" />;
+      case 'merch':
+        return <UpcomingMerch key="merch" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -68,16 +100,7 @@ const PlayerContentView: React.FC = () => {
         toggleLayout={toggleLayout}
       />
 
-      {nextSongs.length > 0 && (
-        <NextUpSongs
-          nextSongs={nextSongs}
-          onSelectSong={handleSelectSong}
-          horizontalMode={horizontalMode}
-          openLibrary={() => openLibrary(true)}
-        />
-      )}
-
-      <UpcomingEvents />
+      {sectionOrder.map(renderSection)}
     </div>
   );
 };

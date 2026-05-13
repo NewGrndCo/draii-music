@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Instagram, Twitter, Facebook, Youtube, MapPin } from 'lucide-react';
+import { Instagram, Twitter, Facebook, Youtube, MapPin, Music2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface SocialLinksProps {
   inFullscreen?: boolean;
@@ -11,6 +12,9 @@ interface SocialLinksProps {
 const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
   const [logoClickCount, setLogoClickCount] = useState(0);
   const navigate = useNavigate();
+  const { profile } = useArtistProfile();
+  const socials = profile?.socials ?? {};
+  const bioText = profile?.bio?.trim();
   
   // Reset click count after timeout
   useEffect(() => {
@@ -81,30 +85,47 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
         <span className={cn("text-white/70", inFullscreen ? "text-[10px]" : "text-xs")}>Suffolk County, NY</span>
       </div>
       
-      {/* Bio text above genre - smaller in fullscreen */}
-      <p className={cn("text-white/70 mb-1 italic", inFullscreen ? "text-[8px]" : "text-xs")}>
-        [𝐚 𝐦𝐢𝐱] : between 𝒏𝒐𝒔𝒕𝒂𝒍𝒈𝒊𝒄 melodies and αмвιєηт progressions..
+      {/* Bio from artist profile (admin-editable) */}
+      <p className={cn("text-white/70 mb-1 italic whitespace-pre-line", inFullscreen ? "text-[8px]" : "text-xs")}>
+        {bioText || '[𝐚 𝐦𝐢𝐱] : between 𝒏𝒐𝒔𝒕𝒂𝒍𝒈𝒊𝒄 melodies and αмвιєηт progressions..'}
       </p>
-      
+
       <p className={cn("text-white/50 mt-1", inFullscreen ? "text-[8px]" : "text-xs")}>
         R&B/Soul/Hip-Hop/Reggae
       </p>
-      
-      {/* Only show social media links when not in fullscreen */}
+
       {!inFullscreen && (
-        <div className="flex items-center justify-center mt-3 gap-4">
-          <a href="https://instagram.com/draiirynell" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-            <Instagram size={20} />
-          </a>
-          <a href="https://x.com/ruseriousdraii" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-            <Twitter size={20} />
-          </a>
-          <a href="https://facebook.com/draiirynell" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-            <Facebook size={20} />
-          </a>
-          <a href="https://youtube.com/@draiirynell" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-            <Youtube size={20} />
-          </a>
+        <div className="flex items-center justify-center mt-3 gap-4 flex-wrap">
+          {(socials.instagram || 'https://instagram.com/draiirynell') && (
+            <a href={socials.instagram || 'https://instagram.com/draiirynell'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Instagram size={20} />
+            </a>
+          )}
+          {(socials.twitter || 'https://x.com/ruseriousdraii') && (
+            <a href={socials.twitter || 'https://x.com/ruseriousdraii'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Twitter size={20} />
+            </a>
+          )}
+          {socials.facebook && (
+            <a href={socials.facebook} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Facebook size={20} />
+            </a>
+          )}
+          {(socials.youtube || 'https://youtube.com/@draiirynell') && (
+            <a href={socials.youtube || 'https://youtube.com/@draiirynell'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Youtube size={20} />
+            </a>
+          )}
+          {socials.tiktok && (
+            <a href={socials.tiktok} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Music2 size={20} />
+            </a>
+          )}
+          {socials.spotify && (
+            <a href={socials.spotify} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
+              <Music2 size={20} />
+            </a>
+          )}
         </div>
       )}
     </div>
