@@ -240,19 +240,33 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
           </ZoomableGroup>
         </ComposableMap>
 
-        {hover && (
-          <div
-            className="pointer-events-none fixed z-50 px-2.5 py-1.5 rounded-md bg-black/85 border border-white/10 text-xs text-white shadow-xl"
-            style={{ left: hover.x + 12, top: hover.y + 12 }}
-          >
-            <div className="font-medium">{hover.label}</div>
-            <div className="text-white/60">{hover.n.toLocaleString()} listen{hover.n === 1 ? '' : 's'}</div>
-          </div>
-        )}
+        {hover && (() => {
+          const flipX = hover.x + 200 > window.innerWidth;
+          const flipY = hover.y + 80 > window.innerHeight;
+          return (
+            <div
+              className="pointer-events-none fixed z-50 px-2.5 py-1.5 rounded-md bg-black/90 border border-white/15 text-xs text-white shadow-2xl backdrop-blur-sm whitespace-nowrap"
+              style={{
+                left: flipX ? hover.x - 12 : hover.x + 14,
+                top: flipY ? hover.y - 12 : hover.y + 14,
+                transform: `translate(${flipX ? '-100%' : '0'}, ${flipY ? '-100%' : '0'})`,
+              }}
+            >
+              <div className="font-medium">{hover.label}</div>
+              <div className="text-white/60">{hover.n.toLocaleString()} listen{hover.n === 1 ? '' : 's'}</div>
+            </div>
+          );
+        })()}
       </div>
 
       {list.length === 0 ? (
-        <div className="text-sm text-white/45 py-4 text-center">No data at this level yet.</div>
+        <div className="text-sm text-white/45 py-6 text-center">
+          {level === 'country'
+            ? 'No state/region data recorded for this country yet — new listens will appear here as soon as fans tune in.'
+            : level === 'region'
+              ? 'No city data recorded for this state yet.'
+              : 'No data at this level yet.'}
+        </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
           {list.map((row) => (
