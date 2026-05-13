@@ -53,23 +53,32 @@ const UpcomingMerch: React.FC = () => {
               </div>
             </>
           );
+          const trackClick = () => {
+            let geo: any = {};
+            try { const c = sessionStorage.getItem('live-presence-geo-v1'); if (c) geo = JSON.parse(c); } catch {}
+            supabase.from('merch_clicks').insert({
+              merch_id: m.id, country: geo.country, region: geo.region, city: geo.city,
+            }).then(() => {});
+          };
           return m.external_url ? (
             <a
               key={m.id}
               href={m.external_url}
               target="_blank"
               rel="noreferrer"
+              onClick={trackClick}
               className="shrink-0 w-36 rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/15 to-blue-500/10 overflow-hidden hover:border-purple-400/40 transition"
             >
               {Card}
             </a>
           ) : (
-            <div
+            <button
               key={m.id}
-              className="shrink-0 w-36 rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/15 to-blue-500/10 overflow-hidden"
+              onClick={trackClick}
+              className="shrink-0 w-36 rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/15 to-blue-500/10 overflow-hidden text-left"
             >
               {Card}
-            </div>
+            </button>
           );
         })}
       </div>
