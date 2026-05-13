@@ -13,12 +13,13 @@ const getAudioSourceCandidates = (audioSrc: string): string[] => {
   const currentBase = import.meta.env.VITE_SUPABASE_URL;
   const cleanPath = audioSrc.replace(/^\/+/, '');
   const objectPath = cleanPath.replace(/^(song-audio|songs)\//, '');
+  const isBucketQualified = cleanPath !== objectPath;
 
   return Array.from(new Set([
-    cleanPath !== objectPath && `${currentBase}/storage/v1/object/public/${cleanPath}`,
+    isBucketQualified && `${currentBase}/storage/v1/object/public/${cleanPath}`,
+    `${LEGACY_PUBLIC_BASE}/storage/v1/object/public/songs/${objectPath}`,
     `${currentBase}/storage/v1/object/public/song-audio/${objectPath}`,
     `${currentBase}/storage/v1/object/public/songs/${objectPath}`,
-    `${LEGACY_PUBLIC_BASE}/storage/v1/object/public/songs/${objectPath}`,
   ].filter(Boolean) as string[]));
 };
 
@@ -64,6 +65,10 @@ export const useAudioElement = (
 
       if (error?.name === 'AbortError') {
         console.debug('Audio play request was superseded before it started');
+        return;
+      }
+
+      if (audioSourceIndexRef.current < audioSourceCandidatesRef.current.length - 1) {
         return;
       }
 
