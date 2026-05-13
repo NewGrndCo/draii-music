@@ -150,15 +150,26 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5">
-          <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
-          <Textarea
-            rows={6}
-            value={profile.bio}
-            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-            placeholder="Tell your story…"
-            className="bg-white/5 border-white/10 text-white"
-          />
+        <div className="admin-glass rounded-2xl p-5 space-y-3">
+          <div>
+            <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
+            <Textarea
+              rows={6}
+              value={profile.bio}
+              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+              placeholder="Tell your story…"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-white/55 mb-1.5 block">Location</Label>
+            <Input
+              value={profile.location}
+              onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+              placeholder="City, Region"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
         </div>
 
         <div className="admin-glass rounded-2xl p-5">
