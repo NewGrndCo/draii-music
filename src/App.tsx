@@ -8,10 +8,10 @@ import { AnimationProvider } from './hooks/useAnimationContext';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import AppBackground from './components/shared/AppBackground';
 import MusicPlayer from './components/MusicPlayer';
-import MailingListModal from './components/MailingListModal';
 import AdminGuard from './components/AdminGuard';
 
 const Admin = lazy(() => import('./pages/Admin'));
+const MailingListModal = lazy(() => import('./components/MailingListModal'));
 
 const App = () => {
   const { currentSong } = useAudio();
@@ -29,7 +29,7 @@ const App = () => {
             } />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
-                <MailingListModal />
+                <Suspense fallback={null}><MailingListModal /></Suspense>
                 
                 <Suspense fallback={
                   <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">

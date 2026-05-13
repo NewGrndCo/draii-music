@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Volume2, VolumeX, Square, DollarSign } from 'lucide-react';
 import { Slider } from '../ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import DonateDialog from './DonateDialog';
+const DonateDialog = lazy(() => import('./DonateDialog'));
 import { usePlayer } from '../../contexts/PlayerContext';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
@@ -91,12 +91,16 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, t
         </TooltipProvider>
       </div>
 
-      <DonateDialog
-        open={donateOpen}
-        onOpenChange={setDonateOpen}
-        songId={currentSong?.id}
-        songTitle={currentSong?.title}
-      />
+      {donateOpen && (
+        <Suspense fallback={null}>
+          <DonateDialog
+            open={donateOpen}
+            onOpenChange={setDonateOpen}
+            songId={currentSong?.id}
+            songTitle={currentSong?.title}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
