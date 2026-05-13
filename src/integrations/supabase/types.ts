@@ -273,6 +273,7 @@ export type Database = {
           play_count: number | null
           preview_path: string | null
           release_date: string | null
+          slug: string | null
           status: string | null
           support_fund_cents: number
           tags: string[] | null
@@ -298,6 +299,7 @@ export type Database = {
           play_count?: number | null
           preview_path?: string | null
           release_date?: string | null
+          slug?: string | null
           status?: string | null
           support_fund_cents?: number
           tags?: string[] | null
@@ -323,6 +325,7 @@ export type Database = {
           play_count?: number | null
           preview_path?: string | null
           release_date?: string | null
+          slug?: string | null
           status?: string | null
           support_fund_cents?: number
           tags?: string[] | null
@@ -338,7 +341,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      slugify: { Args: { input: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

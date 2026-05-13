@@ -81,6 +81,7 @@ export const useMusicLibrary = () => {
             year: '2023',
             songs: rusdSongs.map((song: any) => ({
               id: song.id,
+              slug: song.slug,
               title: song.title || 'Untitled',
               artist: song.artist || 'Draii Rynell',
               album: 'RUSD',
@@ -105,6 +106,7 @@ export const useMusicLibrary = () => {
             year: '2023',
             songs: songs.map((song: any) => ({
               id: song.id,
+              slug: song.slug,
               title: song.title || 'Untitled',
               artist: song.artist || 'Unknown Artist',
               album: `${artist} Collection`,
@@ -134,6 +136,7 @@ export const useMusicLibrary = () => {
             year: '2023',
             songs: collabSongs.map((song: any) => ({
               id: song.id,
+              slug: song.slug,
               title: song.title || 'Untitled',
               artist: song.artist || 'Unknown Artist',
               album: 'Collaborations',
