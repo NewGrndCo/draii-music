@@ -33,16 +33,8 @@ const Analytics: React.FC = () => {
     adminStats().then(setData).catch((e) => toast.error(e.message)).finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('admin-listens')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'listens' }, () => {
-        setActiveNow((n) => n + 1);
-        setTimeout(() => setActiveNow((n) => Math.max(0, n - 1)), 60_000);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+
+
 
   const totals = useMemo(() => {
     if (!data) return null;
