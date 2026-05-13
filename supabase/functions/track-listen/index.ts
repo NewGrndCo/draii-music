@@ -18,9 +18,11 @@ Deno.serve(async (req) => {
     const songId = typeof body.songId === "string" ? body.songId : null;
     const source = typeof body.source === "string" ? body.source.slice(0, 64) : null;
 
-    // Geo + device hints (best effort)
-    const country = req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
-    const city = req.headers.get("cf-ipcity") || req.headers.get("x-vercel-ip-city") || null;
+    // Geo + device hints (best effort) — prefer client-supplied (ipapi) values, fall back to edge headers
+    const cleanStr = (v: any) => (typeof v === "string" && v.trim()) ? v.trim().slice(0, 120) : null;
+    const country = cleanStr(body.country) || req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
+    const region  = cleanStr(body.region)  || req.headers.get("cf-region")     || req.headers.get("x-vercel-ip-country-region") || null;
+    const city    = cleanStr(body.city)    || req.headers.get("cf-ipcity")     || req.headers.get("x-vercel-ip-city") || null;
     const ua = req.headers.get("user-agent") || "";
     const device = /mobile|iphone|android/i.test(ua) ? "mobile" : "desktop";
 
@@ -28,7 +30,7 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
     const { error } = await sb.from("listens").insert({
-      song_id: songId, country, city, device, source,
+      song_id: songId, country, region, city, device, source,
     });
     if (error) return json({ error: error.message }, 400);
 
