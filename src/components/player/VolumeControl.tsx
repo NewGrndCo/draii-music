@@ -91,12 +91,16 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, t
         </TooltipProvider>
       </div>
 
-      <DonateDialog
-        open={donateOpen}
-        onOpenChange={setDonateOpen}
-        songId={currentSong?.id}
-        songTitle={currentSong?.title}
-      />
+      {donateOpen && (
+        <Suspense fallback={null}>
+          <DonateDialog
+            open={donateOpen}
+            onOpenChange={setDonateOpen}
+            songId={currentSong?.id}
+            songTitle={currentSong?.title}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
