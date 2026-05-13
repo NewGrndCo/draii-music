@@ -3,7 +3,6 @@ import React from 'react';
 import { Album } from '../data/musicData';
 import { cn } from '@/lib/utils';
 import { Disc, Sparkles } from 'lucide-react';
-import { useAnimationContext } from '../hooks/useAnimationContext';
 
 interface AlbumCoverProps {
   album: Album;
@@ -22,24 +21,8 @@ const AlbumCover: React.FC<AlbumCoverProps> = ({
   className,
   index = 0
 }) => {
-  const { setAnimatingSong, setAnimationStartPos } = useAnimationContext();
-  
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Immediate response for better UX
+  const handleClick = () => {
     onClick();
-    
-    // Optional animation setup (non-blocking)
-    const imgElement = e.currentTarget.querySelector('img');
-    if (imgElement && album.songs && album.songs.length > 0) {
-      const rect = imgElement.getBoundingClientRect();
-      setAnimationStartPos({
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height
-      });
-      setAnimatingSong(album.songs[0]);
-    }
   };
   
   return (

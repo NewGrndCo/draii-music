@@ -13,7 +13,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
 import MusicLibraryScroll from './player/MusicLibraryScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Disc, X } from 'lucide-react';
+import { Music, Disc, X, User, Users } from 'lucide-react';
+
+const isCollab = (artist: string) => {
+  const a = (artist || '').toLowerCase();
+  return a.includes('feat') || a.includes(' ft') || a.includes(' & ') || a.includes(',') || a.includes(' with ');
+};
+
 
 interface MusicLibraryProps {
   albums: Album[];
@@ -174,10 +180,18 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           {/* Tabs Navigation - Only show when no album is selected */}
           {!selectedAlbum && (
-            <TabsList className="w-full bg-black/40 border border-white/20 mb-4">
+            <TabsList className="w-full bg-black/40 border border-white/20 mb-4 flex-wrap h-auto">
               <TabsTrigger value="all-songs" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                 <Music size={16} />
                 <span>All Songs</span>
+              </TabsTrigger>
+              <TabsTrigger value="singles" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                <User size={16} />
+                <span>Singles</span>
+              </TabsTrigger>
+              <TabsTrigger value="collabs" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                <Users size={16} />
+                <span>Collabs</span>
               </TabsTrigger>
               <TabsTrigger value="albums" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                 <Disc size={16} />
@@ -222,7 +236,17 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
                   <TabsContent value="all-songs" className="h-full">
                     <MusicLibraryScroll songs={allSongs} onSelectSong={handleSelectSong} />
                   </TabsContent>
-                  
+
+                  {/* Singles Tab */}
+                  <TabsContent value="singles" className="h-full">
+                    <MusicLibraryScroll songs={allSongs.filter(s => !isCollab(s.artist))} onSelectSong={handleSelectSong} />
+                  </TabsContent>
+
+                  {/* Collabs Tab */}
+                  <TabsContent value="collabs" className="h-full">
+                    <MusicLibraryScroll songs={allSongs.filter(s => isCollab(s.artist))} onSelectSong={handleSelectSong} />
+                  </TabsContent>
+
                   {/* Albums Tab */}
                   <TabsContent value="albums">
                     <ScrollArea className="h-[70vh]">
