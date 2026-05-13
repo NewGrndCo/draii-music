@@ -8,6 +8,7 @@ import VolumeControl from './VolumeControl';
 import NextUpSongs from './NextUpSongs';
 import UpcomingEvents from './UpcomingEvents';
 import UpcomingMerch from './UpcomingMerch';
+import RecentlyPlayed from './RecentlyPlayed';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 import { useLivePresence } from '@/hooks/useLivePresence';
 
