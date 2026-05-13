@@ -22,19 +22,43 @@ const schema = z.object({
 });
 
 const MailingListModal: React.FC = () => {
+  const { profile } = useArtistProfile();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const modalEnabled = profile?.mailing_modal_enabled ?? true;
+  const required = profile?.mailing_required ?? false;
+  const hasSeen = typeof window !== 'undefined' && !!localStorage.getItem(STORAGE_KEY);
+
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    if (!profile) return;
+    if (required && !hasSeen) {
+      setOpen(true);
+      return;
+    }
+    if (modalEnabled && !hasSeen) {
       setOpen(true);
     }
-  }, []);
+  }, [profile, required, modalEnabled, hasSeen]);
+
+  // Block audio playback while a required signup is pending
+  useEffect(() => {
+    if (!required || hasSeen) return;
+    const pauseAll = () => {
+      document.querySelectorAll('audio').forEach((a) => {
+        try { (a as HTMLAudioElement).pause(); } catch {}
+      });
+    };
+    pauseAll();
+    const id = window.setInterval(pauseAll, 400);
+    return () => window.clearInterval(id);
+  }, [required, hasSeen, open]);
 
   const dismiss = () => {
+    if (required && !success) return; // cannot dismiss when required
     localStorage.setItem(STORAGE_KEY, 'true');
     setOpen(false);
   };
