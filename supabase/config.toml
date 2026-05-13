@@ -1,1 +1,4 @@
 project_id = "gvcvlyojtjormummkzbs"
+
+[functions.mailing-signup]
+verify_jwt = false
