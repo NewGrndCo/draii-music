@@ -26,8 +26,6 @@ const AutoPlayHandler: React.FC<AutoPlayHandlerProps> = ({
   // Create memoized play next song handler that uses the nextSongs from Next Up
   const handlePlayNextSong = useCallback(() => {
     if (nextSongs.length > 0) {
-      // Use the first song from the Next Up list (same as skip next functionality)
-      console.log('Auto-playing next song from Next Up list:', nextSongs[0].title);
       playSong(nextSongs[0]);
     } else if (albums.length > 0) {
       // Fallback if Next Up is empty - play random song
@@ -39,7 +37,6 @@ const AutoPlayHandler: React.FC<AutoPlayHandlerProps> = ({
       
       if (availableSongs.length > 0) {
         const randomIndex = Math.floor(Math.random() * availableSongs.length);
-        console.log('Next Up empty, auto-playing random song:', availableSongs[randomIndex].title);
         playSong(availableSongs[randomIndex]);
       }
     }
@@ -69,9 +66,7 @@ const AutoPlayHandler: React.FC<AutoPlayHandlerProps> = ({
         const randomIndex = Math.floor(Math.random() * allSongs.length);
         const randomSong = allSongs[randomIndex];
         
-        // Play the random song
         playSong(randomSong);
-        console.log('Auto-playing random song from library:', randomSong.title);
       }
     }
   }, [albums, loading, currentSong, playSong]);

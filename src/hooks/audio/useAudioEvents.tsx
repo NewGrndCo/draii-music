@@ -38,7 +38,6 @@ export const useAudioEvents = (
         window.clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
-      console.log('Audio ready - duration loaded:', duration);
     }
   }, [setPlayerState]);
 
@@ -56,8 +55,7 @@ export const useAudioEvents = (
 
   const handlePlaying = useCallback(() => {
     hasPlayedSuccessfully.current = true;
-    console.log('Audio playing - setting ready state');
-    
+
     if (loadingTimeoutRef.current) {
       window.clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = null;
@@ -67,7 +65,6 @@ export const useAudioEvents = (
   }, [setPlayerState]);
 
   const handleCanPlay = useCallback(() => {
-    console.log('Audio can play - setting ready state');
     setPlayerState(prev => ({ ...prev, isReady: true }));
     
     if (loadingTimeoutRef.current) {
@@ -77,16 +74,13 @@ export const useAudioEvents = (
   }, [setPlayerState]);
 
   const handleLoadStart = useCallback(() => {
-    console.log('Audio load started - setting loading state');
     setPlayerState(prev => ({ ...prev, isReady: false }));
-    
-    // Set a timeout to force ready state after 3 seconds
+
     if (loadingTimeoutRef.current) {
       window.clearTimeout(loadingTimeoutRef.current);
     }
-    
+
     loadingTimeoutRef.current = window.setTimeout(() => {
-      console.log('Audio loading timeout - forcing ready state');
       setPlayerState(prev => ({ ...prev, isReady: true }));
       loadingTimeoutRef.current = null;
     }, 3000);
