@@ -180,10 +180,18 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           {/* Tabs Navigation - Only show when no album is selected */}
           {!selectedAlbum && (
-            <TabsList className="w-full bg-black/40 border border-white/20 mb-4">
+            <TabsList className="w-full bg-black/40 border border-white/20 mb-4 flex-wrap h-auto">
               <TabsTrigger value="all-songs" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                 <Music size={16} />
                 <span>All Songs</span>
+              </TabsTrigger>
+              <TabsTrigger value="singles" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                <User size={16} />
+                <span>Singles</span>
+              </TabsTrigger>
+              <TabsTrigger value="collabs" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
+                <Users size={16} />
+                <span>Collabs</span>
               </TabsTrigger>
               <TabsTrigger value="albums" className="flex items-center gap-1 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                 <Disc size={16} />
