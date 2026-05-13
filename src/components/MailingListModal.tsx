@@ -72,7 +72,7 @@ const MailingListModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ email, phone });
+    const parsed = schema.safeParse({ email, phone, zip });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? 'Invalid input');
       return;
@@ -83,6 +83,7 @@ const MailingListModal: React.FC = () => {
       body: {
         email: parsed.data.email,
         phone: parsed.data.phone ? parsed.data.phone : null,
+        zip_code: parsed.data.zip ? parsed.data.zip : null,
       },
     });
     setSubmitting(false);
