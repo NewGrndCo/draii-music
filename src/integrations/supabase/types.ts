@@ -139,6 +139,39 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount_cents: number
+          category: string
+          created_at: string
+          id: string
+          label: string
+          notes: string | null
+          occurred_at: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          category?: string
+          created_at?: string
+          id?: string
+          label: string
+          notes?: string | null
+          occurred_at?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          category?: string
+          created_at?: string
+          id?: string
+          label?: string
+          notes?: string | null
+          occurred_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       listens: {
         Row: {
           city: string | null
@@ -254,6 +287,87 @@ export type Database = {
           price_cents?: number
           sort_order?: number
           stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      merch_clicks: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          merch_id: string | null
+          region: string | null
+          song_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          merch_id?: string | null
+          region?: string | null
+          song_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          merch_id?: string | null
+          region?: string | null
+          song_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merch_clicks_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merch_clicks_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      releases: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          sort_order: number
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+          status?: string
+          target_date?: string | null
+          title?: string
           updated_at?: string
         }
         Relationships: []
