@@ -1,26 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Song } from '../../../data/musicData';
+import { supabase } from '@/integrations/supabase/client';
 
-const PLAYS_KEY = 'songPlayDeltas';
-const LIKES_KEY = 'songLikeDeltas';
 const LIKED_KEY = 'songLikedSet';
-
-const readMap = (key: string): Record<string, number> => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-};
-
-const writeMap = (key: string, map: Record<string, number>) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(map));
-  } catch {
-    /* ignore */
-  }
-};
 
 const readLikedSet = (): Record<string, boolean> => {
   try {
@@ -34,9 +16,7 @@ const readLikedSet = (): Record<string, boolean> => {
 const writeLikedSet = (set: Record<string, boolean>) => {
   try {
     localStorage.setItem(LIKED_KEY, JSON.stringify(set));
-  } catch {
-    /* ignore */
-  }
+  } catch { /* ignore */ }
 };
 
 export const useSongStats = (currentSong: Song | null) => {
@@ -45,55 +25,66 @@ export const useSongStats = (currentSong: Song | null) => {
   const [liked, setLiked] = useState<boolean>(false);
   const [heartAnimation, setHeartAnimation] = useState(false);
 
+  // Load fresh DB values + subscribe to realtime updates for the current song
   useEffect(() => {
     if (!currentSong) return;
+    let alive = true;
 
-    // Increment persistent play count for this song
-    const plays = readMap(PLAYS_KEY);
-    plays[currentSong.id] = (plays[currentSong.id] || 0) + 1;
-    writeMap(PLAYS_KEY, plays);
+    setPlayCount(currentSong.playCount || 0);
+    setLikesCount(currentSong.likesCount || 0);
+    setLiked(!!readLikedSet()[currentSong.id]);
 
-    const likeDeltas = readMap(LIKES_KEY);
-    const likedSet = readLikedSet();
+    // Initial fresh fetch
+    (async () => {
+      const { data } = await (supabase as any)
+        .from('songs')
+        .select('play_count,likes_count')
+        .eq('id', currentSong.id)
+        .maybeSingle();
+      if (!alive || !data) return;
+      setPlayCount(data.play_count ?? 0);
+      setLikesCount(data.likes_count ?? 0);
+    })();
 
-    const basePlays = currentSong.playCount || 0;
-    const baseLikes = currentSong.likesCount || 0;
+    const channel = supabase
+      .channel(`song-stats-${currentSong.id}`)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'songs', filter: `id=eq.${currentSong.id}` },
+        (payload: any) => {
+          const n = payload.new ?? {};
+          if (typeof n.play_count === 'number') setPlayCount(n.play_count);
+          if (typeof n.likes_count === 'number') setLikesCount(n.likes_count);
+        })
+      .subscribe();
 
-    setPlayCount(basePlays + plays[currentSong.id]);
-    setLikesCount(baseLikes + (likeDeltas[currentSong.id] || 0));
-    setLiked(!!likedSet[currentSong.id]);
+    return () => { alive = false; supabase.removeChannel(channel); };
   }, [currentSong]);
 
-  const toggleLike = useCallback(() => {
+  const toggleLike = useCallback(async () => {
     if (!currentSong) return;
     const songId = currentSong.id;
 
-    const likeDeltas = readMap(LIKES_KEY);
     const likedSet = readLikedSet();
     const wasLiked = !!likedSet[songId];
 
-    if (wasLiked) {
-      likeDeltas[songId] = (likeDeltas[songId] || 0) - 1;
-      delete likedSet[songId];
-    } else {
-      likeDeltas[songId] = (likeDeltas[songId] || 0) + 1;
+    if (wasLiked) delete likedSet[songId];
+    else {
       likedSet[songId] = true;
       setHeartAnimation(true);
       setTimeout(() => setHeartAnimation(false), 1000);
     }
-
-    writeMap(LIKES_KEY, likeDeltas);
     writeLikedSet(likedSet);
-
     setLiked(!wasLiked);
-    setLikesCount(prev => prev + (wasLiked ? -1 : 1));
+    // Optimistic
+    setLikesCount((prev) => Math.max(0, prev + (wasLiked ? -1 : 1)));
+
+    // Persist to DB so all listeners see it in realtime
+    try {
+      await supabase.functions.invoke('toggle-like', {
+        body: { songId, liked: !wasLiked },
+      });
+    } catch { /* realtime will reconcile */ }
   }, [currentSong]);
 
-  return {
-    playCount,
-    likesCount,
-    liked,
-    heartAnimation,
-    toggleLike,
-  };
+  return { playCount, likesCount, liked, heartAnimation, toggleLike };
 };
