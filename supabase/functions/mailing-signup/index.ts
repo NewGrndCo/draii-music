@@ -18,7 +18,12 @@ async function geo(ip: string | null) {
     const r = await fetch(`https://ipapi.co/${ip}/json/`);
     if (!r.ok) return {};
     const j = await r.json();
-    return { country: j.country_name || null, region: j.region || null, city: j.city || null };
+    return {
+      country: j.country_name || null,
+      region: j.region || null,
+      city: j.city || null,
+      zip_code: j.postal || null,
+    };
   } catch { return {}; }
 }
 
