@@ -22,8 +22,13 @@ const PlayerContentView: React.FC = () => {
   } = usePlayer();
 
   const { profile } = useArtistProfile();
-  // Track this listener as live for the admin dashboard
-  useLivePresence(!!currentSong);
+  // Track this listener as live for the admin dashboard, including now-playing
+  useLivePresence(!!currentSong, currentSong ? {
+    songId: currentSong.id,
+    songTitle: currentSong.title,
+    songArtist: currentSong.artist,
+    coverArt: currentSong.coverArt,
+  } : undefined);
 
   if (!currentSong) {
     return <div className="text-foreground text-center p-4">Loading music...</div>;
