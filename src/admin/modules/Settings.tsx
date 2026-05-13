@@ -42,7 +42,20 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     adminList<Profile>('artist_profile')
-      .then((rows) => setProfile(rows[0] ?? null))
+      .then((rows) => {
+        const r: any = rows[0];
+        if (!r) { setProfile(null); return; }
+        setProfile({
+          id: r.id,
+          bio: r.bio ?? '',
+          socials: r.socials ?? {},
+          player_layout: (r.player_layout ?? 'normal') as any,
+          frontend_sections: Array.isArray(r.frontend_sections) && r.frontend_sections.length
+            ? r.frontend_sections : ALL_SECTIONS,
+          logo_url: r.logo_url ?? null,
+          location: r.location ?? '',
+        });
+      })
       .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -57,6 +70,7 @@ const Settings: React.FC = () => {
         player_layout: profile.player_layout,
         frontend_sections: profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS,
         logo_url: profile.logo_url,
+        location: profile.location,
       });
       toast.success('Settings saved');
     } catch (e: any) {
