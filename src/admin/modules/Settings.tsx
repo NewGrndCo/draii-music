@@ -55,6 +55,7 @@ const Settings: React.FC = () => {
             ? r.frontend_sections : ALL_SECTIONS,
           logo_url: r.logo_url ?? null,
           location: r.location ?? '',
+          footer_text: r.footer_text ?? '',
         });
       })
       .catch((e) => toast.error(e.message))
