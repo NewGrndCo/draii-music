@@ -77,7 +77,11 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!currentSong || lastTrackedRef.current === currentSong.id) return;
     lastTrackedRef.current = currentSong.id;
     const source = document.referrer ? new URL(document.referrer).hostname : 'direct';
-    supabase.functions.invoke('track-listen', { body: { songId: currentSong.id, source } }).catch(() => {});
+    let geo: any = {};
+    try { const c = sessionStorage.getItem('live-presence-geo-v1'); if (c) geo = JSON.parse(c); } catch {}
+    supabase.functions.invoke('track-listen', {
+      body: { songId: currentSong.id, source, country: geo.country, region: geo.region, city: geo.city },
+    }).catch(() => {});
   }, [currentSong]);
 
   useEffect(() => {
