@@ -1,0 +1,1 @@
+ALTER TABLE public.artist_profile ADD COLUMN IF NOT EXISTS location text DEFAULT '';
