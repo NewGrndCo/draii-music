@@ -15,8 +15,8 @@ const hashString = (input: string): number => {
 const stablePlayCount = (id: string) => 50 + (hashString(`plays:${id}`) % 1000);
 const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
 
-const SUPABASE_PUBLIC_BASE =
-  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
+// Audio + thumbnail files live in the legacy storage bucket
+const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
 export const useMusicLibrary = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
