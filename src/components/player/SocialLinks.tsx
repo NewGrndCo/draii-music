@@ -70,10 +70,10 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
       {/* Logo image instead of text */}
       <div className="flex justify-center mb-2 relative">
         <img 
-          src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" 
-          alt="Draii Rynell Logo" 
+          src={logoUrl} 
+          alt="Artist Logo" 
           className={cn(
-            "relative z-10 animate-scale drop-shadow-lg cursor-pointer",
+            "relative z-10 animate-scale drop-shadow-lg cursor-pointer object-contain",
             inFullscreen ? "h-12" : "h-24"
           )}
           onClick={handleLogoClick}
