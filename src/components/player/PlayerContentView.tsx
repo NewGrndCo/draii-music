@@ -15,7 +15,7 @@ import { useLivePresence } from '@/hooks/useLivePresence';
 const PlayerContentView: React.FC = () => {
   const {
     currentSong, playerState, playCount, likesCount, liked,
-    heartAnimation, horizontalMode, nextSongs,
+    heartAnimation, horizontalMode, nextSongs, recentSongs,
     formatTime, toggleLike, togglePlayPause,
     toggleRepeat, playNextSong, playPreviousSong, skipForward,
     skipBackward, seekTo, handleVolumeChange, toggleLayout,
