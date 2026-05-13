@@ -24,6 +24,8 @@ export type Database = {
           id: string
           location: string | null
           logo_url: string | null
+          mailing_modal_enabled: boolean
+          mailing_required: boolean
           player_layout: string
           socials: Json
           stripe_payment_link: string | null
@@ -39,6 +41,8 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          mailing_modal_enabled?: boolean
+          mailing_required?: boolean
           player_layout?: string
           socials?: Json
           stripe_payment_link?: string | null
@@ -54,6 +58,8 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          mailing_modal_enabled?: boolean
+          mailing_required?: boolean
           player_layout?: string
           socials?: Json
           stripe_payment_link?: string | null
