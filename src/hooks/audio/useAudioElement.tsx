@@ -63,10 +63,7 @@ export const useAudioElement = (
 
       playPromiseRef.current = null;
 
-      if (error?.name === 'AbortError') {
-        console.debug('Audio play request was superseded before it started');
-        return;
-      }
+      if (error?.name === 'AbortError') return;
 
       if (audioSourceIndexRef.current < audioSourceCandidatesRef.current.length - 1) {
         return;
@@ -81,11 +78,52 @@ export const useAudioElement = (
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      
+
       const audio = audioRef.current;
-      const progressHandler = () => eventHandlers.updateProgress(audio);
+      let stallTimer: number | null = null;
+      let stallRetries = 0;
+
+      const clearStallTimer = () => {
+        if (stallTimer !== null) {
+          window.clearTimeout(stallTimer);
+          stallTimer = null;
+        }
+      };
+
+      const progressHandler = () => {
+        eventHandlers.updateProgress(audio);
+        // Network is flowing again — reset stall guard
+        stallRetries = 0;
+        clearStallTimer();
+      };
       const durationHandler = () => eventHandlers.updateDuration(audio);
+
+      const stallHandler = () => {
+        if (stallTimer !== null || !isPlayingRef.current) return;
+        stallTimer = window.setTimeout(() => {
+          stallTimer = null;
+          if (!isPlayingRef.current || !audio.src) return;
+          // Try a soft recovery: reload current src and resume from current position
+          if (stallRetries < 2) {
+            stallRetries += 1;
+            const resumeAt = audio.currentTime;
+            try {
+              audio.load();
+              const onLoaded = () => {
+                audio.removeEventListener('loadedmetadata', onLoaded);
+                if (resumeAt > 0 && Number.isFinite(resumeAt)) {
+                  try { audio.currentTime = resumeAt; } catch {}
+                }
+                if (isPlayingRef.current) attemptPlay();
+              };
+              audio.addEventListener('loadedmetadata', onLoaded, { once: true });
+            } catch {}
+          }
+        }, 4000);
+      };
+
       const errorHandler = (event: Event) => {
+        clearStallTimer();
         const candidates = audioSourceCandidatesRef.current;
         const nextIndex = audioSourceIndexRef.current + 1;
 
@@ -101,7 +139,7 @@ export const useAudioElement = (
 
         eventHandlers.handleError(event);
       };
-      
+
       audio.addEventListener('timeupdate', progressHandler, { passive: true });
       audio.addEventListener('loadedmetadata', durationHandler, { passive: true });
       audio.addEventListener('loadstart', eventHandlers.handleLoadStart, { passive: true });
@@ -109,16 +147,18 @@ export const useAudioElement = (
       audio.addEventListener('canplaythrough', eventHandlers.handleCanPlay, { passive: true });
       audio.addEventListener('ended', eventHandlers.handleSongEnd, { passive: true });
       audio.addEventListener('playing', eventHandlers.handlePlaying, { passive: true });
+      audio.addEventListener('stalled', stallHandler, { passive: true });
+      audio.addEventListener('waiting', stallHandler, { passive: true });
       audio.addEventListener('error', errorHandler, { passive: true });
-      (audio as any).__playerHandlers = { progressHandler, durationHandler, errorHandler };
-      
+      (audio as any).__playerHandlers = { progressHandler, durationHandler, errorHandler, stallHandler };
+
       const handleUserInteraction = () => {
         userInteractedRef.current = true;
         document.removeEventListener('click', handleUserInteraction);
         document.removeEventListener('keydown', handleUserInteraction);
         document.removeEventListener('touchstart', handleUserInteraction);
       };
-      
+
       document.addEventListener('click', handleUserInteraction, { passive: true });
       document.addEventListener('keydown', handleUserInteraction, { passive: true });
       document.addEventListener('touchstart', handleUserInteraction, { passive: true });
@@ -165,7 +205,6 @@ export const useAudioElement = (
       audioSourceIndexRef.current = 0;
       playRequestIdRef.current += 1;
 
-      console.log('Loading audio source:', candidates[0]);
       audioRef.current.src = candidates[0];
       audioRef.current.preload = 'auto';
       audioRef.current.load();
@@ -239,6 +278,10 @@ export const useAudioElement = (
           audio.removeEventListener('timeupdate', handlers.progressHandler);
           audio.removeEventListener('loadedmetadata', handlers.durationHandler);
           audio.removeEventListener('error', handlers.errorHandler);
+          if (handlers.stallHandler) {
+            audio.removeEventListener('stalled', handlers.stallHandler);
+            audio.removeEventListener('waiting', handlers.stallHandler);
+          }
         }
         audio.removeEventListener('loadstart', eventHandlers.handleLoadStart);
         audio.removeEventListener('canplay', eventHandlers.handleCanPlay);

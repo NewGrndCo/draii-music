@@ -25,7 +25,6 @@ export const usePlayerControls = (
   }, [audioRef, setPlayerState]);
   
   const playSong = useCallback((song: Song) => {
-    console.log('Playing song:', song);
     const canStartPlayback = navigator.userActivation?.hasBeenActive ?? true;
     setCurrentSong(song);
     setPlayerState(prev => ({
@@ -36,18 +35,8 @@ export const usePlayerControls = (
   }, [setCurrentSong, setPlayerState]);
   
   const togglePlayPause = useCallback(() => {
-    if (!currentSong) {
-      console.log('No current song to play/pause');
-      return;
-    }
-    
-    console.log('Toggle play/pause - current state:', {
-      isPlaying: playerState.isPlaying,
-      isReady: playerState.isReady,
-      song: currentSong.title
-    });
-    
-    // Always allow the toggle, but show loading if not ready
+    if (!currentSong) return;
+
     setPlayerState(prev => {
       const newIsPlaying = !prev.isPlaying;
       

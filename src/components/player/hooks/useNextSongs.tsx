@@ -47,10 +47,6 @@ export const useNextSongs = (
         setNextSongs(availableSongs);
       }
       
-      // If we're running low on unplayed songs, show a message about rotating through library
-      if (availableSongs.length < allSongs.length * 0.2 && allSongs.length > 10) {
-        console.log(`Library rotation: ${allSongs.length - availableSongs.length}/${allSongs.length} songs played`);
-      }
     }
   }, [currentSong, albums, playHistory]);
   
