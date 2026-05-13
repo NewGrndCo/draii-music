@@ -98,6 +98,23 @@ Deno.serve(async (req) => {
       return json({ ...data, publicUrl: pub.publicUrl });
     }
 
+    if (op === "stats") {
+      const [songs, events, merch, donations, listens] = await Promise.all([
+        sb.from("songs").select("id, play_count, likes_count, support_fund_cents"),
+        sb.from("events").select("id, status, event_date"),
+        sb.from("merch").select("id, active, stock"),
+        sb.from("donations").select("amount_cents, source, created_at"),
+        sb.from("listens").select("country, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
+      ]);
+      return json({
+        songs: songs.data ?? [],
+        events: events.data ?? [],
+        merch: merch.data ?? [],
+        donations: donations.data ?? [],
+        listens: listens.data ?? [],
+      });
+    }
+
     // Generic table ops
     if (!ALLOWED_TABLES.has(String(table))) return json({ error: "Bad table" }, 400);
 
