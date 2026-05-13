@@ -80,6 +80,22 @@ export const useAudioElement = (
       const audio = audioRef.current;
       const progressHandler = () => eventHandlers.updateProgress(audio);
       const durationHandler = () => eventHandlers.updateDuration(audio);
+      const errorHandler = (event: Event) => {
+        const candidates = audioSourceCandidatesRef.current;
+        const nextIndex = audioSourceIndexRef.current + 1;
+
+        if (nextIndex < candidates.length) {
+          audioSourceIndexRef.current = nextIndex;
+          audio.src = candidates[nextIndex];
+          audio.load();
+          if (isPlayingRef.current) {
+            window.setTimeout(() => attemptPlay(), 0);
+          }
+          return;
+        }
+
+        eventHandlers.handleError(event);
+      };
       
       audio.addEventListener('timeupdate', progressHandler, { passive: true });
       audio.addEventListener('loadedmetadata', durationHandler, { passive: true });
@@ -88,7 +104,8 @@ export const useAudioElement = (
       audio.addEventListener('canplaythrough', eventHandlers.handleCanPlay, { passive: true });
       audio.addEventListener('ended', eventHandlers.handleSongEnd, { passive: true });
       audio.addEventListener('playing', eventHandlers.handlePlaying, { passive: true });
-      audio.addEventListener('error', eventHandlers.handleError, { passive: true });
+      audio.addEventListener('error', errorHandler, { passive: true });
+      (audio as any).__playerHandlers = { progressHandler, durationHandler, errorHandler };
       
       const handleUserInteraction = () => {
         userInteractedRef.current = true;
@@ -113,7 +130,7 @@ export const useAudioElement = (
         eventHandlers.loadingTimeoutRef.current = null;
       }
     };
-  }, [playerState.repeat, eventHandlers]);
+  }, [playerState.repeat, eventHandlers, attemptPlay]);
 
   // Handle song changes
   useEffect(() => {
@@ -138,14 +155,18 @@ export const useAudioElement = (
         return;
       }
       
-      const fullAudioSrc = audioSrc.startsWith('http') 
-        ? audioSrc 
-        : `https://iextgszxpxeurbpncapv.supabase.co/storage/v1/object/public/songs/${audioSrc}`;
-      
-      console.log('Loading audio source:', fullAudioSrc);
-      audioRef.current.src = fullAudioSrc;
+      const candidates = getAudioSourceCandidates(audioSrc);
+      audioSourceCandidatesRef.current = candidates;
+      audioSourceIndexRef.current = 0;
+      playRequestIdRef.current += 1;
+
+      console.log('Loading audio source:', candidates[0]);
+      audioRef.current.src = candidates[0];
       audioRef.current.preload = 'auto';
       audioRef.current.load();
+      if (isPlayingRef.current) {
+        window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
+      }
       
       // Update media session metadata
       if ('mediaSession' in navigator) {
@@ -165,7 +186,7 @@ export const useAudioElement = (
       });
       document.dispatchEvent(songChangeEvent);
     }
-  }, [currentSong, setPlayerState, eventHandlers]);
+  }, [currentSong, setPlayerState, eventHandlers, attemptPlay]);
 
   // Handle play state changes separately to avoid race conditions
   useEffect(() => {
