@@ -110,25 +110,33 @@ const Analytics: React.FC = () => {
           <div className="text-sm text-white/45 py-6 text-center">No active listeners right now.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {liveListeners.map((l) => (
-              <div key={l.id} className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/5 px-3 py-2">
-                {l.cover_art ? (
-                  <img src={l.cover_art} alt="" className="h-10 w-10 rounded-md object-cover" />
-                ) : (
-                  <div className="h-10 w-10 rounded-md bg-white/10 flex items-center justify-center">
-                    <PlayCircle className="h-4 w-4 text-white/40" />
+            {liveListeners.map((l) => {
+              const loc = [l.city, l.country].filter(Boolean).join(', ');
+              return (
+                <div key={l.id} className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/5 px-3 py-2">
+                  {l.cover_art ? (
+                    <img src={l.cover_art} alt="" loading="lazy" className="h-10 w-10 rounded-md object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-md bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <PlayCircle className="h-4 w-4 text-white/40" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-white truncate">{l.song_title || 'Idle'}</div>
+                    <div className="text-xs text-white/55 truncate">{l.song_artist || '—'}</div>
+                    {loc && (
+                      <div className="text-[10px] text-white/45 truncate flex items-center gap-1 mt-0.5">
+                        <Globe2 className="h-2.5 w-2.5" /> {loc}
+                      </div>
+                    )}
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white truncate">{l.song_title || 'Idle'}</div>
-                  <div className="text-xs text-white/55 truncate">{l.song_artist || '—'}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-white/45 flex items-center gap-1 flex-shrink-0">
+                    {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                    <span className="hidden sm:inline">{l.device || 'web'}</span>
+                  </div>
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-white/45 flex items-center gap-1">
-                  {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-                  {l.device || 'web'}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
