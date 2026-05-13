@@ -215,22 +215,25 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
             </Geographies>
             {markers.map((m: any) => {
               const r = 3 + (m.n / m.max) * 14;
+              const handleMove = (e: React.MouseEvent) =>
+                setHover({ x: e.clientX, y: e.clientY, label: m.label, n: m.n });
               return (
                 <Marker
                   key={m.key}
                   coordinates={m.coords}
-                  onMouseEnter={(e: any) =>
-                    setHover({ x: e.clientX, y: e.clientY, label: m.label, n: m.n })
-                  }
-                  onMouseMove={(e: any) =>
-                    setHover({ x: e.clientX, y: e.clientY, label: m.label, n: m.n })
-                  }
-                  onMouseLeave={() => setHover(null)}
                   onClick={m.onClick}
-                  style={{ default: { cursor: m.onClick ? 'pointer' : 'default' } } as any}
                 >
-                  <circle r={r} fill="hsl(var(--admin-purple))" fillOpacity={0.55} stroke="hsl(var(--admin-pink))" strokeWidth={1.2} />
-                  <circle r={2} fill="hsl(var(--admin-pink))" />
+                  <g
+                    onMouseEnter={handleMove}
+                    onMouseMove={handleMove}
+                    onMouseLeave={() => setHover(null)}
+                    style={{ cursor: m.onClick ? 'pointer' : 'default', pointerEvents: 'all' }}
+                  >
+                    {/* invisible larger hit-area so the cursor reliably triggers hover */}
+                    <circle r={Math.max(r + 6, 10)} fill="transparent" />
+                    <circle r={r} fill="hsl(var(--admin-purple))" fillOpacity={0.55} stroke="hsl(var(--admin-pink))" strokeWidth={1.2} />
+                    <circle r={2} fill="hsl(var(--admin-pink))" />
+                  </g>
                 </Marker>
               );
             })}
