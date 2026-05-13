@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { adminList, adminDelete } from '@/admin/lib/api';
-import { Mail, Trash2, MapPin, Search, Download } from 'lucide-react';
+import { adminList, adminDelete, adminUpdate } from '@/admin/lib/api';
+import { Mail, Trash2, MapPin, Search, Download, Lock, BellRing } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Entry {
@@ -19,12 +19,25 @@ const MailingList: React.FC = () => {
   const [rows, setRows] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [modalEnabled, setModalEnabled] = useState(true);
+  const [required, setRequired] = useState(false);
+  const [savingFlag, setSavingFlag] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await adminList<Entry>('mailing_list');
+      const [data, profiles] = await Promise.all([
+        adminList<Entry>('mailing_list'),
+        adminList<any>('artist_profile'),
+      ]);
       setRows(data || []);
+      const p = profiles?.[0];
+      if (p) {
+        setProfileId(p.id);
+        setModalEnabled(p.mailing_modal_enabled ?? true);
+        setRequired(p.mailing_required ?? false);
+      }
     } catch (e: any) {
       toast.error(e.message || 'Failed to load');
     } finally {
@@ -33,6 +46,22 @@ const MailingList: React.FC = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const updateFlag = async (key: 'mailing_modal_enabled' | 'mailing_required', value: boolean) => {
+    if (!profileId) return;
+    const prev = key === 'mailing_modal_enabled' ? modalEnabled : required;
+    if (key === 'mailing_modal_enabled') setModalEnabled(value); else setRequired(value);
+    setSavingFlag(key);
+    try {
+      await adminUpdate('artist_profile', profileId, { [key]: value });
+      toast.success('Setting saved');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to save');
+      if (key === 'mailing_modal_enabled') setModalEnabled(prev); else setRequired(prev);
+    } finally {
+      setSavingFlag(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -93,6 +122,42 @@ const MailingList: React.FC = () => {
         >
           <Download className="h-3.5 w-3.5" /> Export CSV
         </button>
+      </div>
+
+      <div className="admin-glass-strong rounded-2xl p-5 grid sm:grid-cols-2 gap-3">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07]">
+          <BellRing className="h-4 w-4 text-pink-400 mt-0.5" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium">Show signup popup</span>
+              <input
+                type="checkbox"
+                checked={modalEnabled}
+                disabled={!profileId || savingFlag === 'mailing_modal_enabled'}
+                onChange={(e) => updateFlag('mailing_modal_enabled', e.target.checked)}
+                className="h-4 w-4 accent-pink-500"
+              />
+            </div>
+            <p className="text-xs text-white/50 mt-1">Display the mailing list popup to new visitors.</p>
+          </div>
+        </label>
+
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07]">
+          <Lock className="h-4 w-4 text-purple-400 mt-0.5" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium">Require signup to listen</span>
+              <input
+                type="checkbox"
+                checked={required}
+                disabled={!profileId || savingFlag === 'mailing_required'}
+                onChange={(e) => updateFlag('mailing_required', e.target.checked)}
+                className="h-4 w-4 accent-purple-500"
+              />
+            </div>
+            <p className="text-xs text-white/50 mt-1">Visitors must enter their info before audio plays.</p>
+          </div>
+        </label>
       </div>
 
       <div className="admin-glass-strong rounded-2xl overflow-hidden">

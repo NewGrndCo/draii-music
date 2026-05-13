@@ -14,6 +14,8 @@ export interface ArtistProfile {
   artist_image_url: string | null;
   support_fund_enabled: boolean;
   stripe_payment_link: string | null;
+  mailing_modal_enabled: boolean;
+  mailing_required: boolean;
 }
 
 const DEFAULT_SECTIONS = ['next_up', 'events', 'merch', 'about'];
@@ -49,6 +51,8 @@ export const useArtistProfile = () => {
           artist_image_url: data.artist_image_url ?? null,
           support_fund_enabled: data.support_fund_enabled ?? true,
           stripe_payment_link: data.stripe_payment_link ?? null,
+          mailing_modal_enabled: data.mailing_modal_enabled ?? true,
+          mailing_required: data.mailing_required ?? false,
         });
       }
       setLoading(false);
