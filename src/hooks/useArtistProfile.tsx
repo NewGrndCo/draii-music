@@ -14,6 +14,8 @@ export interface ArtistProfile {
   artist_image_url: string | null;
   support_fund_enabled: boolean;
   stripe_payment_link: string | null;
+  mailing_modal_enabled: boolean;
+  mailing_required: boolean;
 }
 
 const DEFAULT_SECTIONS = ['next_up', 'events', 'merch', 'about'];
