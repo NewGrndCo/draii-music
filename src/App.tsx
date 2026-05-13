@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
 import { useAudio } from './hooks/useAudio';
@@ -9,8 +9,9 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import AppBackground from './components/shared/AppBackground';
 import MusicPlayer from './components/MusicPlayer';
 import MailingListModal from './components/MailingListModal';
-import Admin from './pages/Admin';
 import AdminGuard from './components/AdminGuard';
+
+const Admin = lazy(() => import('./pages/Admin'));
 
 const App = () => {
   const { currentSong } = useAudio();
@@ -21,7 +22,11 @@ const App = () => {
       <AnimationProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+            <Route path="/admin" element={
+              <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <AdminGuard><Admin /></AdminGuard>
+              </Suspense>
+            } />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
                 <MailingListModal />
