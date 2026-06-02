@@ -39,7 +39,7 @@ const UpcomingMerch: React.FC = () => {
             <>
               <div className="aspect-square bg-white/[0.04]">
                 {m.image_url && (
-                  <img src={m.image_url} alt={m.name} className="w-full h-full object-cover" />
+                  <img src={m.image_url} alt={m.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 )}
               </div>
               <div className="p-2">

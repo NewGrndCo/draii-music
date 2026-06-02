@@ -18,6 +18,10 @@ const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
 // Audio + thumbnail files live in the legacy storage bucket
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
+// Session-scoped cache to avoid refetching the catalog on every mount/route change.
+const LIBRARY_CACHE_KEY = 'music-library-cache-v1';
+const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export const useMusicLibrary = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +42,21 @@ export const useMusicLibrary = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    // Serve from session cache when fresh — prevents repeat egress on remount.
+    try {
+      const raw = sessionStorage.getItem(LIBRARY_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached && Date.now() - cached.t < LIBRARY_CACHE_TTL_MS && Array.isArray(cached.albums)) {
+          setAlbums(cached.albums);
+          setLoading(false);
+          return () => { cancelled = true; };
+        }
+      }
+    } catch { /* ignore cache errors */ }
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -48,8 +67,9 @@ export const useMusicLibrary = () => {
           .from('songs')
           .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id')
           .order('created_at', { ascending: false })
-          .limit(500);
+          .limit(200);
 
+        if (cancelled) return;
         if (songsError) throw songsError;
 
         if (!songsData || songsData.length === 0) {
@@ -153,17 +173,23 @@ export const useMusicLibrary = () => {
           });
         }
 
+        if (cancelled) return;
         setAlbums(processedAlbums);
+        try {
+          sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify({ t: Date.now(), albums: processedAlbums }));
+        } catch { /* quota — safe to ignore */ }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching music library:', err);
         setError('Failed to load music library');
         toast.error("Couldn't load your music", { duration: 2000 });
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchData();
+    return () => { cancelled = true; };
   }, [formatDuration, getFullImageUrl]);
 
   return { albums, loading, error };
