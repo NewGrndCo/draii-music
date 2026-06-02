@@ -190,8 +190,6 @@ export const useMusicLibrary = () => {
 
     fetchData();
     return () => { cancelled = true; };
-
-    fetchData();
   }, [formatDuration, getFullImageUrl]);
 
   return { albums, loading, error };
