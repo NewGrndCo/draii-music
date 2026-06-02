@@ -255,7 +255,7 @@ const Library: React.FC = () => {
                 <div key={s.id} className="p-3 flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0">
                     {cover
-                      ? <img src={cover} alt={s.title || ''} className="h-full w-full object-cover" />
+                      ? <img src={cover} alt={s.title || ''} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                       : <Music2 className="h-4 w-4 text-white/30 m-auto" />}
                   </div>
                   <div className="min-w-0 flex-1">
