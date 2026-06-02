@@ -12,6 +12,7 @@ import AdminGuard from './components/AdminGuard';
 
 const Admin = lazy(() => import('./pages/Admin'));
 const MailingListModal = lazy(() => import('./components/MailingListModal'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App = () => {
   const { currentSong } = useAudio();
@@ -45,6 +46,11 @@ const App = () => {
                 
                 <Toaster position={isMobile ? "bottom-center" : "bottom-right"} />
               </AppBackground>
+            } />
+            <Route path="*" element={
+              <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <NotFound />
+              </Suspense>
             } />
           </Routes>
         </BrowserRouter>
