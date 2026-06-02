@@ -206,7 +206,15 @@ export const useAudioElement = (
       playRequestIdRef.current += 1;
 
       audioRef.current.src = candidates[0];
-      audioRef.current.preload = 'auto';
+      // Streaming strategy:
+      //  - Supabase public Storage serves objects via its global CDN
+      //    with HTTP Range support, so the browser will stream the file
+      //    in partial chunks instead of downloading it whole.
+      //  - We start with preload="metadata" so we only fetch the file
+      //    header (a few KB) until the user actually plays. When playback
+      //    is requested we bump to "auto" to let the browser buffer ahead.
+      audioRef.current.preload = isPlayingRef.current ? 'auto' : 'metadata';
+      audioRef.current.crossOrigin = 'anonymous';
       audioRef.current.load();
       if (isPlayingRef.current) {
         window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
