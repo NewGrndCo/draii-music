@@ -214,7 +214,6 @@ export const useAudioElement = (
       //    header (a few KB) until the user actually plays. When playback
       //    is requested we bump to "auto" to let the browser buffer ahead.
       audioRef.current.preload = isPlayingRef.current ? 'auto' : 'metadata';
-      audioRef.current.crossOrigin = 'anonymous';
       audioRef.current.load();
       if (isPlayingRef.current) {
         window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
