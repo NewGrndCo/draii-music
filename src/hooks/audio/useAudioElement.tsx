@@ -244,9 +244,14 @@ export const useAudioElement = (
   useEffect(() => {
     const handlePlayStateChange = async () => {
       if (!audioRef.current || !currentSong) return;
-      
+
       try {
         if (playerState.isPlaying) {
+          // Allow the browser to buffer ahead via Range requests once the
+          // user actually pressed play. Until then we stay on "metadata".
+          if (audioRef.current.preload !== 'auto') {
+            audioRef.current.preload = 'auto';
+          }
           await attemptPlay(playRequestIdRef.current);
         } else if (!playerState.isPlaying) {
           playRequestIdRef.current += 1;
