@@ -42,6 +42,21 @@ export const useMusicLibrary = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    // Serve from session cache when fresh — prevents repeat egress on remount.
+    try {
+      const raw = sessionStorage.getItem(LIBRARY_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached && Date.now() - cached.t < LIBRARY_CACHE_TTL_MS && Array.isArray(cached.albums)) {
+          setAlbums(cached.albums);
+          setLoading(false);
+          return () => { cancelled = true; };
+        }
+      }
+    } catch { /* ignore cache errors */ }
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -52,8 +67,9 @@ export const useMusicLibrary = () => {
           .from('songs')
           .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id')
           .order('created_at', { ascending: false })
-          .limit(500);
+          .limit(200);
 
+        if (cancelled) return;
         if (songsError) throw songsError;
 
         if (!songsData || songsData.length === 0) {
