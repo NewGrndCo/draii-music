@@ -50,15 +50,20 @@ const Library: React.FC = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Live updates: when play_count or likes_count change in DB, reflect immediately
+  // Live updates: only subscribe while the tab is visible to avoid
+  // unnecessary realtime egress when the admin is in the background.
   useEffect(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     const channel = supabase
       .channel('admin-songs-live')
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'songs' },
         (payload: any) => {
           const n = payload.new;
+          const o = payload.old ?? {};
           if (!n?.id) return;
+          // Skip if neither stat column changed (avoid wasted re-renders/egress reactions)
+          if (n.play_count === o.play_count && n.likes_count === o.likes_count) return;
           setSongs((prev) => prev.map((s) => s.id === n.id
             ? { ...s, play_count: n.play_count ?? s.play_count, likes_count: n.likes_count ?? s.likes_count }
             : s));

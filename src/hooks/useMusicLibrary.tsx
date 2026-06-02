@@ -42,9 +42,13 @@ export const useMusicLibrary = () => {
       try {
         setLoading(true);
 
+        // Egress optimization: select only the columns the player actually uses,
+        // and cap the row count to stay well under Supabase free-tier limits.
         const { data: songsData, error: songsError } = await (supabase as any)
           .from('songs')
-          .select('*');
+          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id')
+          .order('created_at', { ascending: false })
+          .limit(500);
 
         if (songsError) throw songsError;
 
