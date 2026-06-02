@@ -173,15 +173,23 @@ export const useMusicLibrary = () => {
           });
         }
 
+        if (cancelled) return;
         setAlbums(processedAlbums);
+        try {
+          sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify({ t: Date.now(), albums: processedAlbums }));
+        } catch { /* quota — safe to ignore */ }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching music library:', err);
         setError('Failed to load music library');
         toast.error("Couldn't load your music", { duration: 2000 });
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
+    fetchData();
+    return () => { cancelled = true; };
 
     fetchData();
   }, [formatDuration, getFullImageUrl]);
