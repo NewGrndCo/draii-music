@@ -29,17 +29,23 @@ export const useSongStats = (currentSong: Song | null) => {
   useEffect(() => {
     if (!currentSong) return;
     let alive = true;
+    const songId = currentSong.id;
 
     setPlayCount(currentSong.playCount || 0);
     setLikesCount(currentSong.likesCount || 0);
-    setLiked(!!readLikedSet()[currentSong.id]);
+    setLiked(!!readLikedSet()[songId]);
+
+    // Skip network work entirely when tab is hidden (egress saver)
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      return () => { alive = false; };
+    }
 
     // Initial fresh fetch
     (async () => {
       const { data } = await (supabase as any)
         .from('songs')
         .select('play_count,likes_count')
-        .eq('id', currentSong.id)
+        .eq('id', songId)
         .maybeSingle();
       if (!alive || !data) return;
       setPlayCount(data.play_count ?? 0);
@@ -47,18 +53,22 @@ export const useSongStats = (currentSong: Song | null) => {
     })();
 
     const channel = supabase
-      .channel(`song-stats-${currentSong.id}`)
+      .channel(`song-stats-${songId}`)
       .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'songs', filter: `id=eq.${currentSong.id}` },
+        { event: 'UPDATE', schema: 'public', table: 'songs', filter: `id=eq.${songId}` },
         (payload: any) => {
           const n = payload.new ?? {};
+          const o = payload.old ?? {};
+          // Ignore no-op updates to keep client work minimal
+          if (n.play_count === o.play_count && n.likes_count === o.likes_count) return;
           if (typeof n.play_count === 'number') setPlayCount(n.play_count);
           if (typeof n.likes_count === 'number') setLikesCount(n.likes_count);
         })
       .subscribe();
 
     return () => { alive = false; supabase.removeChannel(channel); };
-  }, [currentSong]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSong?.id]);
 
   const toggleLike = useCallback(async () => {
     if (!currentSong) return;
