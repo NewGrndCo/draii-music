@@ -18,6 +18,10 @@ const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
 // Audio + thumbnail files live in the legacy storage bucket
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
+// Session-scoped cache to avoid refetching the catalog on every mount/route change.
+const LIBRARY_CACHE_KEY = 'music-library-cache-v1';
+const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export const useMusicLibrary = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
