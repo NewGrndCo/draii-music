@@ -92,6 +92,14 @@ const Library: React.FC = () => {
     return Array.from(map.entries());
   }, [filtered]);
 
+  // Albums/projects available for the album_id picker
+  const albumOptions = useMemo(
+    () => songs
+      .filter((s) => (s.category || 'single').toLowerCase() !== 'single')
+      .map((s) => ({ id: s.id, label: `${s.title || 'Untitled'} · ${s.category}` })),
+    [songs],
+  );
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
@@ -301,12 +309,13 @@ const Library: React.FC = () => {
       )}
 
       {/* Edit dialog */}
-      {editTarget && <EditSongDialog song={editTarget} onClose={() => setEditTarget(null)} onSave={saveEdit} />}
+      {editTarget && <EditSongDialog song={editTarget} albumOptions={albumOptions} onClose={() => setEditTarget(null)} onSave={saveEdit} />}
 
       {/* Batch edit dialog */}
       {batchOpen && (
         <BatchEditDialog
           ids={Array.from(selected)}
+          albumOptions={albumOptions}
           onClose={() => setBatchOpen(false)}
           onApplied={(patch) => {
             setSongs((prev) => prev.map((s) => (selected.has(s.id) ? { ...s, ...patch } : s)));
@@ -320,7 +329,7 @@ const Library: React.FC = () => {
 };
 
 // ─── Edit dialog ──────────────────────────────────────────────────────────────
-const EditSongDialog: React.FC<{ song: Song; onClose: () => void; onSave: (p: Partial<Song>) => void }> = ({ song, onClose, onSave }) => {
+const EditSongDialog: React.FC<{ song: Song; albumOptions: { id: string; label: string }[]; onClose: () => void; onSave: (p: Partial<Song>) => void }> = ({ song, albumOptions, onClose, onSave }) => {
   const [d, setD] = useState<Partial<Song>>({ ...song });
   return (
     <Dialog open onOpenChange={onClose}>
@@ -341,8 +350,12 @@ const EditSongDialog: React.FC<{ song: Song; onClose: () => void; onSave: (p: Pa
                 onChange={(e) => setD({ ...d, release_date: e.target.value })} className="bg-white/5 border-white/10 text-white" />
             </Field>
           </div>
-          <Field label="Album / project ID (optional)">
-            <Input value={d.album_id ?? ''} onChange={(e) => setD({ ...d, album_id: e.target.value || null as any })} className="bg-white/5 border-white/10 text-white" />
+          <Field label="Album / project">
+            <select value={d.album_id ?? ''} onChange={(e) => setD({ ...d, album_id: (e.target.value || null) as any })}
+              className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+              <option value="">— none —</option>
+              {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            </select>
           </Field>
           <Field label="Support fund ($)">
             <Input type="number" value={((d.support_fund_cents ?? 0) / 100) as any}
@@ -383,7 +396,7 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
 );
 
 // ─── Batch edit dialog ────────────────────────────────────────────────────────
-const BatchEditDialog: React.FC<{ ids: string[]; onClose: () => void; onApplied: (patch: Partial<Song>) => void }> = ({ ids, onClose, onApplied }) => {
+const BatchEditDialog: React.FC<{ ids: string[]; albumOptions: { id: string; label: string }[]; onClose: () => void; onApplied: (patch: Partial<Song>) => void }> = ({ ids, albumOptions, onClose, onApplied }) => {
   const [category, setCategory] = useState('');
   const [albumId, setAlbumId] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
@@ -419,8 +432,13 @@ const BatchEditDialog: React.FC<{ ids: string[]; onClose: () => void; onApplied:
               <option value="single">Single</option><option value="project">Project / EP</option><option value="album">Album</option>
             </select>
           </Field>
-          <Field label="Set album / project ID (or '__clear__' to empty)">
-            <Input value={albumId} onChange={(e) => setAlbumId(e.target.value)} placeholder="— unchanged —" className="bg-white/5 border-white/10 text-white" />
+          <Field label="Set album / project">
+            <select value={albumId} onChange={(e) => setAlbumId(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+              <option value="">— unchanged —</option>
+              <option value="__clear__">Clear (no album)</option>
+              {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            </select>
           </Field>
           <Field label="Set release date">
             <Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} className="bg-white/5 border-white/10 text-white" />
