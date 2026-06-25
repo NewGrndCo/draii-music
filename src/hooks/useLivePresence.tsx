@@ -111,11 +111,11 @@ export const useLivePresence = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  // Re-broadcast when current song changes
+  // Re-broadcast when current song or playback state changes
   useEffect(() => {
     trackNow();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meta?.songId, meta?.songTitle, meta?.songArtist, meta?.coverArt]);
+  }, [meta?.songId, meta?.songTitle, meta?.songArtist, meta?.coverArt, meta?.isPlaying]);
 };
 
 /** Counts active listeners via the presence channel. */
