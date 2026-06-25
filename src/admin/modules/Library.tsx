@@ -329,7 +329,7 @@ const Library: React.FC = () => {
 };
 
 // ─── Edit dialog ──────────────────────────────────────────────────────────────
-const EditSongDialog: React.FC<{ song: Song; onClose: () => void; onSave: (p: Partial<Song>) => void }> = ({ song, onClose, onSave }) => {
+const EditSongDialog: React.FC<{ song: Song; albumOptions: { id: string; label: string }[]; onClose: () => void; onSave: (p: Partial<Song>) => void }> = ({ song, albumOptions, onClose, onSave }) => {
   const [d, setD] = useState<Partial<Song>>({ ...song });
   return (
     <Dialog open onOpenChange={onClose}>
@@ -350,8 +350,12 @@ const EditSongDialog: React.FC<{ song: Song; onClose: () => void; onSave: (p: Pa
                 onChange={(e) => setD({ ...d, release_date: e.target.value })} className="bg-white/5 border-white/10 text-white" />
             </Field>
           </div>
-          <Field label="Album / project ID (optional)">
-            <Input value={d.album_id ?? ''} onChange={(e) => setD({ ...d, album_id: e.target.value || null as any })} className="bg-white/5 border-white/10 text-white" />
+          <Field label="Album / project">
+            <select value={d.album_id ?? ''} onChange={(e) => setD({ ...d, album_id: (e.target.value || null) as any })}
+              className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+              <option value="">— none —</option>
+              {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            </select>
           </Field>
           <Field label="Support fund ($)">
             <Input type="number" value={((d.support_fund_cents ?? 0) / 100) as any}
