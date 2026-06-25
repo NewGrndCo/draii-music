@@ -10,7 +10,9 @@ import UpcomingEvents from './UpcomingEvents';
 import UpcomingMerch from './UpcomingMerch';
 import RecentlyPlayed from './RecentlyPlayed';
 import ArtistAbout from './ArtistAbout';
+import TrendingSongs from './TrendingSongs';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import { useMusicLibrary } from '@/hooks/useMusicLibrary';
 import { useLivePresence } from '@/hooks/useLivePresence';
 
 const PlayerContentView: React.FC = () => {
