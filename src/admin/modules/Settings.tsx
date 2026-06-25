@@ -146,6 +146,14 @@ const Settings: React.FC = () => {
     setProfile({ ...profile, frontend_sections: list });
   };
 
+  const toggleVisibility = (idx: number) => {
+    if (!profile) return;
+    const list = [...profile.frontend_sections];
+    const key = list[idx];
+    list[idx] = isHidden(key) ? baseKey(key) : `${HIDDEN_PREFIX}${baseKey(key)}`;
+    setProfile({ ...profile, frontend_sections: list });
+  };
+
   if (loading) return <div className="admin-glass rounded-2xl p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>;
   if (!profile) return <div className="admin-glass rounded-2xl p-4 md:p-6 text-sm text-white/60">Profile row missing.</div>;
 
