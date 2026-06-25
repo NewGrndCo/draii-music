@@ -3,6 +3,7 @@ import { adminStats } from '../lib/api';
 import StatCard from '../components/StatCard';
 import GeographicMap, { FocusTarget } from '../components/GeographicMap';
 import ListenLog from '../components/ListenLog';
+import PredictiveSection from '../components/PredictiveSection';
 import { Globe2, PlayCircle, Heart, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLiveListeners } from '@/hooks/useLivePresence';
