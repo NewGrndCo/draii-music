@@ -57,7 +57,7 @@ const getGeo = (): Promise<Geo> => {
  */
 export const useLivePresence = (
   enabled = true,
-  meta?: { songId?: string; songTitle?: string; songArtist?: string; coverArt?: string }
+  meta?: { songId?: string; songTitle?: string; songArtist?: string; coverArt?: string; isPlaying?: boolean; position?: number; duration?: number }
 ) => {
   const idRef = useRef<string>(`${Math.random().toString(36).slice(2)}-${Date.now()}`);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -80,6 +80,9 @@ export const useLivePresence = (
       song_title: m?.songTitle,
       song_artist: m?.songArtist,
       cover_art: m?.coverArt,
+      is_playing: m?.isPlaying,
+      position: m?.position,
+      duration: m?.duration,
     }).catch(() => {});
   };
 
