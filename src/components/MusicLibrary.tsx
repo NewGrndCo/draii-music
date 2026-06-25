@@ -244,12 +244,12 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
 
                   {/* Singles Tab */}
                   <TabsContent value="singles" className="h-full">
-                    <MusicLibraryScroll songs={allSongs.filter(s => !isCollab(s.artist))} onSelectSong={handleSelectSong} />
+                    <MusicLibraryScroll songs={allSongs.filter(s => isSingle(s))} onSelectSong={handleSelectSong} />
                   </TabsContent>
 
                   {/* Collabs Tab */}
                   <TabsContent value="collabs" className="h-full">
-                    <MusicLibraryScroll songs={allSongs.filter(s => isCollab(s.artist))} onSelectSong={handleSelectSong} />
+                    <MusicLibraryScroll songs={allSongs.filter(s => isCollabSong(s))} onSelectSong={handleSelectSong} />
                   </TabsContent>
 
                   {/* Albums Tab */}
