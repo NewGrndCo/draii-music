@@ -19,7 +19,7 @@ const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
 // Session-scoped cache to avoid refetching the catalog on every mount/route change.
-const LIBRARY_CACHE_KEY = 'music-library-cache-v1';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v3';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export const useMusicLibrary = () => {
@@ -65,7 +65,8 @@ export const useMusicLibrary = () => {
         // and cap the row count to stay well under Supabase free-tier limits.
         const { data: songsData, error: songsError } = await (supabase as any)
           .from('songs')
-          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id')
+          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id,hidden,dsp_links')
+          .eq('hidden', false)
           .order('created_at', { ascending: false })
           .limit(200);
 
@@ -113,7 +114,7 @@ export const useMusicLibrary = () => {
               coverArt: '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png',
               audioSrc: song.file_path || '',
               playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0,
+              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null,
             })),
           });
         }
@@ -138,7 +139,7 @@ export const useMusicLibrary = () => {
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
               playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0,
+              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null,
             })),
           });
         });
@@ -168,7 +169,7 @@ export const useMusicLibrary = () => {
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
               playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0,
+              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null, isCollab: true,
             })),
           });
         }

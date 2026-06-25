@@ -3,6 +3,8 @@ import { adminStats } from '../lib/api';
 import StatCard from '../components/StatCard';
 import GeographicMap, { FocusTarget } from '../components/GeographicMap';
 import ListenLog from '../components/ListenLog';
+import PredictiveSection from '../components/PredictiveSection';
+import RecentListensChart from '../components/RecentListensChart';
 import { Globe2, PlayCircle, Heart, Smartphone, Monitor, Loader2, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLiveListeners } from '@/hooks/useLivePresence';
@@ -106,6 +108,9 @@ const Analytics: React.FC = () => {
             {liveListeners.map((l) => {
               const code = toCountryCode(l.country);
               const loc = [l.city, l.region, l.country].filter(Boolean).join(', ');
+              const since = Math.max(0, Math.floor((Date.now() - (l.joined_at || Date.now())) / 1000));
+              const sinceLabel = since < 60 ? `${since}s` : since < 3600 ? `${Math.floor(since / 60)}m` : `${Math.floor(since / 3600)}h`;
+              const playing = l.is_playing;
               return (
                 <button
                   key={l.id}
@@ -120,7 +125,10 @@ const Analytics: React.FC = () => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-white truncate">{l.song_title || 'Idle'}</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`inline-block h-1.5 w-1.5 rounded-full ${playing ? 'bg-green-400 animate-pulse' : 'bg-white/30'}`} />
+                      <div className="text-sm text-white truncate">{l.song_title || 'Idle'}</div>
+                    </div>
                     <div className="text-xs text-white/55 truncate">{l.song_artist || '—'}</div>
                     {loc && (
                       <div className="text-[10px] text-white/45 truncate flex items-center gap-1 mt-0.5">
@@ -128,9 +136,12 @@ const Analytics: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-[10px] uppercase tracking-widest text-white/45 flex items-center gap-1 flex-shrink-0">
-                    {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-                    <span className="hidden sm:inline">{l.device || 'web'}</span>
+                  <div className="flex flex-col items-end gap-0.5 text-[10px] uppercase tracking-widest text-white/45 flex-shrink-0">
+                    <div className="flex items-center gap-1">
+                      {l.device === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                      <span className="hidden sm:inline">{l.device || 'web'}</span>
+                    </div>
+                    <span className="text-white/40 normal-case tracking-normal">{sinceLabel} ago</span>
                   </div>
                 </button>
               );
@@ -138,6 +149,8 @@ const Analytics: React.FC = () => {
           </div>
         )}
       </div>
+
+      <RecentListensChart listens={data.listens as any} />
 
       <div id="analytics-geo-map">
         <GeographicMap listens={data.listens as any} focus={focus} onClearFocus={() => setFocus(null)} />
@@ -196,6 +209,8 @@ const Analytics: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <PredictiveSection data={data as any} />
     </div>
   );
 };

@@ -389,10 +389,12 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          dsp_link: string | null
           duration: number | null
           file_path: string | null
           genre: string | null
           guest_artists: string[]
+          hidden: boolean
           id: string
           is_collaboration: boolean
           likes_count: number | null
@@ -415,10 +417,12 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          dsp_link?: string | null
           duration?: number | null
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
+          hidden?: boolean
           id: string
           is_collaboration?: boolean
           likes_count?: number | null
@@ -441,10 +445,12 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          dsp_link?: string | null
           duration?: number | null
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
+          hidden?: boolean
           id?: string
           is_collaboration?: boolean
           likes_count?: number | null

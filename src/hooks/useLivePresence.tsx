@@ -12,6 +12,9 @@ export interface LiveListener {
   city?: string;
   region?: string;
   device?: string;
+  is_playing?: boolean;
+  position?: number;
+  duration?: number;
 }
 
 const CHANNEL_NAME = 'listeners-live';
@@ -54,7 +57,7 @@ const getGeo = (): Promise<Geo> => {
  */
 export const useLivePresence = (
   enabled = true,
-  meta?: { songId?: string; songTitle?: string; songArtist?: string; coverArt?: string }
+  meta?: { songId?: string; songTitle?: string; songArtist?: string; coverArt?: string; isPlaying?: boolean; position?: number; duration?: number }
 ) => {
   const idRef = useRef<string>(`${Math.random().toString(36).slice(2)}-${Date.now()}`);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -77,6 +80,9 @@ export const useLivePresence = (
       song_title: m?.songTitle,
       song_artist: m?.songArtist,
       cover_art: m?.coverArt,
+      is_playing: m?.isPlaying,
+      position: m?.position,
+      duration: m?.duration,
     }).catch(() => {});
   };
 
@@ -105,11 +111,11 @@ export const useLivePresence = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  // Re-broadcast when current song changes
+  // Re-broadcast when current song or playback state changes
   useEffect(() => {
     trackNow();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meta?.songId, meta?.songTitle, meta?.songArtist, meta?.coverArt]);
+  }, [meta?.songId, meta?.songTitle, meta?.songArtist, meta?.coverArt, meta?.isPlaying]);
 };
 
 /** Counts active listeners via the presence channel. */
@@ -140,6 +146,9 @@ export const useLiveListeners = () => {
           city: m.city,
           region: m.region,
           device: m.device,
+          is_playing: m.is_playing,
+          position: m.position,
+          duration: m.duration,
         });
       }
       setListeners(arr);

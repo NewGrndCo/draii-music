@@ -1,18 +1,17 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { Volume2, VolumeX, Square, DollarSign } from 'lucide-react';
-import { Slider } from '../ui/slider';
+import { Square, DollarSign, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 const DonateDialog = lazy(() => import('./DonateDialog'));
 import { usePlayer } from '../../contexts/PlayerContext';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface VolumeControlProps {
-  volume: number;
-  onVolumeChange: (values: number[]) => void;
+  volume?: number;
+  onVolumeChange?: (values: number[]) => void;
   toggleLayout: () => void;
 }
 
-const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, toggleLayout }) => {
+const VolumeControl: React.FC<VolumeControlProps> = ({ toggleLayout }) => {
   const [donateOpen, setDonateOpen] = useState(false);
   const { currentSong } = usePlayer();
   const { profile } = useArtistProfile();
@@ -29,29 +28,34 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, t
   };
 
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex items-center gap-2 px-[6px] mx-[9px]">
-        <button
-          className="text-white hover:text-white/80 transition-colors p-2 touch-manipulation"
-          onClick={() => onVolumeChange([volume === 0 ? 0.8 : 0])}
-          style={{ minHeight: '44px', minWidth: '44px' }}
-          aria-label="Mute"
-        >
-          {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-        </button>
-        <div className="py-2 touch-manipulation" style={{ minHeight: '44px' }}>
-          <Slider
-            defaultValue={[0.8]}
-            max={1}
-            step={0.01}
-            value={[volume]}
-            onValueChange={onVolumeChange}
-            className="w-24"
-          />
-        </div>
+    <div className="flex items-center justify-between py-2 px-2">
+      <div className="flex items-center gap-2">
+        {currentSong?.dspLink && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  href={currentSong.dspLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Available on streaming services"
+                  className="flex items-center gap-1.5 text-xs text-white/80 hover:text-white border border-white/15 hover:border-white/30 rounded-full px-2.5 py-1 transition-colors touch-manipulation"
+                  style={{ minHeight: '32px' }}
+                >
+                  <ExternalLink size={12} />
+                  <span>Available on</span>
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-black/90 border-white/10 text-white text-xs">
+                Open streaming links
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
+
         {supportEnabled && (
           <TooltipProvider>
             <Tooltip>

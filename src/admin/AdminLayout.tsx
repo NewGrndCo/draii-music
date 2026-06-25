@@ -4,7 +4,6 @@ import {
   LayoutDashboard, Library, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
   Wifi, ChevronLeft, Mail, DollarSign,
-  Sparkles, Megaphone, Kanban,
 } from 'lucide-react';
 import { ADMIN_TOKEN_KEY } from './lib/api';
 
@@ -18,12 +17,9 @@ const items = [
   { key: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
   { key: 'library',     label: 'Library',       icon: Library },
   { key: 'analytics',   label: 'Analytics',     icon: BarChart3 },
-  { key: 'predictive',  label: 'Predictive',    icon: Sparkles },
-  { key: 'outreach',    label: 'Outreach',      icon: Megaphone },
-  { key: 'planning',    label: 'Planning',      icon: Kanban },
+  { key: 'revenue',     label: 'Revenue',       icon: DollarSign },
   { key: 'events',      label: 'Events',        icon: CalendarDays },
   { key: 'merch',       label: 'Merch',         icon: ShoppingBag },
-  { key: 'support',     label: 'Support Fund',  icon: DollarSign },
   { key: 'mailing',     label: 'Mailing',       icon: Mail },
   { key: 'settings',    label: 'Settings',      icon: Settings },
 ];

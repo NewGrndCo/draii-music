@@ -10,7 +10,9 @@ import UpcomingEvents from './UpcomingEvents';
 import UpcomingMerch from './UpcomingMerch';
 import RecentlyPlayed from './RecentlyPlayed';
 import ArtistAbout from './ArtistAbout';
+import TrendingSongs from './TrendingSongs';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import { useMusicLibrary } from '@/hooks/useMusicLibrary';
 import { useLivePresence } from '@/hooks/useLivePresence';
 
 const PlayerContentView: React.FC = () => {
@@ -24,12 +26,15 @@ const PlayerContentView: React.FC = () => {
   } = usePlayer();
 
   const { profile } = useArtistProfile();
+  const { albums } = useMusicLibrary();
+  const allSongs = React.useMemo(() => albums.flatMap((a) => a.songs || []), [albums]);
   // Track this listener as live for the admin dashboard, including now-playing
   useLivePresence(!!currentSong, currentSong ? {
     songId: currentSong.id,
     songTitle: currentSong.title,
     songArtist: currentSong.artist,
     coverArt: currentSong.coverArt,
+    isPlaying: playerState?.isPlaying,
   } : undefined);
 
   if (!currentSong) {
@@ -38,11 +43,14 @@ const PlayerContentView: React.FC = () => {
 
   const sectionOrder = profile?.frontend_sections?.length
     ? profile.frontend_sections
-    : ['next_up', 'events', 'merch', 'about'];
-  const order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
+    : ['trending', 'next_up', 'events', 'merch', 'about'];
+  let order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
+  if (!order.includes('trending')) order = ['trending', ...order];
 
   const renderSection = (key: string) => {
     switch (key) {
+      case 'trending':
+        return <TrendingSongs key="trending" songs={allSongs} onSelectSong={handleSelectSong} />;
       case 'next_up':
         return (
           <React.Fragment key="next_up">
@@ -108,11 +116,7 @@ const PlayerContentView: React.FC = () => {
         skipBackward={skipBackward}
       />
 
-      <VolumeControl
-        volume={playerState.volume}
-        onVolumeChange={handleVolumeChange}
-        toggleLayout={toggleLayout}
-      />
+      <VolumeControl toggleLayout={toggleLayout} />
 
       {order.map(renderSection)}
     </div>

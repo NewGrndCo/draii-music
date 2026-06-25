@@ -1,60 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { adminCall, adminInsert, adminUpdate, adminDelete, adminStats } from '../lib/api';
-import { Loader2, Plus, Trash2, Calendar, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { adminInsert, adminDelete, adminStats } from '../lib/api';
+import SupportFund from './SupportFund';
+import { Loader2, Plus, Trash2, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 type Stats = Awaited<ReturnType<typeof adminStats>>;
 
-const STATUSES = [
-  { id: 'recording',    label: 'Recording',    accent: 'from-purple-500/30 to-purple-500/5' },
-  { id: 'mixing',       label: 'Mixing',       accent: 'from-pink-500/30 to-pink-500/5' },
-  { id: 'distribution', label: 'Distribution', accent: 'from-blue-500/30 to-blue-500/5' },
-  { id: 'promo',        label: 'Promo',        accent: 'from-amber-500/30 to-amber-500/5' },
-  { id: 'released',     label: 'Released',     accent: 'from-emerald-500/30 to-emerald-500/5' },
-] as const;
+const monthKey = (d: string) => (d || '').slice(0, 7);
 
-const monthKey = (d: string) => d.slice(0, 7);
-
-const ArtistPlanning: React.FC = () => {
+const Revenue: React.FC = () => {
   const [data, setData] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [newRelease, setNewRelease] = useState({ title: '', target_date: '' });
-  const [newExpense, setNewExpense] = useState({ label: '', amount: '', category: 'production', occurred_at: new Date().toISOString().slice(0, 10) });
+  const [newExpense, setNewExpense] = useState({
+    label: '',
+    amount: '',
+    category: 'production',
+    occurred_at: new Date().toISOString().slice(0, 10),
+  });
 
   const reload = async () => {
-    try {
-      const d = await adminStats();
-      setData(d);
-    } catch (e: any) {
-      toast.error(e.message);
-    }
+    try { setData(await adminStats()); } catch (e: any) { toast.error(e.message); }
   };
 
-  useEffect(() => {
-    reload().finally(() => setLoading(false));
-  }, []);
-
-  const moveRelease = async (id: string, status: string) => {
-    try {
-      await adminUpdate('releases', id, { status });
-      await reload();
-    } catch (e: any) { toast.error(e.message); }
-  };
-
-  const addRelease = async () => {
-    if (!newRelease.title.trim()) return;
-    try {
-      await adminInsert('releases', { title: newRelease.title.trim(), target_date: newRelease.target_date || null, status: 'recording' });
-      setNewRelease({ title: '', target_date: '' });
-      await reload();
-    } catch (e: any) { toast.error(e.message); }
-  };
-
-  const removeRelease = async (id: string) => {
-    if (!confirm('Delete this release?')) return;
-    try { await adminDelete('releases', id); await reload(); } catch (e: any) { toast.error(e.message); }
-  };
+  useEffect(() => { reload().finally(() => setLoading(false)); }, []);
 
   const addExpense = async () => {
     const cents = Math.round(parseFloat(newExpense.amount || '0') * 100);
@@ -76,14 +45,12 @@ const ArtistPlanning: React.FC = () => {
     try { await adminDelete('expenses', id); await reload(); } catch (e: any) { toast.error(e.message); }
   };
 
-  // Revenue tracker math
   const revenue = useMemo(() => {
     if (!data) return { totalDonations: 0, totalSupportFund: 0, totalExpenses: 0, net: 0, monthly: [] as any[] };
     const totalDonations = data.donations.reduce((s: number, d: any) => s + (d.amount_cents || 0), 0);
     const totalSupportFund = data.songs.reduce((s: number, x: any) => s + (x.support_fund_cents || 0), 0);
     const totalExpenses = data.expenses.reduce((s: number, e: any) => s + (e.amount_cents || 0), 0);
     const net = totalDonations + totalSupportFund - totalExpenses;
-
     const months: Record<string, { month: string; income: number; expense: number }> = {};
     const ensure = (k: string) => (months[k] ??= { month: k, income: 0, expense: 0 });
     data.donations.forEach((d: any) => { ensure(monthKey(d.created_at)).income += (d.amount_cents || 0) / 100; });
@@ -97,96 +64,14 @@ const ArtistPlanning: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      {/* Release timeline planner */}
-      <section className="admin-glass rounded-2xl p-3 md:p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Calendar className="h-4 w-4 text-purple-300" />
-          <h3 className="font-display text-base font-semibold">Release Timeline Planner</h3>
-        </div>
-        <p className="text-xs text-white/50 mb-4">Drag — well, click — releases through each stage from Recording to Released.</p>
+      <SupportFund />
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          <input
-            value={newRelease.title}
-            onChange={(e) => setNewRelease({ ...newRelease, title: e.target.value })}
-            placeholder="New release title"
-            className="flex-1 min-w-[200px] bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-purple-300/50"
-          />
-          <input
-            type="date"
-            value={newRelease.target_date}
-            onChange={(e) => setNewRelease({ ...newRelease, target_date: e.target.value })}
-            className="bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-300/50"
-          />
-          <button
-            onClick={addRelease}
-            className="px-4 py-2 rounded-lg admin-gradient-bg text-sm font-medium text-white flex items-center gap-1.5 hover:opacity-90"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {STATUSES.map((s) => {
-            const items = data.releases.filter((r: any) => r.status === s.id);
-            return (
-              <div key={s.id} className={`rounded-xl bg-gradient-to-b ${s.accent} border border-white/5 p-3 min-h-[200px]`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[10px] uppercase tracking-widest text-white/65 font-semibold">{s.label}</div>
-                  <span className="text-[10px] text-white/45">{items.length}</span>
-                </div>
-                <div className="space-y-2">
-                  {items.length === 0 && (
-                    <div className="text-[11px] text-white/35 text-center py-4">Empty</div>
-                  )}
-                  {items.map((r: any) => {
-                    const idx = STATUSES.findIndex((x) => x.id === s.id);
-                    return (
-                      <div key={r.id} className="rounded-lg bg-black/40 border border-white/10 p-2 group">
-                        <div className="text-sm text-white truncate">{r.title}</div>
-                        {r.target_date && (
-                          <div className="text-[10px] text-white/50 mt-0.5">Target {r.target_date}</div>
-                        )}
-                        <div className="flex items-center gap-1 mt-2">
-                          {idx > 0 && (
-                            <button
-                              onClick={() => moveRelease(r.id, STATUSES[idx - 1].id)}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-white/70"
-                              title="Move back"
-                            >←</button>
-                          )}
-                          {idx < STATUSES.length - 1 && (
-                            <button
-                              onClick={() => moveRelease(r.id, STATUSES[idx + 1].id)}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-white/70"
-                              title="Advance"
-                            >→</button>
-                          )}
-                          <button
-                            onClick={() => removeRelease(r.id)}
-                            className="ml-auto text-[10px] p-1 rounded text-white/45 hover:text-pink-300 opacity-0 group-hover:opacity-100 transition"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Revenue tracker */}
       <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <DollarSign className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Revenue Tracker</h3>
         </div>
-        <p className="text-xs text-white/50 mb-4">Income from donations &amp; support fund vs production expenses.</p>
+        <p className="text-xs text-white/50 mb-4">Donations &amp; support fund income vs. production expenses.</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           <div className="rounded-xl bg-white/[0.04] border border-white/5 p-3">
@@ -228,7 +113,6 @@ const ArtistPlanning: React.FC = () => {
           </div>
         )}
 
-        {/* Add expense */}
         <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 mb-3">
           <div className="text-[10px] uppercase tracking-widest text-white/55 mb-2">Log a new expense</div>
           <div className="flex flex-wrap gap-2">
@@ -273,7 +157,6 @@ const ArtistPlanning: React.FC = () => {
           </div>
         </div>
 
-        {/* Expense list */}
         {data.expenses.length === 0 ? (
           <div className="text-sm text-white/45 py-4 text-center">No expenses logged yet.</div>
         ) : (
@@ -311,4 +194,4 @@ const ArtistPlanning: React.FC = () => {
   );
 };
 
-export default ArtistPlanning;
+export default Revenue;

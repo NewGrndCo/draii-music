@@ -10,6 +10,9 @@ export interface Song {
   playCount?: number;
   likesCount?: number;
   genre?: string;
+  category?: string;
+  isCollab?: boolean;
+  dspLink?: string | null;
 }
 
 export interface Album {
