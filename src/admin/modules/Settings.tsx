@@ -21,12 +21,16 @@ interface Profile {
 }
 
 const SECTION_LABELS: Record<string, string> = {
+  trending: 'Trending songs',
   next_up: 'Next Up songs',
   events: 'Upcoming events',
   merch: 'Merch slider',
   about: 'About the artist',
 };
-const ALL_SECTIONS = ['next_up', 'events', 'merch', 'about'];
+const ALL_SECTIONS = ['trending', 'next_up', 'events', 'merch', 'about'];
+const HIDDEN_PREFIX = '!';
+const baseKey = (s: string) => (s.startsWith(HIDDEN_PREFIX) ? s.slice(1) : s);
+const isHidden = (s: string) => s.startsWith(HIDDEN_PREFIX);
 
 const socialFields: { key: string; label: string; icon: React.ElementType }[] = [
   { key: 'twitter',   label: 'Twitter / X',   icon: Twitter },
