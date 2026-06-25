@@ -169,7 +169,7 @@ export const useMusicLibrary = () => {
               coverArt: getFullImageUrl(song.thumbnail_path),
               audioSrc: song.file_path || '',
               playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null,
+              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null, isCollab: true,
             })),
           });
         }
