@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent listens spark */}
-      <div className="admin-glass rounded-2xl p-5 md:p-6">
+      <div className="admin-glass rounded-2xl p-3 md:p-5 md:p-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display text-base font-semibold">Recent listens (24h)</h3>
           <span className="text-xs text-white/50">{recentListens.toLocaleString()} captured</span>
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
       {/* Cross-tab summaries */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Top songs */}
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-center gap-2 mb-3">
             <Trophy className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-base font-semibold">Top songs</h3>
@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Upcoming events */}
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-center gap-2 mb-3">
             <CalendarDays className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-base font-semibold">Next events</h3>
@@ -136,7 +136,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Active merch */}
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-center gap-2 mb-3">
             <ShoppingBag className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-base font-semibold">Active merch</h3>
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
 
       {/* Listener geography */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-center gap-2 mb-3">
             <MapPin className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-base font-semibold">Top listener countries</h3>
@@ -190,7 +190,7 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-center gap-2 mb-3">
             <Users className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-base font-semibold">Live listeners</h3>

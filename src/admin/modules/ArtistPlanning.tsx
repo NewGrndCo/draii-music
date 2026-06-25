@@ -98,7 +98,7 @@ const ArtistPlanning: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Release timeline planner */}
-      <section className="admin-glass rounded-2xl p-5">
+      <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <Calendar className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Release Timeline Planner</h3>
@@ -181,7 +181,7 @@ const ArtistPlanning: React.FC = () => {
       </section>
 
       {/* Revenue tracker */}
-      <section className="admin-glass rounded-2xl p-5">
+      <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <DollarSign className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Revenue Tracker</h3>

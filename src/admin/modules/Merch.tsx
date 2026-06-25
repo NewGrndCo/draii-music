@@ -69,7 +69,7 @@ const Merch: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-3">Add a product</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
             <Input placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="md:col-span-2 bg-white/5 border-white/10 text-white" />
@@ -115,7 +115,7 @@ const Merch: React.FC = () => {
       </div>
 
       {/* Live slider preview */}
-      <div className="admin-glass-strong rounded-2xl p-5">
+      <div className="admin-glass-strong rounded-2xl p-3 md:p-5">
         <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend preview</div>
         <h3 className="font-display text-base font-semibold mb-4 flex items-center gap-2"><ShoppingBag className="h-4 w-4 text-purple-300" /> Active merch slider</h3>
         {activeMerch.length === 0 ? (

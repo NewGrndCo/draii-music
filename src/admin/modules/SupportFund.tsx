@@ -56,12 +56,12 @@ const SupportFund: React.FC = () => {
   };
 
   if (loading) return <div className="admin-glass rounded-2xl p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>;
-  if (!row) return <div className="admin-glass rounded-2xl p-6 text-sm text-white/60">Profile row missing.</div>;
+  if (!row) return <div className="admin-glass rounded-2xl p-4 md:p-6 text-sm text-white/60">Profile row missing.</div>;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="h-10 w-10 rounded-xl bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center">
@@ -79,7 +79,7 @@ const SupportFund: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5 space-y-3">
+        <div className="admin-glass rounded-2xl p-3 md:p-5 space-y-3">
           <div>
             <h3 className="font-display text-base font-semibold">Stripe Payment Link</h3>
             <p className="text-xs text-white/55 mt-1">
@@ -109,7 +109,7 @@ const SupportFund: React.FC = () => {
       </div>
 
       <div className="space-y-5">
-        <div className="admin-glass-strong rounded-2xl p-5 space-y-3">
+        <div className="admin-glass-strong rounded-2xl p-3 md:p-5 space-y-3">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-purple-300" />
             <h3 className="font-display text-sm font-semibold">How to set up</h3>

@@ -382,7 +382,7 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
   };
 
   return (
-    <div className="admin-glass rounded-2xl p-5">
+    <div className="admin-glass rounded-2xl p-3 md:p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display text-base font-semibold">Bulk uploader</h3>
