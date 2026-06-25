@@ -115,11 +115,7 @@ const PlayerContentView: React.FC = () => {
         skipBackward={skipBackward}
       />
 
-      <VolumeControl
-        volume={playerState.volume}
-        onVolumeChange={handleVolumeChange}
-        toggleLayout={toggleLayout}
-      />
+      <VolumeControl toggleLayout={toggleLayout} />
 
       {order.map(renderSection)}
     </div>
