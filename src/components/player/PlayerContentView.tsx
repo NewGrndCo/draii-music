@@ -26,6 +26,8 @@ const PlayerContentView: React.FC = () => {
   } = usePlayer();
 
   const { profile } = useArtistProfile();
+  const { albums } = useMusicLibrary();
+  const allSongs = React.useMemo(() => albums.flatMap((a) => a.songs || []), [albums]);
   // Track this listener as live for the admin dashboard, including now-playing
   useLivePresence(!!currentSong, currentSong ? {
     songId: currentSong.id,
