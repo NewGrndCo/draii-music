@@ -146,6 +146,9 @@ export const useLiveListeners = () => {
           city: m.city,
           region: m.region,
           device: m.device,
+          is_playing: m.is_playing,
+          position: m.position,
+          duration: m.duration,
         });
       }
       setListeners(arr);
