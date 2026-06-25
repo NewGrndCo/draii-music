@@ -65,7 +65,8 @@ export const useMusicLibrary = () => {
         // and cap the row count to stay well under Supabase free-tier limits.
         const { data: songsData, error: songsError } = await (supabase as any)
           .from('songs')
-          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id')
+          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id,hidden,dsp_links')
+          .eq('hidden', false)
           .order('created_at', { ascending: false })
           .limit(200);
 
