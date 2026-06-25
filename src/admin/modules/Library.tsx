@@ -92,6 +92,14 @@ const Library: React.FC = () => {
     return Array.from(map.entries());
   }, [filtered]);
 
+  // Albums/projects available for the album_id picker
+  const albumOptions = useMemo(
+    () => songs
+      .filter((s) => (s.category || 'single').toLowerCase() !== 'single')
+      .map((s) => ({ id: s.id, label: `${s.title || 'Untitled'} · ${s.category}` })),
+    [songs],
+  );
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
