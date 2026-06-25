@@ -141,6 +141,8 @@ const Analytics: React.FC = () => {
         )}
       </div>
 
+      <RecentListensChart listens={data.listens as any} />
+
       <div id="analytics-geo-map">
         <GeographicMap listens={data.listens as any} focus={focus} onClearFocus={() => setFocus(null)} />
       </div>
