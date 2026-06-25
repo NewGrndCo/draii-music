@@ -1,18 +1,17 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { Volume2, VolumeX, Square, DollarSign } from 'lucide-react';
-import { Slider } from '../ui/slider';
+import { Square, DollarSign, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 const DonateDialog = lazy(() => import('./DonateDialog'));
 import { usePlayer } from '../../contexts/PlayerContext';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface VolumeControlProps {
-  volume: number;
-  onVolumeChange: (values: number[]) => void;
+  volume?: number;
+  onVolumeChange?: (values: number[]) => void;
   toggleLayout: () => void;
 }
 
-const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange, toggleLayout }) => {
+const VolumeControl: React.FC<VolumeControlProps> = ({ toggleLayout }) => {
   const [donateOpen, setDonateOpen] = useState(false);
   const { currentSong } = usePlayer();
   const { profile } = useArtistProfile();
