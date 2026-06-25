@@ -101,7 +101,7 @@ const MailingList: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="admin-glass-strong rounded-2xl p-5 flex flex-wrap items-center gap-3">
+      <div className="admin-glass-strong rounded-2xl p-3 md:p-5 flex flex-wrap items-center gap-3">
         <div className="h-10 w-10 rounded-xl admin-gradient-bg flex items-center justify-center">
           <Mail className="h-5 w-5 text-white" />
         </div>
@@ -125,7 +125,7 @@ const MailingList: React.FC = () => {
         </button>
       </div>
 
-      <div className="admin-glass-strong rounded-2xl p-5 grid sm:grid-cols-2 gap-3">
+      <div className="admin-glass-strong rounded-2xl p-3 md:p-5 grid sm:grid-cols-2 gap-3">
         <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07]">
           <BellRing className="h-4 w-4 text-pink-400 mt-0.5" />
           <div className="flex-1">

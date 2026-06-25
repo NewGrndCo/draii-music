@@ -59,7 +59,7 @@ const Events: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-3">Add an event</h3>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
             <Input placeholder="Title" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="md:col-span-2 bg-white/5 border-white/10 text-white" />
@@ -101,7 +101,7 @@ const Events: React.FC = () => {
       </div>
 
       {/* Live preview */}
-      <div className="admin-glass-strong rounded-2xl p-5">
+      <div className="admin-glass-strong rounded-2xl p-3 md:p-5">
         <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend preview</div>
         <h3 className="font-display text-base font-semibold mb-4">Upcoming events</h3>
         {upcoming.length === 0 ? (

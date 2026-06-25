@@ -140,12 +140,12 @@ const Settings: React.FC = () => {
   };
 
   if (loading) return <div className="admin-glass rounded-2xl p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>;
-  if (!profile) return <div className="admin-glass rounded-2xl p-6 text-sm text-white/60">Profile row missing.</div>;
+  if (!profile) return <div className="admin-glass rounded-2xl p-4 md:p-6 text-sm text-white/60">Profile row missing.</div>;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-3">Logo (above the player)</h3>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="h-28 w-28 rounded-xl bg-white border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
@@ -187,7 +187,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-1">Footer text</h3>
           <p className="text-xs text-white/50 mb-3">Shown at the bottom of the public player. The current year is appended automatically.</p>
           <Input
@@ -198,7 +198,7 @@ const Settings: React.FC = () => {
           />
         </div>
 
-        <div className="admin-glass rounded-2xl p-5 space-y-3">
+        <div className="admin-glass rounded-2xl p-3 md:p-5 space-y-3">
           <div>
             <h3 className="font-display text-base font-semibold mb-3">Artist bio</h3>
             <Textarea
@@ -220,7 +220,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5 space-y-4">
+        <div className="admin-glass rounded-2xl p-3 md:p-5 space-y-4">
           <div>
             <h3 className="font-display text-base font-semibold">About the artist (detailed)</h3>
             <p className="text-xs text-white/50 mt-1">Shown on the public player below Events &amp; Merch. The short bio above stays as the header tagline.</p>
@@ -273,7 +273,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-3">Social links</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {socialFields.map(({ key, label, icon: Icon }) => (
@@ -296,7 +296,7 @@ const Settings: React.FC = () => {
       </div>
 
       <div className="space-y-5">
-        <div className="admin-glass-strong rounded-2xl p-5 space-y-4">
+        <div className="admin-glass-strong rounded-2xl p-3 md:p-5 space-y-4">
           <div>
             <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
             <h3 className="font-display text-base font-semibold mt-0.5 flex items-center gap-2"><Globe className="h-4 w-4 text-purple-300" /> Player layout</h3>
@@ -321,7 +321,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass-strong rounded-2xl p-5 space-y-3">
+        <div className="admin-glass-strong rounded-2xl p-3 md:p-5 space-y-3">
           <div>
             <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
             <h3 className="font-display text-base font-semibold mt-0.5">Section order</h3>

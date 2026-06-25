@@ -90,7 +90,7 @@ const Analytics: React.FC = () => {
         <StatCard label="Listens (5k cap)" value={data.listens.length.toLocaleString()} icon={Globe2} accent="blue" />
       </div>
 
-      <div className="admin-glass rounded-2xl p-5">
+      <div className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display text-base font-semibold flex items-center gap-2">
             <Radio className="h-4 w-4 text-purple-300" />
@@ -146,7 +146,7 @@ const Analytics: React.FC = () => {
       <ListenLog listens={data.listens as any} songs={data.songs as any} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="admin-glass rounded-2xl p-5">
+        <div className="admin-glass rounded-2xl p-3 md:p-5">
           <h3 className="font-display text-base font-semibold mb-4">Support fund &amp; donations</h3>
           <div className="text-3xl font-display font-semibold admin-gradient-text">${(donTotal / 100).toFixed(2)}</div>
           <div className="text-xs text-white/45 mt-1">All-time across all sources</div>
@@ -168,7 +168,7 @@ const Analytics: React.FC = () => {
           </div>
         </div>
 
-        <div className="admin-glass rounded-2xl p-5 space-y-6">
+        <div className="admin-glass rounded-2xl p-3 md:p-5 space-y-6">
           <div>
             <h3 className="font-display text-base font-semibold mb-3">Devices</h3>
             <div className="flex h-3 rounded-full overflow-hidden bg-white/5">

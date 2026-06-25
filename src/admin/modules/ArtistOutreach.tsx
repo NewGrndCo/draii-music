@@ -110,7 +110,7 @@ const ArtistOutreach: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Superfan finder */}
-      <section className="admin-glass rounded-2xl p-5">
+      <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <Users className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Superfan Finder</h3>
@@ -153,7 +153,7 @@ const ArtistOutreach: React.FC = () => {
       </section>
 
       {/* Campaign generator */}
-      <section className="admin-glass rounded-2xl p-5">
+      <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <Megaphone className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Campaign Generator</h3>
@@ -206,7 +206,7 @@ const ArtistOutreach: React.FC = () => {
       </section>
 
       {/* Personalization engine */}
-      <section className="admin-glass rounded-2xl p-5">
+      <section className="admin-glass rounded-2xl p-3 md:p-5">
         <div className="flex items-center gap-2 mb-1">
           <MessageSquareQuote className="h-4 w-4 text-purple-300" />
           <h3 className="font-display text-base font-semibold">Personalization Engine</h3>

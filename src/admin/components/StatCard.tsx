@@ -19,19 +19,19 @@ const colorFor = (a: Props['accent']) => {
 const StatCard: React.FC<Props> = ({ label, value, hint, icon: Icon, accent = 'purple' }) => {
   const c = colorFor(accent);
   return (
-    <div className="admin-glass rounded-2xl p-4 md:p-5 relative overflow-hidden group">
+    <div className="admin-glass rounded-xl md:rounded-2xl p-3 md:p-5 relative overflow-hidden group">
       <div
-        className="absolute -top-10 -right-10 h-32 w-32 rounded-full blur-3xl opacity-40 transition-opacity group-hover:opacity-60"
+        className="absolute -top-10 -right-10 h-24 w-24 md:h-32 md:w-32 rounded-full blur-3xl opacity-40 transition-opacity group-hover:opacity-60"
         style={{ background: c }}
       />
-      <div className="flex items-start justify-between relative">
-        <div>
-          <div className="text-[11px] uppercase tracking-widest text-white/55">{label}</div>
-          <div className="font-display text-2xl md:text-3xl font-semibold mt-2">{value}</div>
-          {hint && <div className="text-xs text-white/50 mt-1">{hint}</div>}
+      <div className="flex items-start justify-between gap-2 relative">
+        <div className="min-w-0">
+          <div className="text-[10px] md:text-[11px] uppercase tracking-widest text-white/55 truncate">{label}</div>
+          <div className="font-display text-lg md:text-3xl font-semibold mt-1 md:mt-2 leading-tight break-words">{value}</div>
+          {hint && <div className="text-[11px] md:text-xs text-white/50 mt-1">{hint}</div>}
         </div>
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: `${c}22`, color: c }}>
-          <Icon className="h-4 w-4" />
+        <div className="h-7 w-7 md:h-9 md:w-9 rounded-lg md:rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c}22`, color: c }}>
+          <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </div>
       </div>
     </div>
