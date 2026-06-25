@@ -15,9 +15,14 @@ import MusicLibraryScroll from './player/MusicLibraryScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Disc, X, User, Users } from 'lucide-react';
 
-const isCollab = (artist: string) => {
-  const a = (artist || '').toLowerCase();
+const isCollabSong = (s: Song) => {
+  if (s.isCollab) return true;
+  const a = (s.artist || '').toLowerCase();
   return a.includes('feat') || a.includes(' ft') || a.includes(' & ') || a.includes(',') || a.includes(' with ');
+};
+const isSingle = (s: Song) => {
+  if (s.category) return s.category.toLowerCase() === 'single';
+  return !isCollabSong(s);
 };
 
 
