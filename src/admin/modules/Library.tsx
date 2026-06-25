@@ -309,12 +309,13 @@ const Library: React.FC = () => {
       )}
 
       {/* Edit dialog */}
-      {editTarget && <EditSongDialog song={editTarget} onClose={() => setEditTarget(null)} onSave={saveEdit} />}
+      {editTarget && <EditSongDialog song={editTarget} albumOptions={albumOptions} onClose={() => setEditTarget(null)} onSave={saveEdit} />}
 
       {/* Batch edit dialog */}
       {batchOpen && (
         <BatchEditDialog
           ids={Array.from(selected)}
+          albumOptions={albumOptions}
           onClose={() => setBatchOpen(false)}
           onApplied={(patch) => {
             setSongs((prev) => prev.map((s) => (selected.has(s.id) ? { ...s, ...patch } : s)));
