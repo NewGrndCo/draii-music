@@ -389,6 +389,7 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          dsp_link: string | null
           duration: number | null
           file_path: string | null
           genre: string | null
@@ -416,6 +417,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          dsp_link?: string | null
           duration?: number | null
           file_path?: string | null
           genre?: string | null
@@ -443,6 +445,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          dsp_link?: string | null
           duration?: number | null
           file_path?: string | null
           genre?: string | null
