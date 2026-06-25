@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon } from 'lucide-react';
+import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
