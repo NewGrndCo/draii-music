@@ -102,17 +102,22 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
         </aside>
 
         {/* Main area */}
-        <main className="flex-1 min-w-0 p-3 md:p-6">
+        <main className="flex-1 min-w-0 p-2 sm:p-3 md:p-6">
           {/* Header */}
-          <header className="admin-glass-strong rounded-2xl px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 mb-6">
-            <div className="flex-1 min-w-[200px]">
-              <h1 className="font-display text-lg md:text-2xl font-semibold leading-tight">
-                <span className="admin-gradient-text">DR Admin</span>
-                <span className="text-white/85"> Control Center</span>
-              </h1>
-              <p className="text-xs text-white/50 mt-0.5">Manage every surface of draiirynell.com in real time.</p>
+          <header className="admin-glass-strong rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 flex flex-wrap items-center gap-2 md:gap-3 mb-3 md:mb-6">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="md:hidden h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shrink-0">
+                <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain p-0.5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="font-display text-base md:text-2xl font-semibold leading-tight truncate">
+                  <span className="admin-gradient-text">DR Admin</span>
+                  <span className="text-white/85 hidden sm:inline"> Control Center</span>
+                </h1>
+                <p className="text-[10px] md:text-xs text-white/50 mt-0.5 truncate">Manage every surface of draiirynell.com in real time.</p>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hidden w-full md:w-auto">
               <StatusPill label="Database" ok icon={Database} />
               <StatusPill label="Stripe" ok={false} icon={ShieldCheck} />
               <StatusPill label="Spotify API" ok={false} icon={Wifi} />
@@ -120,23 +125,24 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
           </header>
 
           {/* Mobile tab bar */}
-          <div className="md:hidden -mx-1 mb-4 overflow-x-auto scrollbar-hidden">
-            <div className="flex gap-2 px-1">
+          <div className="md:hidden -mx-1 mb-3 overflow-x-auto scrollbar-hidden sticky top-0 z-10 py-1 backdrop-blur-md">
+            <div className="flex gap-1.5 px-1">
               {items.map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => onChange(key)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs whitespace-nowrap
+                  aria-label={label}
+                  className={`flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-full text-xs whitespace-nowrap active:scale-95 transition
                     ${active === key ? 'admin-gradient-bg text-white' : 'admin-glass text-white/70'}`}
                 >
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className="h-4 w-4" />
                   {label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-6">{children}</div>
+          <div className="space-y-4 md:space-y-6">{children}</div>
         </main>
       </div>
     </div>
