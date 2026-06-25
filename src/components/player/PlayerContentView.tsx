@@ -42,11 +42,14 @@ const PlayerContentView: React.FC = () => {
 
   const sectionOrder = profile?.frontend_sections?.length
     ? profile.frontend_sections
-    : ['next_up', 'events', 'merch', 'about'];
-  const order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
+    : ['trending', 'next_up', 'events', 'merch', 'about'];
+  let order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
+  if (!order.includes('trending')) order = ['trending', ...order];
 
   const renderSection = (key: string) => {
     switch (key) {
+      case 'trending':
+        return <TrendingSongs key="trending" songs={allSongs} onSelectSong={handleSelectSong} />;
       case 'next_up':
         return (
           <React.Fragment key="next_up">
