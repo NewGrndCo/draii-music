@@ -340,17 +340,24 @@ const Settings: React.FC = () => {
           <div>
             <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
             <h3 className="font-display text-base font-semibold mt-0.5">Section order</h3>
-            <p className="text-xs text-white/50 mt-1">Reorder how Next Up, Events and Merch appear on the public player.</p>
+            <p className="text-xs text-white/50 mt-1">Reorder sections on the public player and toggle each one's visibility with the eye icon.</p>
           </div>
           <div className="space-y-2">
-            {(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS).map((key, idx, arr) => (
-              <div key={key} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                <GripVertical className="h-4 w-4 text-white/40" />
-                <div className="flex-1 text-sm">{SECTION_LABELS[key] ?? key}</div>
-                <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => moveSection(idx, -1)} className="h-7 w-7 text-white/70"><ArrowUp className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" disabled={idx === arr.length - 1} onClick={() => moveSection(idx, 1)} className="h-7 w-7 text-white/70"><ArrowDown className="h-4 w-4" /></Button>
-              </div>
-            ))}
+            {(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS).map((raw, idx, arr) => {
+              const key = baseKey(raw);
+              const hidden = isHidden(raw);
+              return (
+                <div key={raw + idx} className={`flex items-center gap-2 border rounded-xl px-3 py-2 ${hidden ? 'bg-white/[0.02] border-white/5 opacity-60' : 'bg-white/5 border-white/10'}`}>
+                  <GripVertical className="h-4 w-4 text-white/40" />
+                  <div className="flex-1 text-sm">{SECTION_LABELS[key] ?? key}</div>
+                  <Button size="icon" variant="ghost" onClick={() => toggleVisibility(idx)} className="h-7 w-7 text-white/70" title={hidden ? 'Show on front' : 'Hide from front'}>
+                    {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => moveSection(idx, -1)} className="h-7 w-7 text-white/70"><ArrowUp className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" disabled={idx === arr.length - 1} onClick={() => moveSection(idx, 1)} className="h-7 w-7 text-white/70"><ArrowDown className="h-4 w-4" /></Button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
