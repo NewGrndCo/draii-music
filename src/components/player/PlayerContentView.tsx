@@ -34,6 +34,7 @@ const PlayerContentView: React.FC = () => {
     songTitle: currentSong.title,
     songArtist: currentSong.artist,
     coverArt: currentSong.coverArt,
+    isPlaying: playerState?.isPlaying,
   } : undefined);
 
   if (!currentSong) {
