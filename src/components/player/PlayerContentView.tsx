@@ -41,11 +41,11 @@ const PlayerContentView: React.FC = () => {
     return <div className="text-foreground text-center p-4">Loading music...</div>;
   }
 
-  const sectionOrder = profile?.frontend_sections?.length
+  const rawOrder = profile?.frontend_sections?.length
     ? profile.frontend_sections
     : ['trending', 'next_up', 'events', 'merch', 'about'];
-  let order = sectionOrder.includes('about') ? sectionOrder : [...sectionOrder, 'about'];
-  if (!order.includes('trending')) order = ['trending', ...order];
+  // Filter out sections explicitly hidden via "!" prefix in settings.
+  const order = rawOrder.filter((k) => !k.startsWith('!'));
 
   const renderSection = (key: string) => {
     switch (key) {
