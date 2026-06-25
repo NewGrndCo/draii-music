@@ -84,6 +84,19 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
     };
   }, [selectedAlbum]);
 
+  // Lock page scroll while the library is open — only the song list should scroll.
+  useEffect(() => {
+    if (!isVisible) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouch = (document.body.style as any).touchAction;
+    document.body.style.overflow = 'hidden';
+    (document.body.style as any).touchAction = 'none';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      (document.body.style as any).touchAction = prevTouch;
+    };
+  }, [isVisible]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.trim()) {
