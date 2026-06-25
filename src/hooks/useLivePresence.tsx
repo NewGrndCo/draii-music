@@ -12,6 +12,9 @@ export interface LiveListener {
   city?: string;
   region?: string;
   device?: string;
+  is_playing?: boolean;
+  position?: number;
+  duration?: number;
 }
 
 const CHANNEL_NAME = 'listeners-live';
