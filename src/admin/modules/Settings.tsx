@@ -55,9 +55,12 @@ const Settings: React.FC = () => {
       .then((rows) => {
         const r: any = rows[0];
         if (!r) { setProfile(null); return; }
-        const sections = Array.isArray(r.frontend_sections) && r.frontend_sections.length
-          ? [...r.frontend_sections] : [...ALL_SECTIONS];
-        if (!sections.includes('about')) sections.push('about');
+        const stored = Array.isArray(r.frontend_sections) ? [...r.frontend_sections] : [];
+        // Ensure every known section is present (append missing as visible).
+        ALL_SECTIONS.forEach((k) => {
+          if (!stored.some((s: string) => baseKey(s) === k)) stored.push(k);
+        });
+        const sections = stored;
         setProfile({
           id: r.id,
           bio: r.bio ?? '',
