@@ -31,7 +31,9 @@ const cutoff = (r: Range) => {
 const fmt = (iso?: string) => {
   if (!iso) return '';
   const d = new Date(iso);
-  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleString(undefined, {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+  });
 };
 
 interface Props {

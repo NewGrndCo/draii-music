@@ -207,6 +207,9 @@ const Dashboard: React.FC = () => {
   );
 };
 
+const fmtHour12 = (d: Date) =>
+  d.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true }).replace(/\s/, '');
+
 const ListensSpark: React.FC<{ listens: any[] }> = ({ listens }) => {
   const now = Date.now();
   const buckets = new Array(24).fill(0);
@@ -217,19 +220,36 @@ const ListensSpark: React.FC<{ listens: any[] }> = ({ listens }) => {
   });
   const max = Math.max(1, ...buckets);
   return (
-    <div className="flex items-end gap-1 h-24">
-      {buckets.map((v, i) => (
-        <div
-          key={i}
-          className="flex-1 rounded-t-md transition-all"
-          style={{
-            height: `${(v / max) * 100}%`,
-            background: 'var(--admin-gradient)',
-            opacity: 0.4 + (v / max) * 0.6,
-          }}
-          title={`${v} plays`}
-        />
-      ))}
+    <div>
+      <div className="flex items-end gap-1 h-24">
+        {buckets.map((v, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-t-md transition-all relative group"
+            style={{
+              height: `${(v / max) * 100}%`,
+              background: 'var(--admin-gradient)',
+              opacity: 0.4 + (v / max) * 0.6,
+            }}
+            title={`${v} plays`}
+          />
+        ))}
+      </div>
+      <div className="flex gap-1 mt-1.5">
+        {buckets.map((_, i) => {
+          const d = new Date(now - (23 - i) * 3.6e6);
+          const label = fmtHour12(d);
+          // Show label every 3 hours to avoid crowding
+          const showLabel = i % 3 === 0;
+          return (
+            <div key={i} className="flex-1 text-center">
+              {showLabel && (
+                <span className="text-[9px] text-white/40 tabular-nums">{label}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
