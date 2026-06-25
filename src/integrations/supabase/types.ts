@@ -393,6 +393,7 @@ export type Database = {
           file_path: string | null
           genre: string | null
           guest_artists: string[]
+          hidden: boolean
           id: string
           is_collaboration: boolean
           likes_count: number | null
@@ -419,6 +420,7 @@ export type Database = {
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
+          hidden?: boolean
           id: string
           is_collaboration?: boolean
           likes_count?: number | null
@@ -445,6 +447,7 @@ export type Database = {
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
+          hidden?: boolean
           id?: string
           is_collaboration?: boolean
           likes_count?: number | null
