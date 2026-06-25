@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon } from 'lucide-react';
+import { Loader2, Save, Twitter, Youtube, Instagram, Music, Globe, GripVertical, ArrowUp, ArrowDown, Upload, ImageIcon, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -21,12 +21,16 @@ interface Profile {
 }
 
 const SECTION_LABELS: Record<string, string> = {
+  trending: 'Trending songs',
   next_up: 'Next Up songs',
   events: 'Upcoming events',
   merch: 'Merch slider',
   about: 'About the artist',
 };
-const ALL_SECTIONS = ['next_up', 'events', 'merch', 'about'];
+const ALL_SECTIONS = ['trending', 'next_up', 'events', 'merch', 'about'];
+const HIDDEN_PREFIX = '!';
+const baseKey = (s: string) => (s.startsWith(HIDDEN_PREFIX) ? s.slice(1) : s);
+const isHidden = (s: string) => s.startsWith(HIDDEN_PREFIX);
 
 const socialFields: { key: string; label: string; icon: React.ElementType }[] = [
   { key: 'twitter',   label: 'Twitter / X',   icon: Twitter },
@@ -51,9 +55,12 @@ const Settings: React.FC = () => {
       .then((rows) => {
         const r: any = rows[0];
         if (!r) { setProfile(null); return; }
-        const sections = Array.isArray(r.frontend_sections) && r.frontend_sections.length
-          ? [...r.frontend_sections] : [...ALL_SECTIONS];
-        if (!sections.includes('about')) sections.push('about');
+        const stored = Array.isArray(r.frontend_sections) ? [...r.frontend_sections] : [];
+        // Ensure every known section is present (append missing as visible).
+        ALL_SECTIONS.forEach((k) => {
+          if (!stored.some((s: string) => baseKey(s) === k)) stored.push(k);
+        });
+        const sections = stored;
         setProfile({
           id: r.id,
           bio: r.bio ?? '',
@@ -136,6 +143,14 @@ const Settings: React.FC = () => {
     const target = idx + dir;
     if (target < 0 || target >= list.length) return;
     [list[idx], list[target]] = [list[target], list[idx]];
+    setProfile({ ...profile, frontend_sections: list });
+  };
+
+  const toggleVisibility = (idx: number) => {
+    if (!profile) return;
+    const list = [...profile.frontend_sections];
+    const key = list[idx];
+    list[idx] = isHidden(key) ? baseKey(key) : `${HIDDEN_PREFIX}${baseKey(key)}`;
     setProfile({ ...profile, frontend_sections: list });
   };
 
@@ -325,17 +340,24 @@ const Settings: React.FC = () => {
           <div>
             <div className="text-[11px] uppercase tracking-widest text-white/45">Frontend</div>
             <h3 className="font-display text-base font-semibold mt-0.5">Section order</h3>
-            <p className="text-xs text-white/50 mt-1">Reorder how Next Up, Events and Merch appear on the public player.</p>
+            <p className="text-xs text-white/50 mt-1">Reorder sections on the public player and toggle each one's visibility with the eye icon.</p>
           </div>
           <div className="space-y-2">
-            {(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS).map((key, idx, arr) => (
-              <div key={key} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                <GripVertical className="h-4 w-4 text-white/40" />
-                <div className="flex-1 text-sm">{SECTION_LABELS[key] ?? key}</div>
-                <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => moveSection(idx, -1)} className="h-7 w-7 text-white/70"><ArrowUp className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" disabled={idx === arr.length - 1} onClick={() => moveSection(idx, 1)} className="h-7 w-7 text-white/70"><ArrowDown className="h-4 w-4" /></Button>
-              </div>
-            ))}
+            {(profile.frontend_sections?.length ? profile.frontend_sections : ALL_SECTIONS).map((raw, idx, arr) => {
+              const key = baseKey(raw);
+              const hidden = isHidden(raw);
+              return (
+                <div key={raw + idx} className={`flex items-center gap-2 border rounded-xl px-3 py-2 ${hidden ? 'bg-white/[0.02] border-white/5 opacity-60' : 'bg-white/5 border-white/10'}`}>
+                  <GripVertical className="h-4 w-4 text-white/40" />
+                  <div className="flex-1 text-sm">{SECTION_LABELS[key] ?? key}</div>
+                  <Button size="icon" variant="ghost" onClick={() => toggleVisibility(idx)} className="h-7 w-7 text-white/70" title={hidden ? 'Show on front' : 'Hide from front'}>
+                    {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => moveSection(idx, -1)} className="h-7 w-7 text-white/70"><ArrowUp className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" disabled={idx === arr.length - 1} onClick={() => moveSection(idx, 1)} className="h-7 w-7 text-white/70"><ArrowDown className="h-4 w-4" /></Button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

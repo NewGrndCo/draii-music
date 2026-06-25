@@ -18,15 +18,14 @@ export interface ArtistProfile {
   mailing_required: boolean;
 }
 
-const DEFAULT_SECTIONS = ['next_up', 'events', 'merch', 'about'];
-const PROFILE_CACHE_KEY = 'artist-profile-cache-v1';
+const DEFAULT_SECTIONS = ['trending', 'next_up', 'events', 'merch', 'about'];
+const PROFILE_CACHE_KEY = 'artist-profile-cache-v2';
 const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const normalize = (data: any): ArtistProfile => {
   const sections = Array.isArray(data.frontend_sections) && data.frontend_sections.length
     ? [...data.frontend_sections]
     : [...DEFAULT_SECTIONS];
-  if (!sections.includes('about')) sections.push('about');
   return {
     id: data.id,
     bio: data.bio ?? '',
