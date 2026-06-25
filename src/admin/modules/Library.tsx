@@ -396,7 +396,7 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
 );
 
 // ─── Batch edit dialog ────────────────────────────────────────────────────────
-const BatchEditDialog: React.FC<{ ids: string[]; onClose: () => void; onApplied: (patch: Partial<Song>) => void }> = ({ ids, onClose, onApplied }) => {
+const BatchEditDialog: React.FC<{ ids: string[]; albumOptions: { id: string; label: string }[]; onClose: () => void; onApplied: (patch: Partial<Song>) => void }> = ({ ids, albumOptions, onClose, onApplied }) => {
   const [category, setCategory] = useState('');
   const [albumId, setAlbumId] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
@@ -432,8 +432,13 @@ const BatchEditDialog: React.FC<{ ids: string[]; onClose: () => void; onApplied:
               <option value="single">Single</option><option value="project">Project / EP</option><option value="album">Album</option>
             </select>
           </Field>
-          <Field label="Set album / project ID (or '__clear__' to empty)">
-            <Input value={albumId} onChange={(e) => setAlbumId(e.target.value)} placeholder="— unchanged —" className="bg-white/5 border-white/10 text-white" />
+          <Field label="Set album / project">
+            <select value={albumId} onChange={(e) => setAlbumId(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+              <option value="">— unchanged —</option>
+              <option value="__clear__">Clear (no album)</option>
+              {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            </select>
           </Field>
           <Field label="Set release date">
             <Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} className="bg-white/5 border-white/10 text-white" />
