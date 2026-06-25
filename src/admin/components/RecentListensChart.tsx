@@ -8,9 +8,12 @@ interface Props {
 
 type Range = '24h' | '7d' | '30d';
 
+const fmtHour = (d: Date) =>
+  d.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true }).replace(/\s/, '');
+
 const RANGE_CONFIG: Record<Range, { hours: number; bucketHours: number; label: (d: Date) => string }> = {
-  '24h': { hours: 24, bucketHours: 1, label: (d) => `${d.getHours().toString().padStart(2, '0')}:00` },
-  '7d':  { hours: 24 * 7, bucketHours: 6, label: (d) => `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}h` },
+  '24h': { hours: 24, bucketHours: 1, label: fmtHour },
+  '7d':  { hours: 24 * 7, bucketHours: 6, label: (d) => `${d.getMonth() + 1}/${d.getDate()} ${fmtHour(d)}` },
   '30d': { hours: 24 * 30, bucketHours: 24, label: (d) => `${d.getMonth() + 1}/${d.getDate()}` },
 };
 
