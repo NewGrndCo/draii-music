@@ -197,6 +197,8 @@ const Analytics: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <PredictiveSection data={data as any} />
     </div>
   );
 };
