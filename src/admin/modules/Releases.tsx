@@ -189,6 +189,7 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
       };
       const u = await updateRow<Release>('releases', release.id, patch);
       onSaved(u);
+      invalidateMusicLibraryCache();
       toast.success('Saved');
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }
