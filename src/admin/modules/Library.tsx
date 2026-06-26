@@ -497,8 +497,8 @@ const BatchEditDialog: React.FC<{ ids: string[]; albumOptions: { id: string; lab
 };
 
 // ─── Bulk uploader (unchanged behavior, kept compact) ─────────────────────────
-const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
-  const [items, setItems] = useState<{ file: File; title: string; artist: string; genre: string; status: 'pending' | 'uploading' | 'done' | 'error'; err?: string }[]>([]);
+const BulkUploader: React.FC<{ onUploaded: () => void; albumOptions: { id: string; label: string }[] }> = ({ onUploaded, albumOptions }) => {
+  const [items, setItems] = useState<{ file: File; title: string; artist: string; genre: string; albumId: string; status: 'pending' | 'uploading' | 'done' | 'error'; err?: string }[]>([]);
   const [drag, setDrag] = useState(false);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -506,7 +506,7 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
   const addFiles = (files: FileList | File[]) => {
     const arr = Array.from(files).filter((f) => /audio\/(mpeg|wav|x-wav|mp3)/i.test(f.type) || /\.(mp3|wav)$/i.test(f.name));
     if (!arr.length) { toast.error('Only MP3 and WAV files'); return; }
-    setItems((prev) => [...prev, ...arr.map((file) => ({ file, title: file.name.replace(/\.[^.]+$/, ''), artist: 'Draii Rynell', genre: 'R&B/Soul', status: 'pending' as const }))]);
+    setItems((prev) => [...prev, ...arr.map((file) => ({ file, title: file.name.replace(/\.[^.]+$/, ''), artist: 'Draii Rynell', genre: 'R&B/Soul', albumId: '', status: 'pending' as const }))]);
     setOpen(true);
   };
 
@@ -521,6 +521,7 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
         await adminInsert('songs', {
           id: crypto.randomUUID(), title: it.title, artist: it.artist, genre: it.genre,
           file_path: publicUrl, status: 'published', visibility: 'published', category: 'single',
+          album_id: it.albumId || null,
         });
         setItems((prev) => prev.map((x, idx) => idx === i ? { ...x, status: 'done' } : x));
       } catch (e: any) {
