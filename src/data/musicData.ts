@@ -17,6 +17,7 @@ export interface Song {
 
 export interface Album {
   id: string;
+  slug?: string;
   title: string;
   artist: string;
   coverArt: string;
