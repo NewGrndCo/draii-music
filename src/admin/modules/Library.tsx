@@ -360,7 +360,7 @@ const EditSongDialog: React.FC<{ song: Song; albumOptions: { id: string; label: 
                 onChange={(e) => setD({ ...d, release_date: e.target.value })} className="bg-white/5 border-white/10 text-white" />
             </Field>
           </div>
-          <Field label="Album / project">
+          <Field label="Album / EP">
             <select value={d.album_id ?? ''} onChange={(e) => setD({ ...d, album_id: (e.target.value || null) as any })}
               className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
               <option value="">— none —</option>
@@ -439,10 +439,10 @@ const BatchEditDialog: React.FC<{ ids: string[]; albumOptions: { id: string; lab
             <select value={category} onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
               <option value="">— unchanged —</option>
-              <option value="single">Single</option><option value="project">Project / EP</option><option value="album">Album</option>
+              <option value="single">Single</option><option value="ep">EP</option><option value="album">Album</option>
             </select>
           </Field>
-          <Field label="Set album / project">
+          <Field label="Set album / EP">
             <select value={albumId} onChange={(e) => setAlbumId(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
               <option value="">— unchanged —</option>
