@@ -5,19 +5,22 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v6';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v7';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const SONG_FIELDS =
+  'id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,hidden,dsp_link,is_collaboration,release_date,created_at';
 
 export const useMusicLibrary = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getFullImageUrl = useCallback((path: string): string => {
+  const getFullImageUrl = useCallback((path?: string | null): string => {
     if (!path) return 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/lovable-uploads')) return path;
-    return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/songs/${path}`;
+    return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
   }, []);
 
   const formatDuration = useCallback((seconds: number): string => {
@@ -42,124 +45,110 @@ export const useMusicLibrary = () => {
       }
     } catch { /* ignore */ }
 
+    const detectCollabFromArtist = (artist: string) => {
+      const a = (artist || '').toLowerCase();
+      return /\bfeat\.?\b|\bft\.?\b|\bfeaturing\b|\bwith\b|&|,/.test(a);
+    };
+
+    const toSong = (r: any, overrides: Partial<Song> = {}): Song => ({
+      id: r.id,
+      slug: r.slug,
+      title: r.title || 'Untitled',
+      artist: r.artist || 'Unknown Artist',
+      album: overrides.album ?? '',
+      duration: formatDuration(r.duration || 180),
+      coverArt: overrides.coverArt ?? getFullImageUrl(r.thumbnail_path),
+      audioSrc: r.file_path || '',
+      playCount: r.play_count ?? 0,
+      likesCount: r.likes_count ?? 0,
+      category: overrides.category ?? r.category ?? 'single',
+      dspLink: r.dsp_link ?? null,
+      isCollab: overrides.isCollab ?? (!!r.is_collaboration || detectCollabFromArtist(r.artist)),
+    });
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        const { data, error: err } = await (supabase as any)
-          .from('songs')
-          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id,hidden,dsp_link,is_collaboration,release_date,created_at')
-          .eq('hidden', false)
-          .order('created_at', { ascending: false })
-          .limit(300);
+
+        // Pull releases + their tracks + song details in one go.
+        const [{ data: releasesData, error: relErr }, { data: songsData, error: songErr }] = await Promise.all([
+          (supabase as any)
+            .from('releases')
+            .select(`id,slug,title,type,primary_artist,cover_path,release_date,sort_order,visibility,
+                     release_tracks(track_number,disc_number,hidden,song:songs(${SONG_FIELDS}))`)
+            .neq('visibility', 'private')
+            .order('sort_order', { ascending: true })
+            .order('release_date', { ascending: false, nullsFirst: false })
+            .limit(200),
+          (supabase as any)
+            .from('songs')
+            .select(SONG_FIELDS)
+            .eq('hidden', false)
+            .order('created_at', { ascending: false })
+            .limit(300),
+        ]);
 
         if (cancelled) return;
-        if (err) throw err;
+        if (relErr) throw relErr;
+        if (songErr) throw songErr;
 
-        const rows: any[] = data ?? [];
-        if (!rows.length) {
-          toast('No songs available right now', { duration: 2000 });
-        }
+        const releases: any[] = releasesData ?? [];
+        const allSongs: any[] = songsData ?? [];
 
-        const detectCollabFromArtist = (artist: string) => {
-          const a = (artist || '').toLowerCase();
-          return /\bfeat\.?\b|\bft\.?\b|\bfeaturing\b|\bwith\b|&|,/.test(a);
-        };
+        const songsOnReleases = new Set<string>();
+        const processed: Album[] = [];
 
-        const toSong = (r: any, overrides: Partial<Song> = {}): Song => ({
-          id: r.id,
-          slug: r.slug,
-          title: r.title || 'Untitled',
-          artist: r.artist || 'Unknown Artist',
-          album: overrides.album ?? '',
-          duration: formatDuration(r.duration || 180),
-          coverArt: overrides.coverArt ?? getFullImageUrl(r.thumbnail_path),
-          audioSrc: r.file_path || '',
-          playCount: r.play_count ?? 0,
-          likesCount: r.likes_count ?? 0,
-          category: r.category || 'single',
-          dspLink: r.dsp_link ?? null,
-          isCollab: !!r.is_collaboration || detectCollabFromArtist(r.artist),
-        });
+        for (const rel of releases) {
+          const tracks = (rel.release_tracks ?? [])
+            .filter((t: any) => t.song && !t.hidden && !t.song.hidden && t.song.file_path)
+            .sort((a: any, b: any) =>
+              (a.disc_number ?? 1) - (b.disc_number ?? 1) ||
+              (a.track_number ?? 0) - (b.track_number ?? 0)
+            );
+          if (!tracks.length) continue;
 
-        // Album / project parent rows
-        // Album / EP / project (legacy) parent rows
-        const parents = rows.filter((r) => {
-          const c = (r.category || '').toLowerCase();
-          return c === 'album' || c === 'ep' || c === 'project';
-        });
+          const firstSong = tracks[0].song;
+          const cover = rel.cover_path
+            ? getFullImageUrl(rel.cover_path)
+            : getFullImageUrl(firstSong?.thumbnail_path);
+          const albumTitle = rel.title || 'Untitled';
+          const relCategory = (rel.type || 'album').toLowerCase();
 
-        const childrenByAlbum = new Map<string, any[]>();
-        rows.forEach((r) => {
-          if (r.album_id) {
-            const arr = childrenByAlbum.get(r.album_id) || [];
-            arr.push(r);
-            childrenByAlbum.set(r.album_id, arr);
-          }
-        });
+          tracks.forEach((t: any) => songsOnReleases.add(t.song.id));
 
-        const processedAlbums: Album[] = [];
-
-        // Real albums/projects from CMS
-        parents.forEach((p) => {
-          const tracks = childrenByAlbum.get(p.id) || [];
-          // Include the parent itself as the title track if it has audio
-          const allTracks = p.file_path ? [p, ...tracks] : tracks;
-          if (!allTracks.length) return;
-          const cover = getFullImageUrl(p.thumbnail_path || tracks[0]?.thumbnail_path);
-          processedAlbums.push({
-            id: p.id,
-            title: p.title || 'Untitled Album',
-            artist: p.artist || 'Unknown Artist',
+          processed.push({
+            id: rel.id,
+            title: albumTitle,
+            artist: rel.primary_artist || firstSong?.artist || 'Unknown Artist',
             coverArt: cover,
-            year: p.release_date ? new Date(p.release_date).getFullYear().toString() : '',
-            songs: allTracks.map((r) => toSong(r, { album: p.title || '', coverArt: cover })),
-          });
-        });
-
-        // Legacy RUSD synthetic album (covers tracks tagged via thumbnail path)
-        const rusdSongs = rows.filter((r) => {
-          const t = (r.thumbnail_path || '').toLowerCase();
-          return t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49');
-        });
-        const rusdAlreadyGrouped = rusdSongs.every((r) => r.album_id && parents.some((p) => p.id === r.album_id));
-        if (rusdSongs.length && !rusdAlreadyGrouped && !parents.some((p) => (p.title || '').toUpperCase() === 'RUSD')) {
-          const cover = '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png';
-          processedAlbums.push({
-            id: 'rusd-album',
-            title: 'RUSD',
-            artist: 'Draii Rynell',
-            coverArt: cover,
-            year: '2023',
-            songs: rusdSongs.map((r) => toSong(r, { album: 'RUSD', coverArt: cover })),
+            year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
+            songs: tracks.map((t: any) =>
+              toSong(t.song, { album: albumTitle, coverArt: cover, category: relCategory })
+            ),
           });
         }
 
-        // Tracks that have no album_id and aren't an album/project parent live as standalone "singles".
-        // Expose them so the Songs/Singles tabs can find them even when no album wraps them.
-        const standaloneSongs = rows.filter((r) => {
-          if (r.album_id) return false;
-          const c = (r.category || 'single').toLowerCase();
-          if (c === 'album' || c === 'ep' || c === 'project') return false;
-          // Skip RUSD legacy songs already covered by the synthetic album above.
-          const t = (r.thumbnail_path || '').toLowerCase();
-          if (t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49')) return false;
-          return true;
-        });
-        if (standaloneSongs.length) {
-          processedAlbums.push({
+        // Orphan songs (not yet attached to any release) — group as a singles pool.
+        const orphans = allSongs.filter((s) => s.file_path && !songsOnReleases.has(s.id));
+        if (orphans.length) {
+          processed.push({
             id: 'singles-pool',
             title: 'Singles',
             artist: 'Various',
-            coverArt: getFullImageUrl(standaloneSongs[0]?.thumbnail_path || ''),
+            coverArt: getFullImageUrl(orphans[0]?.thumbnail_path),
             year: '',
-            songs: standaloneSongs.map((r) => toSong(r)),
+            songs: orphans.map((r) => toSong(r, { category: 'single' })),
           });
         }
 
+        if (!processed.length) {
+          toast('No songs available right now', { duration: 2000 });
+        }
+
         if (cancelled) return;
-        setAlbums(processedAlbums);
+        setAlbums(processed);
         try {
-          sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify({ t: Date.now(), albums: processedAlbums }));
+          sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify({ t: Date.now(), albums: processed }));
         } catch { /* quota */ }
       } catch (e) {
         if (cancelled) return;
