@@ -33,6 +33,7 @@ const Admin: React.FC = () => {
         {tab === 'genres'     && <Genres />}
         {tab === 'analytics'  && <Analytics />}
         {tab === 'revenue'    && <Revenue />}
+        {tab === 'campaigns'  && <Campaigns />}
         {tab === 'events'     && <Events />}
         {tab === 'merch'      && <Merch />}
         {tab === 'mailing'    && <MailingList />}
