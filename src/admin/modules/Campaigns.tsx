@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { toast } from 'sonner';
 import {
   Megaphone, Plus, Trash2, Copy, Download, RefreshCw, ExternalLink,
-  QrCode, Radio, BarChart3, ArrowLeft, Search,
+  Radio, BarChart3, ArrowLeft, Search,
 } from 'lucide-react';
 import {
   Campaign, CampaignEvent, CAMPAIGN_TYPES, DESTINATION_KINDS,
