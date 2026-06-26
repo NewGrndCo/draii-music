@@ -133,15 +133,27 @@ export const useMusicLibrary = () => {
           });
         }
 
-        // "All songs" virtual group so the Songs tab has every visible track
-        processedAlbums.push({
-          id: '__all__',
-          title: 'All Songs',
-          artist: 'Various',
-          coverArt: '',
-          year: '',
-          songs: rows.map((r) => toSong(r)),
+        // Tracks that have no album_id and aren't an album/project parent live as standalone "singles".
+        // Expose them so the Songs/Singles tabs can find them even when no album wraps them.
+        const standaloneSongs = rows.filter((r) => {
+          if (r.album_id) return false;
+          const c = (r.category || 'single').toLowerCase();
+          if (c === 'album' || c === 'project') return false;
+          // Skip RUSD legacy songs already covered by the synthetic album above.
+          const t = (r.thumbnail_path || '').toLowerCase();
+          if (t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49')) return false;
+          return true;
         });
+        if (standaloneSongs.length) {
+          processedAlbums.push({
+            id: 'singles-pool',
+            title: 'Singles',
+            artist: 'Various',
+            coverArt: getFullImageUrl(standaloneSongs[0]?.thumbnail_path || ''),
+            year: '',
+            songs: standaloneSongs.map((r) => toSong(r)),
+          });
+        }
 
         if (cancelled) return;
         setAlbums(processedAlbums);
