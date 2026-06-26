@@ -13,6 +13,7 @@ import {
   coverUrl, RELEASE_TYPES, slugify,
 } from '../lib/musicApi';
 import { adminUploadFile } from '../lib/api';
+import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
