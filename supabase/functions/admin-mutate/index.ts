@@ -54,10 +54,23 @@ const ALLOWED_TABLES = new Set([
   "artist_profile",
   "listens",
   "mailing_list",
+  "release_plans",
   "releases",
+  "release_tracks",
+  "song_artists",
+  "genres",
+  "song_genres",
   "expenses",
   "merch_clicks",
 ]);
+
+const NO_CREATED_AT = new Set(["artist_profile", "song_genres", "release_tracks"]);
+const ORDER_OVERRIDES: Record<string, { col: string; asc: boolean }> = {
+  artist_profile: { col: "updated_at", asc: false },
+  song_genres: { col: "song_id", asc: true },
+  release_tracks: { col: "release_id", asc: true },
+  releases: { col: "created_at", asc: false },
+};
 
 const ALLOWED_BUCKETS = new Set([
   "song-audio",
