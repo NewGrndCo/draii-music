@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, Library, BarChart3, CalendarDays,
+  LayoutDashboard, Music2, Disc3, Users, Tag, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
   Wifi, ChevronLeft, Mail, DollarSign,
 } from 'lucide-react';
@@ -15,7 +15,10 @@ interface Props {
 
 const items = [
   { key: 'dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
-  { key: 'library',     label: 'Library',       icon: Library },
+  { key: 'songs',       label: 'Songs',         icon: Music2 },
+  { key: 'releases',    label: 'Releases',      icon: Disc3 },
+  { key: 'artists',     label: 'Artists',       icon: Users },
+  { key: 'genres',      label: 'Genres',        icon: Tag },
   { key: 'analytics',   label: 'Analytics',     icon: BarChart3 },
   { key: 'revenue',     label: 'Revenue',       icon: DollarSign },
   { key: 'events',      label: 'Events',        icon: CalendarDays },

@@ -54,10 +54,23 @@ const ALLOWED_TABLES = new Set([
   "artist_profile",
   "listens",
   "mailing_list",
+  "release_plans",
   "releases",
+  "release_tracks",
+  "song_artists",
+  "genres",
+  "song_genres",
   "expenses",
   "merch_clicks",
 ]);
+
+const NO_CREATED_AT = new Set(["artist_profile", "song_genres", "release_tracks"]);
+const ORDER_OVERRIDES: Record<string, { col: string; asc: boolean }> = {
+  artist_profile: { col: "updated_at", asc: false },
+  song_genres: { col: "song_id", asc: true },
+  release_tracks: { col: "release_id", asc: true },
+  releases: { col: "created_at", asc: false },
+};
 
 const ALLOWED_BUCKETS = new Set([
   "song-audio",
@@ -82,7 +95,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({} as any));
-    const { token, op, table, payload, id, bucket, path } = body || {};
+    const { token, op, table, payload, id, bucket, path, filter } = body || {};
 
     const ok = await verifyToken(String(token ?? ""), SERVICE_ROLE);
     if (!ok) return json({ error: "Unauthorized" }, 401);
@@ -102,7 +115,7 @@ Deno.serve(async (req) => {
     }
 
     if (op === "stats") {
-      const [songs, events, merch, donations, listens, mailing, releases, expenses, clicks] = await Promise.all([
+      const [songs, events, merch, donations, listens, mailing, plans, expenses, clicks] = await Promise.all([
         sb.from("songs").select("id, title, artist, thumbnail_path, play_count, likes_count, support_fund_cents"),
         sb.from("events").select("id, status, event_date"),
         sb.from("merch").select("id, name, image_url, price_cents, stock, active"),
@@ -120,22 +133,93 @@ Deno.serve(async (req) => {
         donations: donations.data ?? [],
         listens: listens.data ?? [],
         mailing: mailing.data ?? [],
-        releases: releases.data ?? [],
+        releases: plans.data ?? [],
         expenses: expenses.data ?? [],
         merch_clicks: clicks.data ?? [],
       });
     }
 
-    // Generic table ops
+    // ---- Composite-PK ops for the music graph ----
+
+    if (op === "release_tracks.list") {
+      const release_id = String(payload?.release_id || "");
+      if (!release_id) return json({ error: "Missing release_id" }, 400);
+      const { data, error } = await sb
+        .from("release_tracks")
+        .select("release_id, song_id, track_number, disc_number, hidden, songs(id, title, artist, duration, thumbnail_path, file_path, play_count, likes_count)")
+        .eq("release_id", release_id)
+        .order("disc_number", { ascending: true })
+        .order("track_number", { ascending: true });
+      if (error) return json({ error: error.message }, 400);
+      return json({ data });
+    }
+
+    if (op === "release_tracks.upsert") {
+      const rows = Array.isArray(payload?.rows) ? payload.rows : null;
+      if (!rows) return json({ error: "Missing rows" }, 400);
+      const { data, error } = await sb.from("release_tracks").upsert(rows, { onConflict: "release_id,song_id" }).select();
+      if (error) return json({ error: error.message }, 400);
+      return json({ data });
+    }
+
+    if (op === "release_tracks.remove") {
+      const release_id = String(payload?.release_id || "");
+      const song_id = String(payload?.song_id || "");
+      if (!release_id || !song_id) return json({ error: "Missing ids" }, 400);
+      const { error } = await sb.from("release_tracks").delete().eq("release_id", release_id).eq("song_id", song_id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (op === "release_tracks.reorder") {
+      // payload.rows: [{release_id, song_id, track_number, disc_number}]
+      const rows = Array.isArray(payload?.rows) ? payload.rows : null;
+      if (!rows) return json({ error: "Missing rows" }, 400);
+      // Two-pass to avoid unique(release_id,disc_number,track_number) collisions:
+      // first move all to negative track numbers, then to final values.
+      const tempRows = rows.map((r: any, i: number) => ({ ...r, track_number: -1 * (i + 1) }));
+      const t1 = await sb.from("release_tracks").upsert(tempRows, { onConflict: "release_id,song_id" });
+      if (t1.error) return json({ error: t1.error.message }, 400);
+      const t2 = await sb.from("release_tracks").upsert(rows, { onConflict: "release_id,song_id" });
+      if (t2.error) return json({ error: t2.error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (op === "song_artists.list") {
+      const song_id = String(payload?.song_id || "");
+      if (!song_id) return json({ error: "Missing song_id" }, 400);
+      const { data, error } = await sb.from("song_artists").select("*").eq("song_id", song_id).order("sort_order");
+      if (error) return json({ error: error.message }, 400);
+      return json({ data });
+    }
+
+    if (op === "song_genres.set") {
+      const song_id = String(payload?.song_id || "");
+      const genre_ids: string[] = Array.isArray(payload?.genre_ids) ? payload.genre_ids : [];
+      if (!song_id) return json({ error: "Missing song_id" }, 400);
+      const del = await sb.from("song_genres").delete().eq("song_id", song_id);
+      if (del.error) return json({ error: del.error.message }, 400);
+      if (genre_ids.length) {
+        const ins = await sb.from("song_genres").insert(genre_ids.map((g) => ({ song_id, genre_id: g })));
+        if (ins.error) return json({ error: ins.error.message }, 400);
+      }
+      return json({ ok: true });
+    }
+
+    // ---- Generic table ops ----
     if (!ALLOWED_TABLES.has(String(table))) return json({ error: "Bad table" }, 400);
 
     if (op === "list") {
-      // artist_profile has no created_at column
-      const orderCol = table === "artist_profile" ? "updated_at" : "created_at";
-      const { data, error } = await sb.from(table).select("*").order(orderCol, { ascending: false });
+      const override = ORDER_OVERRIDES[String(table)];
+      const orderCol = override?.col ?? "created_at";
+      const ascending = override?.asc ?? false;
+      let q = sb.from(table).select("*").order(orderCol, { ascending });
+      if (filter && typeof filter === "object") {
+        for (const [k, v] of Object.entries(filter)) q = q.eq(k, v as any);
+      }
+      const { data, error } = await q;
       if (error) return json({ error: error.message }, 400);
 
-      // Auto-seed a default artist_profile row so the Settings page always works
       if (table === "artist_profile" && (!data || data.length === 0)) {
         const { data: created, error: insErr } = await sb
           .from("artist_profile")

@@ -2,7 +2,10 @@ import React, { useState, lazy, Suspense } from 'react';
 import AdminLayout from '@/admin/AdminLayout';
 
 const Dashboard   = lazy(() => import('@/admin/modules/Dashboard'));
-const Library     = lazy(() => import('@/admin/modules/Library'));
+const Songs       = lazy(() => import('@/admin/modules/Songs'));
+const Releases    = lazy(() => import('@/admin/modules/Releases'));
+const Artists     = lazy(() => import('@/admin/modules/Artists'));
+const Genres      = lazy(() => import('@/admin/modules/Genres'));
 const Analytics   = lazy(() => import('@/admin/modules/Analytics'));
 const Events      = lazy(() => import('@/admin/modules/Events'));
 const Merch       = lazy(() => import('@/admin/modules/Merch'));
@@ -23,7 +26,10 @@ const Admin: React.FC = () => {
     <AdminLayout active={tab} onChange={setTab}>
       <Suspense fallback={<Fallback />}>
         {tab === 'dashboard'  && <Dashboard />}
-        {tab === 'library'    && <Library />}
+        {tab === 'songs'      && <Songs />}
+        {tab === 'releases'   && <Releases />}
+        {tab === 'artists'    && <Artists />}
+        {tab === 'genres'     && <Genres />}
         {tab === 'analytics'  && <Analytics />}
         {tab === 'revenue'    && <Revenue />}
         {tab === 'events'     && <Events />}
