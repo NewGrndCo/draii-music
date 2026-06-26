@@ -27,7 +27,7 @@ const DialogsContainer: React.FC = () => {
     window.history.replaceState({}, '', url);
   }, [albums, loading, openLibrary, handleSelectSong]);
 
-  if (!showLibrary) return null;
+  if (!showLibrary) return <></>;
 
   return (
     <Suspense fallback={null}>
