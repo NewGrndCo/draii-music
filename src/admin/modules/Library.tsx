@@ -562,10 +562,18 @@ const BulkUploader: React.FC<{ onUploaded: () => void; albumOptions: { id: strin
                 {items.map((it, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center bg-white/[0.03] rounded-lg p-2 text-sm">
                     <div className="col-span-12 md:col-span-3 truncate text-white/80 text-xs">{it.file.name}</div>
-                    <Input value={it.title} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x))} placeholder="Title" className="col-span-6 md:col-span-3 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <Input value={it.artist} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, artist: e.target.value } : x))} placeholder="Artist" className="col-span-6 md:col-span-3 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <Input value={it.genre} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, genre: e.target.value } : x))} placeholder="Genre" className="col-span-8 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <div className="col-span-4 md:col-span-1 text-right">
+                    <Input value={it.title} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x))} placeholder="Title" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <Input value={it.artist} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, artist: e.target.value } : x))} placeholder="Artist" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <Input value={it.genre} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, genre: e.target.value } : x))} placeholder="Genre" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <select
+                      value={it.albumId}
+                      onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, albumId: e.target.value } : x))}
+                      className="col-span-6 md:col-span-2 h-8 bg-white/5 border border-white/10 rounded-md px-2 text-xs text-white"
+                    >
+                      <option value="">No album</option>
+                      {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                    </select>
+                    <div className="col-span-12 md:col-span-1 text-right">
                       {it.status === 'pending' && <Plus className="h-4 w-4 ml-auto text-white/40" />}
                       {it.status === 'uploading' && <Loader2 className="h-4 w-4 ml-auto animate-spin text-purple-300" />}
                       {it.status === 'done' && <span className="text-xs text-emerald-300">Done</span>}
