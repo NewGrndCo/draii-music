@@ -68,6 +68,128 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_events: {
+        Row: {
+          browser: string | null
+          campaign_id: string
+          city: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          id: string
+          ip: string | null
+          is_unique: boolean
+          latitude: number | null
+          longitude: number | null
+          os: string | null
+          referral_method: string | null
+          region: string | null
+          response_ms: number | null
+          session_id: string | null
+          user_agent: string | null
+          visitor_hash: string | null
+        }
+        Insert: {
+          browser?: string | null
+          campaign_id: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip?: string | null
+          is_unique?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          os?: string | null
+          referral_method?: string | null
+          region?: string | null
+          response_ms?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          visitor_hash?: string | null
+        }
+        Update: {
+          browser?: string | null
+          campaign_id?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip?: string | null
+          is_unique?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          os?: string | null
+          referral_method?: string | null
+          region?: string | null
+          response_ms?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          visitor_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          budget_cents: number | null
+          code: string
+          created_at: string
+          destination_id: string | null
+          destination_kind: string
+          destination_url: string | null
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          start_date: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          budget_cents?: number | null
+          code: string
+          created_at?: string
+          destination_id?: string | null
+          destination_kind?: string
+          destination_url?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          budget_cents?: number | null
+          code?: string
+          created_at?: string
+          destination_id?: string | null
+          destination_kind?: string
+          destination_url?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount_cents: number

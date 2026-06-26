@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Music2, Disc3, Users, Tag, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
-  Wifi, ChevronLeft, Mail, DollarSign,
+  Wifi, ChevronLeft, Mail, DollarSign, Megaphone,
 } from 'lucide-react';
 import { ADMIN_TOKEN_KEY } from './lib/api';
 
@@ -21,6 +21,7 @@ const items = [
   { key: 'genres',      label: 'Genres',        icon: Tag },
   { key: 'analytics',   label: 'Analytics',     icon: BarChart3 },
   { key: 'revenue',     label: 'Revenue',       icon: DollarSign },
+  { key: 'campaigns',   label: 'Campaigns',     icon: Megaphone },
   { key: 'events',      label: 'Events',        icon: CalendarDays },
   { key: 'merch',       label: 'Merch',         icon: ShoppingBag },
   { key: 'mailing',     label: 'Mailing',       icon: Mail },

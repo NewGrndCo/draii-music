@@ -13,6 +13,7 @@ import AdminGuard from './components/AdminGuard';
 const Admin = lazy(() => import('./pages/Admin'));
 const MailingListModal = lazy(() => import('./components/MailingListModal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const CampaignRedirect = lazy(() => import('./pages/CampaignRedirect'));
 
 const App = () => {
   const { currentSong } = useAudio();
@@ -26,6 +27,11 @@ const App = () => {
             <Route path="/admin" element={
               <Suspense fallback={<div className="min-h-screen bg-black" />}>
                 <AdminGuard><Admin /></AdminGuard>
+              </Suspense>
+            } />
+            <Route path="/c/:code" element={
+              <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <CampaignRedirect />
               </Suspense>
             } />
             <Route path="/" element={
