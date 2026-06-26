@@ -178,6 +178,27 @@ export type Database = {
         }
         Relationships: []
       }
+      genres: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       listens: {
         Row: {
           city: string | null
@@ -345,7 +366,7 @@ export type Database = {
           },
         ]
       }
-      releases: {
+      release_plans: {
         Row: {
           cover_url: string | null
           created_at: string
@@ -381,25 +402,194 @@ export type Database = {
         }
         Relationships: []
       }
+      release_tracks: {
+        Row: {
+          created_at: string
+          disc_number: number
+          hidden: boolean
+          release_id: string
+          song_id: string
+          track_number: number
+        }
+        Insert: {
+          created_at?: string
+          disc_number?: number
+          hidden?: boolean
+          release_id: string
+          song_id: string
+          track_number?: number
+        }
+        Update: {
+          created_at?: string
+          disc_number?: number
+          hidden?: boolean
+          release_id?: string
+          song_id?: string
+          track_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_tracks_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_tracks_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      releases: {
+        Row: {
+          copyright: string | null
+          cover_path: string | null
+          created_at: string
+          description: string | null
+          id: string
+          label: string | null
+          primary_artist: string
+          release_date: string | null
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["release_status"]
+          title: string
+          type: Database["public"]["Enums"]["release_type"]
+          upc: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["release_visibility"]
+        }
+        Insert: {
+          copyright?: string | null
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string | null
+          primary_artist: string
+          release_date?: string | null
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["release_status"]
+          title: string
+          type?: Database["public"]["Enums"]["release_type"]
+          upc?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["release_visibility"]
+        }
+        Update: {
+          copyright?: string | null
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string | null
+          primary_artist?: string
+          release_date?: string | null
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["release_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["release_type"]
+          upc?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["release_visibility"]
+        }
+        Relationships: []
+      }
+      song_artists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          role: Database["public"]["Enums"]["artist_role"]
+          song_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          role?: Database["public"]["Enums"]["artist_role"]
+          song_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          role?: Database["public"]["Enums"]["artist_role"]
+          song_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_artists_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      song_genres: {
+        Row: {
+          genre_id: string
+          song_id: string
+        }
+        Insert: {
+          genre_id: string
+          song_id: string
+        }
+        Update: {
+          genre_id?: string
+          song_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_genres_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "genres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "song_genres_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       songs: {
         Row: {
           album_id: string | null
           artist: string | null
           bpm: number | null
           category: string | null
+          composer: string | null
           created_at: string
           description: string | null
           dsp_link: string | null
           duration: number | null
+          explicit: boolean
           file_path: string | null
           genre: string | null
           guest_artists: string[]
           hidden: boolean
           id: string
           is_collaboration: boolean
+          isrc: string | null
           likes_count: number | null
+          lyrics: string | null
           play_count: number | null
           preview_path: string | null
+          producer: string | null
           release_date: string | null
           slug: string | null
           status: string | null
@@ -415,19 +605,24 @@ export type Database = {
           artist?: string | null
           bpm?: number | null
           category?: string | null
+          composer?: string | null
           created_at?: string
           description?: string | null
           dsp_link?: string | null
           duration?: number | null
+          explicit?: boolean
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
           hidden?: boolean
           id: string
           is_collaboration?: boolean
+          isrc?: string | null
           likes_count?: number | null
+          lyrics?: string | null
           play_count?: number | null
           preview_path?: string | null
+          producer?: string | null
           release_date?: string | null
           slug?: string | null
           status?: string | null
@@ -443,19 +638,24 @@ export type Database = {
           artist?: string | null
           bpm?: number | null
           category?: string | null
+          composer?: string | null
           created_at?: string
           description?: string | null
           dsp_link?: string | null
           duration?: number | null
+          explicit?: boolean
           file_path?: string | null
           genre?: string | null
           guest_artists?: string[]
           hidden?: boolean
           id?: string
           is_collaboration?: boolean
+          isrc?: string | null
           likes_count?: number | null
+          lyrics?: string | null
           play_count?: number | null
           preview_path?: string | null
+          producer?: string | null
           release_date?: string | null
           slug?: string | null
           status?: string | null
@@ -476,7 +676,16 @@ export type Database = {
       slugify: { Args: { input: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      artist_role: "primary" | "featured" | "producer" | "composer" | "remixer"
+      release_status: "draft" | "scheduled" | "published" | "archived"
+      release_type:
+        | "single"
+        | "ep"
+        | "album"
+        | "compilation"
+        | "collaboration"
+        | "mixtape"
+      release_visibility: "public" | "unlisted" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -603,6 +812,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      artist_role: ["primary", "featured", "producer", "composer", "remixer"],
+      release_status: ["draft", "scheduled", "published", "archived"],
+      release_type: [
+        "single",
+        "ep",
+        "album",
+        "compilation",
+        "collaboration",
+        "mixtape",
+      ],
+      release_visibility: ["public", "unlisted", "private"],
+    },
   },
 } as const
