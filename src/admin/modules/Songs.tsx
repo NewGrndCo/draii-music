@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Search, Pencil, Trash2, Music2, EyeOff, Eye, Upload, X } from 'lucide-react';
+import { Loader2, Search, Pencil, Trash2, Music2, EyeOff, Eye, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { listTable, updateRow, deleteRow, insertRow, coverUrl } from '../lib/musicApi';
-import { adminUploadFile } from '../lib/api';
+import { listTable, updateRow, deleteRow, coverUrl } from '../lib/musicApi';
 import BulkUploader from '../components/BulkUploader';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 
