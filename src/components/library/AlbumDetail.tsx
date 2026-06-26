@@ -1,7 +1,9 @@
 import React from 'react';
 import { Album, Song } from '../../data/musicData';
-import { Play, Shuffle } from 'lucide-react';
+import { Play, Shuffle, Share2 } from 'lucide-react';
 import AppleStyleSongRow from './AppleStyleSongRow';
+import { copyToClipboard } from '../../utils/shareUtils';
+import { toast } from 'sonner';
 
 interface AlbumDetailProps {
   album: Album;
@@ -19,6 +21,21 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
   const shuffle = () => {
     if (!tracks.length) return;
     onSelectSong(tracks[Math.floor(Math.random() * tracks.length)]);
+  };
+
+  const share = async () => {
+    const key = album.slug || album.id;
+    const url = `${window.location.origin}?a=${encodeURIComponent(key)}`;
+    const data = { title: album.title, text: `${album.title} — ${album.artist}`, url };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else { await copyToClipboard(url); toast.success('Album link copied'); }
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') {
+        await copyToClipboard(url);
+        toast.success('Album link copied');
+      }
+    }
   };
 
   const metaParts = ['ALBUM'];
@@ -64,6 +81,13 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
                 className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-4 py-1.5 rounded-full border border-white/15 hover:bg-white/15 transition-colors disabled:opacity-40"
               >
                 <Shuffle size={12} /> Shuffle
+              </button>
+              <button
+                onClick={share}
+                aria-label="Share album"
+                className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-4 py-1.5 rounded-full border border-white/15 hover:bg-white/15 transition-colors"
+              >
+                <Share2 size={12} /> Share
               </button>
             </div>
           </div>
