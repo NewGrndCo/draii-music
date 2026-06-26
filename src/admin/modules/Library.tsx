@@ -352,7 +352,7 @@ const EditSongDialog: React.FC<{ song: Song; albumOptions: { id: string; label: 
             <Field label="Category">
               <select value={d.category ?? 'single'} onChange={(e) => setD({ ...d, category: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
-                <option value="single">Single</option><option value="project">Project / EP</option><option value="album">Album</option>
+                <option value="single">Single</option><option value="ep">EP</option><option value="album">Album</option>
               </select>
             </Field>
             <Field label="Release date">
