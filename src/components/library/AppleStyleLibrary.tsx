@@ -23,30 +23,37 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: 'recent', label: 'Recently Added', icon: Clock },
 ];
 
-const detectCollab = (s: Song) => {
-  if (s.isCollab) return true;
-  const a = (s.artist || '').toLowerCase();
-  return /\bfeat\b|\bfeat\.\b|\bft\b|\bft\.\b|\bfeaturing\b|\bwith\b|&|,/.test(a);
-};
-
 const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isVisible }) => {
   const [tab, setTab] = useState<Tab>('songs');
   const [query, setQuery] = useState('');
   const [openAlbum, setOpenAlbum] = useState<Album | null>(null);
 
-  const allSongs = useMemo(() => albums.flatMap((a) => a.songs || []), [albums]);
+  // Flatten all songs across albums + standalone pool, dedup by id.
+  const allSongs = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Song[] = [];
+    for (const a of albums) {
+      for (const s of a.songs || []) {
+        if (seen.has(s.id)) continue;
+        seen.add(s.id);
+        out.push(s);
+      }
+    }
+    return out;
+  }, [albums]);
 
-  // Real albums only — synthetic per-artist "Collection" groups are excluded from the album grid.
+  // Album cards = real albums/projects only (exclude the singles aggregator).
   const realAlbums = useMemo(
-    () => albums.filter((a) => !a.id.startsWith('singles-') && a.id !== 'collaborations'),
+    () => albums.filter((a) => a.id !== 'singles-pool'),
     [albums]
   );
 
+  // Singles = explicitly flagged as single in the CMS and not part of an album/collab.
   const singles = useMemo(
-    () => allSongs.filter((s) => !detectCollab(s)),
+    () => allSongs.filter((s) => (s.category || 'single').toLowerCase() === 'single' && !s.isCollab),
     [allSongs]
   );
-  const collabs = useMemo(() => allSongs.filter(detectCollab), [allSongs]);
+  const collabs = useMemo(() => allSongs.filter((s) => !!s.isCollab), [allSongs]);
 
   const filtered = (list: Song[]) => {
     const q = query.trim().toLowerCase();

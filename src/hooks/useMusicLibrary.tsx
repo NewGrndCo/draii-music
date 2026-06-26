@@ -3,24 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Song, Album } from '../data/musicData';
 import { toast } from 'sonner';
 
-// Deterministic hash → integer for stable per-song counts
-const hashString = (input: string): number => {
-  let hash = 5381;
-  for (let i = 0; i < input.length; i++) {
-    hash = ((hash << 5) + hash) ^ input.charCodeAt(i);
-  }
-  return Math.abs(hash);
-};
-
-const stablePlayCount = (id: string) => 50 + (hashString(`plays:${id}`) % 1000);
-const stableLikesCount = (id: string) => 10 + (hashString(`likes:${id}`) % 200);
-
-// Audio + thumbnail files live in the legacy storage bucket
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
-// Session-scoped cache to avoid refetching the catalog on every mount/route change.
-const LIBRARY_CACHE_KEY = 'music-library-cache-v3';
-const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const LIBRARY_CACHE_KEY = 'music-library-cache-v4';
+const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const useMusicLibrary = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -36,15 +22,14 @@ export const useMusicLibrary = () => {
 
   const formatDuration = useCallback((seconds: number): string => {
     if (!seconds || isNaN(seconds)) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }, []);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Serve from session cache when fresh — prevents repeat egress on remount.
     try {
       const raw = sessionStorage.getItem(LIBRARY_CACHE_KEY);
       if (raw) {
@@ -55,122 +40,118 @@ export const useMusicLibrary = () => {
           return () => { cancelled = true; };
         }
       }
-    } catch { /* ignore cache errors */ }
+    } catch { /* ignore */ }
 
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // Egress optimization: select only the columns the player actually uses,
-        // and cap the row count to stay well under Supabase free-tier limits.
-        const { data: songsData, error: songsError } = await (supabase as any)
+        const { data, error: err } = await (supabase as any)
           .from('songs')
-          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id,hidden,dsp_link')
+          .select('id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,album_id,hidden,dsp_link,is_collaboration,release_date,created_at')
           .eq('hidden', false)
           .order('created_at', { ascending: false })
-          .limit(200);
+          .limit(300);
 
         if (cancelled) return;
-        if (songsError) throw songsError;
+        if (err) throw err;
 
-        if (!songsData || songsData.length === 0) {
-          console.warn('No songs found in the database');
+        const rows: any[] = data ?? [];
+        if (!rows.length) {
           toast('No songs available right now', { duration: 2000 });
         }
 
-        const artistGroups: Record<string, any[]> = {};
-        const rusdSongs: any[] = [];
+        const detectCollabFromArtist = (artist: string) => {
+          const a = (artist || '').toLowerCase();
+          return /\bfeat\.?\b|\bft\.?\b|\bfeaturing\b|\bwith\b|&|,/.test(a);
+        };
 
-        (songsData ?? []).forEach((song: any) => {
-          const artist = song.artist?.split(/&|feat\.|ft\.|with|,/)[0].trim() || 'Unknown Artist';
-          const thumbnailPath = song.thumbnail_path || '';
-          if (
-            thumbnailPath.toLowerCase().includes('rusd') ||
-            thumbnailPath.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49')
-          ) {
-            rusdSongs.push(song);
-          } else {
-            if (!artistGroups[artist]) artistGroups[artist] = [];
-            artistGroups[artist].push(song);
+        const toSong = (r: any, overrides: Partial<Song> = {}): Song => ({
+          id: r.id,
+          slug: r.slug,
+          title: r.title || 'Untitled',
+          artist: r.artist || 'Unknown Artist',
+          album: overrides.album ?? '',
+          duration: formatDuration(r.duration || 180),
+          coverArt: overrides.coverArt ?? getFullImageUrl(r.thumbnail_path),
+          audioSrc: r.file_path || '',
+          playCount: r.play_count ?? 0,
+          likesCount: r.likes_count ?? 0,
+          category: r.category || 'single',
+          dspLink: r.dsp_link ?? null,
+          isCollab: !!r.is_collaboration || detectCollabFromArtist(r.artist),
+        });
+
+        // Album / project parent rows
+        const parents = rows.filter((r) => {
+          const c = (r.category || '').toLowerCase();
+          return c === 'album' || c === 'project';
+        });
+
+        const childrenByAlbum = new Map<string, any[]>();
+        rows.forEach((r) => {
+          if (r.album_id) {
+            const arr = childrenByAlbum.get(r.album_id) || [];
+            arr.push(r);
+            childrenByAlbum.set(r.album_id, arr);
           }
         });
 
         const processedAlbums: Album[] = [];
 
-        if (rusdSongs.length > 0) {
+        // Real albums/projects from CMS
+        parents.forEach((p) => {
+          const tracks = childrenByAlbum.get(p.id) || [];
+          // Include the parent itself as the title track if it has audio
+          const allTracks = p.file_path ? [p, ...tracks] : tracks;
+          if (!allTracks.length) return;
+          const cover = getFullImageUrl(p.thumbnail_path || tracks[0]?.thumbnail_path);
+          processedAlbums.push({
+            id: p.id,
+            title: p.title || 'Untitled Album',
+            artist: p.artist || 'Unknown Artist',
+            coverArt: cover,
+            year: p.release_date ? new Date(p.release_date).getFullYear().toString() : '',
+            songs: allTracks.map((r) => toSong(r, { album: p.title || '', coverArt: cover })),
+          });
+        });
+
+        // Legacy RUSD synthetic album (covers tracks tagged via thumbnail path)
+        const rusdSongs = rows.filter((r) => {
+          const t = (r.thumbnail_path || '').toLowerCase();
+          return t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49');
+        });
+        const rusdAlreadyGrouped = rusdSongs.every((r) => r.album_id && parents.some((p) => p.id === r.album_id));
+        if (rusdSongs.length && !rusdAlreadyGrouped && !parents.some((p) => (p.title || '').toUpperCase() === 'RUSD')) {
+          const cover = '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png';
           processedAlbums.push({
             id: 'rusd-album',
             title: 'RUSD',
             artist: 'Draii Rynell',
-            coverArt: '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png',
+            coverArt: cover,
             year: '2023',
-            songs: rusdSongs.map((song: any) => ({
-              id: song.id,
-              slug: song.slug,
-              title: song.title || 'Untitled',
-              artist: song.artist || 'Draii Rynell',
-              album: 'RUSD',
-              duration: formatDuration(song.duration || 180),
-              coverArt: '/lovable-uploads/a73e2069-fe62-49c6-b32f-cc97e9d58b49.png',
-              audioSrc: song.file_path || '',
-              playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null,
-            })),
+            songs: rusdSongs.map((r) => toSong(r, { album: 'RUSD', coverArt: cover })),
           });
         }
 
-        Object.entries(artistGroups).forEach(([artist, songs]) => {
-          const firstValidThumb = songs[0]?.thumbnail_path || '';
-          const albumCoverPath = getFullImageUrl(firstValidThumb);
-
-          processedAlbums.push({
-            id: `singles-${artist}`,
-            title: `${artist} Collection`,
-            artist,
-            coverArt: albumCoverPath,
-            year: '2023',
-            songs: songs.map((song: any) => ({
-              id: song.id,
-              slug: song.slug,
-              title: song.title || 'Untitled',
-              artist: song.artist || 'Unknown Artist',
-              album: `${artist} Collection`,
-              duration: formatDuration(song.duration || 180),
-              coverArt: getFullImageUrl(song.thumbnail_path),
-              audioSrc: song.file_path || '',
-              playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null,
-            })),
-          });
+        // Tracks that have no album_id and aren't an album/project parent live as standalone "singles".
+        // Expose them so the Songs/Singles tabs can find them even when no album wraps them.
+        const standaloneSongs = rows.filter((r) => {
+          if (r.album_id) return false;
+          const c = (r.category || 'single').toLowerCase();
+          if (c === 'album' || c === 'project') return false;
+          // Skip RUSD legacy songs already covered by the synthetic album above.
+          const t = (r.thumbnail_path || '').toLowerCase();
+          if (t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49')) return false;
+          return true;
         });
-
-        const collabSongs = (songsData ?? []).filter((song: any) =>
-          song.artist?.toLowerCase().includes('ft') ||
-          song.artist?.includes('&') ||
-          song.artist?.includes(',') ||
-          song.artist?.toLowerCase().includes('feat') ||
-          song.artist?.toLowerCase().includes('with')
-        );
-
-        if (collabSongs.length > 0) {
+        if (standaloneSongs.length) {
           processedAlbums.push({
-            id: 'collaborations',
-            title: 'Collaborations',
-            artist: 'Various Artists',
-            coverArt: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500',
-            year: '2023',
-            songs: collabSongs.map((song: any) => ({
-              id: song.id,
-              slug: song.slug,
-              title: song.title || 'Untitled',
-              artist: song.artist || 'Unknown Artist',
-              album: 'Collaborations',
-              duration: formatDuration(song.duration || 180),
-              coverArt: getFullImageUrl(song.thumbnail_path),
-              audioSrc: song.file_path || '',
-              playCount: song.play_count ?? 0,
-              likesCount: song.likes_count ?? 0, category: song.category, dspLink: song.dsp_link ?? null, isCollab: true,
-            })),
+            id: 'singles-pool',
+            title: 'Singles',
+            artist: 'Various',
+            coverArt: getFullImageUrl(standaloneSongs[0]?.thumbnail_path || ''),
+            year: '',
+            songs: standaloneSongs.map((r) => toSong(r)),
           });
         }
 
@@ -178,10 +159,10 @@ export const useMusicLibrary = () => {
         setAlbums(processedAlbums);
         try {
           sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify({ t: Date.now(), albums: processedAlbums }));
-        } catch { /* quota — safe to ignore */ }
-      } catch (err) {
+        } catch { /* quota */ }
+      } catch (e) {
         if (cancelled) return;
-        console.error('Error fetching music library:', err);
+        console.error('Error fetching music library:', e);
         setError('Failed to load music library');
         toast.error("Couldn't load your music", { duration: 2000 });
       } finally {
