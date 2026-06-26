@@ -12,6 +12,7 @@ const Merch       = lazy(() => import('@/admin/modules/Merch'));
 const Settings    = lazy(() => import('@/admin/modules/Settings'));
 const MailingList = lazy(() => import('@/admin/modules/MailingList'));
 const Revenue     = lazy(() => import('@/admin/modules/Revenue'));
+const Campaigns   = lazy(() => import('@/admin/modules/Campaigns'));
 
 const Fallback = () => (
   <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">
