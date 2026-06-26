@@ -265,6 +265,9 @@ const Library: React.FC = () => {
                   className="w-full flex items-center gap-2 px-4 py-3 hover:bg-white/[0.03] transition text-left">
                   {isCollapsed ? <ChevronRight className="h-4 w-4 text-white/45" /> : <ChevronDown className="h-4 w-4 text-white/45" />}
                   <h3 className="font-display text-sm font-semibold text-white/85">{groupName}</h3>
+                  {groupTypeFor(groupName) && (
+                    <span className="text-[10px] uppercase tracking-widest text-white/40 border border-white/10 rounded-full px-1.5">{groupTypeFor(groupName)}</span>
+                  )}
                   <span className="text-xs text-white/45">{rows.length}</span>
                   <span
                     role="button"
