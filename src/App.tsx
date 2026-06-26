@@ -13,6 +13,7 @@ import AdminGuard from './components/AdminGuard';
 const Admin = lazy(() => import('./pages/Admin'));
 const MailingListModal = lazy(() => import('./components/MailingListModal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const CampaignRedirect = lazy(() => import('./pages/CampaignRedirect'));
 
 const App = () => {
   const { currentSong } = useAudio();
