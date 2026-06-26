@@ -13,6 +13,7 @@ import {
   coverUrl, RELEASE_TYPES, slugify,
 } from '../lib/musicApi';
 import { adminUploadFile } from '../lib/api';
+import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
@@ -188,6 +189,7 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
       };
       const u = await updateRow<Release>('releases', release.id, patch);
       onSaved(u);
+      invalidateMusicLibraryCache();
       toast.success('Saved');
     } catch (e: any) { toast.error(e.message); }
     finally { setSaving(false); }

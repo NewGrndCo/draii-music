@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Search, Pencil, Trash2, Music2, EyeOff, Eye, Upload, X } from 'lucide-react';
+import { Loader2, Search, Pencil, Trash2, Music2, EyeOff, Eye, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { listTable, updateRow, deleteRow, insertRow, coverUrl } from '../lib/musicApi';
-import { adminUploadFile } from '../lib/api';
+import { listTable, updateRow, deleteRow, coverUrl } from '../lib/musicApi';
+import BulkUploader from '../components/BulkUploader';
+import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 
 interface SongRow {
   id: string;
@@ -145,8 +146,8 @@ const Songs: React.FC = () => {
         </div>
       )}
 
-      {edit && <SongEditor song={edit} onClose={() => setEdit(null)} onSaved={(u) => { setSongs((p) => p.map((s) => s.id === u.id ? { ...s, ...u } : s)); setEdit(null); }} />}
-      {uploadOpen && <SongUploader onClose={() => setUploadOpen(false)} onUploaded={(row) => { setSongs((p) => [row, ...p]); setUploadOpen(false); }} />}
+      {edit && <SongEditor song={edit} onClose={() => setEdit(null)} onSaved={(u) => { setSongs((p) => p.map((s) => s.id === u.id ? { ...s, ...u } : s)); setEdit(null); invalidateMusicLibraryCache(); }} />}
+      {uploadOpen && <BulkUploader onClose={() => setUploadOpen(false)} onDone={() => { setUploadOpen(false); invalidateMusicLibraryCache(); refresh(); }} />}
     </div>
   );
 };
@@ -215,51 +216,5 @@ const Lbl: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
     <div className="[&_input]:bg-white/5 [&_input]:border-white/10 [&_input]:text-white">{children}</div>
   </label>
 );
-
-const SongUploader: React.FC<{ onClose: () => void; onUploaded: (s: SongRow) => void }> = ({ onClose, onUploaded }) => {
-  const [title, setTitle] = useState('');
-  const [artist, setArtist] = useState('');
-  const [audio, setAudio] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  const submit = async () => {
-    if (!title || !artist || !audio) { toast.error('Title, artist, and audio file are required'); return; }
-    setUploading(true);
-    try {
-      const ext = audio.name.split('.').pop() || 'mp3';
-      const path = `tracks/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-      const publicUrl = await adminUploadFile('song-audio', path, audio);
-      const row = await insertRow<SongRow>('songs', {
-        title, artist, file_path: publicUrl, duration: 0,
-      });
-      onUploaded(row);
-      toast.success('Uploaded');
-    } catch (e: any) { toast.error(e.message); }
-    finally { setUploading(false); }
-  };
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md bg-black/85 border-white/10 text-white">
-        <DialogHeader><DialogTitle>Upload Song</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <Lbl label="Title"><Input value={title} onChange={(e) => setTitle(e.target.value)} /></Lbl>
-          <Lbl label="Primary Artist"><Input value={artist} onChange={(e) => setArtist(e.target.value)} /></Lbl>
-          <Lbl label="Audio file">
-            <Input type="file" accept="audio/*" onChange={(e) => setAudio(e.target.files?.[0] || null)} />
-          </Lbl>
-          <p className="text-[11px] text-white/45">Add cover art by attaching this song to a release.</p>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={uploading}><X className="h-4 w-4 mr-1" /> Cancel</Button>
-          <Button onClick={submit} disabled={uploading} className="admin-gradient-bg">
-            {uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
-            Upload
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 export default Songs;

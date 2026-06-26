@@ -5,8 +5,12 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v8';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v9';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
+
+export const invalidateMusicLibraryCache = () => {
+  try { sessionStorage.removeItem(LIBRARY_CACHE_KEY); } catch { /* ignore */ }
+};
 
 const SONG_FIELDS =
   'id,slug,title,artist,duration,file_path,thumbnail_path,play_count,likes_count,category,hidden,dsp_link,is_collaboration,release_date,created_at';
