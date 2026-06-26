@@ -42,9 +42,14 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
     return out;
   }, [albums]);
 
-  // Albums tab = real albums/projects only (exclude virtual singles aggregator).
+  // Albums tab = real albums/EPs only (exclude singles + virtual pool).
   const realAlbums = useMemo(
-    () => albums.filter((a) => a.id !== 'singles-pool' && (a.songs?.length || 0) > 0),
+    () => albums.filter((a) => {
+      if (a.id === 'singles-pool') return false;
+      if (!(a.songs?.length)) return false;
+      const cat = (a.songs[0]?.category || '').toLowerCase();
+      return cat === 'album' || cat === 'ep';
+    }),
     [albums]
   );
 
