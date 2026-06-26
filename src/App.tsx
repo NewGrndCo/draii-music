@@ -29,6 +29,11 @@ const App = () => {
                 <AdminGuard><Admin /></AdminGuard>
               </Suspense>
             } />
+            <Route path="/c/:code" element={
+              <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <CampaignRedirect />
+              </Suspense>
+            } />
             <Route path="/" element={
               <AppBackground currentSong={currentSong}>
                 <Suspense fallback={null}><MailingListModal /></Suspense>
