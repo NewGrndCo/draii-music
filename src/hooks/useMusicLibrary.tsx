@@ -3,9 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Song, Album } from '../data/musicData';
 import { toast } from 'sonner';
 
-const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
+const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v7';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v8';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const SONG_FIELDS =
