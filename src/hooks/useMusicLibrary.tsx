@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v5';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v6';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const useMusicLibrary = () => {
@@ -82,9 +82,10 @@ export const useMusicLibrary = () => {
         });
 
         // Album / project parent rows
+        // Album / EP / project (legacy) parent rows
         const parents = rows.filter((r) => {
           const c = (r.category || '').toLowerCase();
-          return c === 'album' || c === 'project';
+          return c === 'album' || c === 'ep' || c === 'project';
         });
 
         const childrenByAlbum = new Map<string, any[]>();
@@ -138,7 +139,7 @@ export const useMusicLibrary = () => {
         const standaloneSongs = rows.filter((r) => {
           if (r.album_id) return false;
           const c = (r.category || 'single').toLowerCase();
-          if (c === 'album' || c === 'project') return false;
+          if (c === 'album' || c === 'ep' || c === 'project') return false;
           // Skip RUSD legacy songs already covered by the synthetic album above.
           const t = (r.thumbnail_path || '').toLowerCase();
           if (t.includes('rusd') || t.includes('a73e2069-fe62-49c6-b32f-cc97e9d58b49')) return false;
