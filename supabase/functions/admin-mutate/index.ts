@@ -62,6 +62,8 @@ const ALLOWED_TABLES = new Set([
   "song_genres",
   "expenses",
   "merch_clicks",
+  "campaigns",
+  "campaign_events",
 ]);
 
 const NO_CREATED_AT = new Set(["artist_profile", "song_genres", "release_tracks"]);
