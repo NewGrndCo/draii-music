@@ -28,21 +28,23 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   const [query, setQuery] = useState('');
   const [openAlbum, setOpenAlbum] = useState<Album | null>(null);
 
-  // Use the dedicated "All Songs" virtual album when present; fall back to flattening.
+  // Flatten all songs across albums + standalone pool, dedup by id.
   const allSongs = useMemo(() => {
-    const all = albums.find((a) => a.id === '__all__');
-    if (all) return all.songs;
     const seen = new Set<string>();
-    return albums.flatMap((a) => a.songs).filter((s) => {
-      if (seen.has(s.id)) return false;
-      seen.add(s.id);
-      return true;
-    });
+    const out: Song[] = [];
+    for (const a of albums) {
+      for (const s of a.songs || []) {
+        if (seen.has(s.id)) continue;
+        seen.add(s.id);
+        out.push(s);
+      }
+    }
+    return out;
   }, [albums]);
 
-  // Real albums = anything except the virtual __all__ aggregator.
+  // Album cards = real albums/projects only (exclude the singles aggregator).
   const realAlbums = useMemo(
-    () => albums.filter((a) => a.id !== '__all__'),
+    () => albums.filter((a) => a.id !== 'singles-pool'),
     [albums]
   );
 
