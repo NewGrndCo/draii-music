@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { listTable, updateRow, deleteRow, insertRow, coverUrl } from '../lib/musicApi';
 import { adminUploadFile } from '../lib/api';
+import BulkUploader from '../components/BulkUploader';
+import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 
 interface SongRow {
   id: string;
