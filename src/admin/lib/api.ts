@@ -13,7 +13,8 @@ export type AdminTable =
   | 'artist_profile' | 'listens' | 'mailing_list'
   | 'release_plans' | 'releases' | 'release_tracks'
   | 'song_artists' | 'genres' | 'song_genres'
-  | 'expenses' | 'merch_clicks';
+  | 'expenses' | 'merch_clicks'
+  | 'campaigns' | 'campaign_events';
 
 interface AdminCallArgs {
   op: AdminOp;
