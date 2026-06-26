@@ -561,4 +561,217 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
   );
 };
 
+// ─── Album & EP manager ───────────────────────────────────────────────────────
+type AlbumShell = {
+  id: string;
+  title: string;
+  artist: string;
+  category: 'album' | 'ep';
+  thumbnail_path: string | null;
+  release_date: string | null;
+  trackCount: number;
+};
+
+const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ songs, onChanged }) => {
+  const [open, setOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<AlbumShell | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  // Shells = parent rows without an audio file (legacy 'project' shown as EP).
+  const shells: AlbumShell[] = useMemo(() => {
+    const childCount = new Map<string, number>();
+    songs.forEach((s) => {
+      if (s.album_id) childCount.set(s.album_id, (childCount.get(s.album_id) ?? 0) + 1);
+    });
+    return songs
+      .filter((s) => {
+        const c = (s.category || '').toLowerCase();
+        return (c === 'album' || c === 'ep' || c === 'project') && !s.file_path;
+      })
+      .map((s) => {
+        const raw = (s.category || 'album').toLowerCase();
+        const category: 'album' | 'ep' = raw === 'album' ? 'album' : 'ep';
+        return {
+          id: s.id,
+          title: s.title || 'Untitled',
+          artist: s.artist || '',
+          category,
+          thumbnail_path: s.thumbnail_path,
+          release_date: s.release_date,
+          trackCount: childCount.get(s.id) ?? 0,
+        };
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [songs]);
+
+  const remove = async (shell: AlbumShell) => {
+    if (shell.trackCount > 0) {
+      if (!confirm(`"${shell.title}" still has ${shell.trackCount} tracks assigned. Delete anyway? (Tracks won't be deleted — they'll just lose their album link.)`)) return;
+    } else if (!confirm(`Delete "${shell.title}"?`)) return;
+    try {
+      await adminDelete('songs', shell.id);
+      toast.success('Deleted');
+      onChanged();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  return (
+    <div className="admin-glass rounded-2xl">
+      <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.03]">
+        <div className="flex items-center gap-2">
+          <Music2 className="h-4 w-4 text-purple-300" />
+          <span className="font-display text-sm font-semibold">Albums & EPs</span>
+          <span className="text-xs text-white/55">· {shells.length}</span>
+        </div>
+        {open ? <ChevronDown className="h-4 w-4 text-white/45" /> : <ChevronRight className="h-4 w-4 text-white/45" />}
+      </button>
+
+      {open && (
+        <div className="p-3 md:p-4 pt-0 space-y-3">
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-white/55">Create album/EP shells (cover + title). Then go to your tracks, select them, and use Batch edit → Set album/EP to attach them. Tracks inherit the cover automatically on the front-end.</p>
+            <Button size="sm" onClick={() => setCreating(true)} className="admin-gradient-bg text-white border-0 shrink-0 ml-3">
+              <Plus className="h-4 w-4 mr-1" />New
+            </Button>
+          </div>
+
+          {shells.length === 0 ? (
+            <div className="text-sm text-white/45 text-center py-6">No albums or EPs yet. Click <span className="text-white/75">New</span> to create one.</div>
+          ) : (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {shells.map((shell) => {
+                const cover = coverUrl(shell.thumbnail_path);
+                return (
+                  <li key={shell.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition">
+                    <div className="h-12 w-12 rounded-md overflow-hidden bg-white/[0.04] shrink-0">
+                      {cover ? <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Music2 className="h-4 w-4 text-white/30 m-auto h-full" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-white font-medium truncate">{shell.title}</div>
+                      <div className="text-xs text-white/55 flex items-center gap-2">
+                        <span className="uppercase tracking-wide">{shell.category}</span>
+                        <span>·</span>
+                        <span>{shell.trackCount} track{shell.trackCount === 1 ? '' : 's'}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => setEditTarget(shell)} title="Edit" className="h-8 w-8 flex items-center justify-center rounded-md text-white/65 hover:text-white hover:bg-white/5"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => remove(shell)} title="Delete" className="h-8 w-8 flex items-center justify-center rounded-md text-rose-300/70 hover:text-rose-200 hover:bg-rose-500/10"><Trash2 className="h-4 w-4" /></button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {(creating || editTarget) && (
+        <AlbumEditorDialog
+          target={editTarget}
+          onClose={() => { setCreating(false); setEditTarget(null); }}
+          onSaved={() => { setCreating(false); setEditTarget(null); onChanged(); }}
+        />
+      )}
+    </div>
+  );
+};
+
+const AlbumEditorDialog: React.FC<{
+  target: AlbumShell | null;
+  onClose: () => void;
+  onSaved: () => void;
+}> = ({ target, onClose, onSaved }) => {
+  const [title, setTitle] = useState(target?.title ?? '');
+  const [artist, setArtist] = useState(target?.artist ?? 'Draii Rynell');
+  const [category, setCategory] = useState<'album' | 'ep'>(target?.category ?? 'album');
+  const [releaseDate, setReleaseDate] = useState((target?.release_date ?? '').toString().slice(0, 10));
+  const [coverPath, setCoverPath] = useState<string | null>(target?.thumbnail_path ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const onPickFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!/image\//.test(file.type)) { toast.error('Pick an image file'); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `albums/${crypto.randomUUID()}.${ext}`;
+      const publicUrl = await adminUploadFile('song-art', path, file);
+      setCoverPath(publicUrl);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setUploading(false); }
+  };
+
+  const save = async () => {
+    if (!title.trim()) { toast.error('Title required'); return; }
+    setSaving(true);
+    try {
+      const payload: any = {
+        title: title.trim(),
+        artist: artist.trim() || 'Unknown Artist',
+        category,
+        thumbnail_path: coverPath || null,
+        release_date: releaseDate || null,
+      };
+      if (target) {
+        await adminUpdate('songs', target.id, payload);
+        toast.success('Album updated');
+      } else {
+        await adminInsert('songs', { id: crypto.randomUUID(), ...payload, status: 'published', visibility: 'published' });
+        toast.success('Album created');
+      }
+      onSaved();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="bg-zinc-950 border-white/10 text-white max-w-md">
+        <DialogHeader><DialogTitle>{target ? 'Edit' : 'New'} album / EP</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="h-24 w-24 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center hover:border-white/25 transition"
+            >
+              {uploading ? <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+                : coverPath ? <img src={coverUrl(coverPath)} alt="" className="h-full w-full object-cover" />
+                : <Upload className="h-5 w-5 text-white/40" />}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => onPickFile(e.target.files?.[0] ?? undefined)} />
+            <div className="text-xs text-white/55">Click the square to {coverPath ? 'change' : 'upload'} cover art. This image is used for the album and inherited by all its tracks on the front-end.</div>
+          </div>
+          <Field label="Title">
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+          </Field>
+          <Field label="Artist">
+            <Input value={artist} onChange={(e) => setArtist(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Type">
+              <select value={category} onChange={(e) => setCategory(e.target.value as 'album' | 'ep')}
+                className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+                <option value="album">Album</option>
+                <option value="ep">EP</option>
+              </select>
+            </Field>
+            <Field label="Release date">
+              <Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+            </Field>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} className="text-white/70">Cancel</Button>
+          <Button onClick={save} disabled={saving || uploading} className="admin-gradient-bg text-white border-0">
+            {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}{target ? 'Save' : 'Create'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default Library;
