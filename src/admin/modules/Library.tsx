@@ -82,15 +82,35 @@ const Library: React.FC = () => {
     });
   }, [songs, q, filter]);
 
-  // Group by category for visual organization
+  // Build a lookup of album shells (id → { title, type }) so tracks can be
+  // grouped under the actual album name instead of a generic bucket.
+  const albumLookup = useMemo(() => {
+    const m = new Map<string, { title: string; type: 'ALBUM' | 'EP' }>();
+    songs.forEach((s) => {
+      const c = (s.category || '').toLowerCase();
+      if ((c === 'album' || c === 'ep' || c === 'project') && !s.file_path) {
+        m.set(s.id, { title: s.title || 'Untitled', type: c === 'album' ? 'ALBUM' : 'EP' });
+      }
+    });
+    return m;
+  }, [songs]);
+
   const groups = useMemo(() => {
     const map = new Map<string, Song[]>();
     filtered.forEach((s) => {
-      const key = s.hidden ? 'Hidden' : ((s.category || 'single').toLowerCase() === 'single' ? 'Singles' : 'Projects & Albums');
+      let key: string;
+      if (s.hidden) key = 'Hidden';
+      else if (s.album_id && albumLookup.has(s.album_id)) key = albumLookup.get(s.album_id)!.title;
+      else key = (s.category || 'single').toLowerCase() === 'single' ? 'Singles' : 'Projects & Albums';
       const arr = map.get(key) || []; arr.push(s); map.set(key, arr);
     });
     return Array.from(map.entries());
-  }, [filtered]);
+  }, [filtered, albumLookup]);
+
+  const groupTypeFor = (name: string): 'ALBUM' | 'EP' | null => {
+    for (const v of albumLookup.values()) if (v.title === name) return v.type;
+    return null;
+  };
 
   // Album/EP "shells" — parent rows with no audio file. These are the only valid
   // album_id targets so the picker isn't polluted by every track that was tagged
