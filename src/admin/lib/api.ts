@@ -11,7 +11,9 @@ type AdminOp =
 export type AdminTable =
   | 'songs' | 'events' | 'merch' | 'donations'
   | 'artist_profile' | 'listens' | 'mailing_list'
-  | 'releases' | 'expenses' | 'merch_clicks';
+  | 'release_plans' | 'releases' | 'release_tracks'
+  | 'song_artists' | 'genres' | 'song_genres'
+  | 'expenses' | 'merch_clicks';
 
 interface AdminCallArgs {
   op: AdminOp;
