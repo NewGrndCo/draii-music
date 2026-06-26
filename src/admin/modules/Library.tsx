@@ -92,11 +92,20 @@ const Library: React.FC = () => {
     return Array.from(map.entries());
   }, [filtered]);
 
-  // Albums/projects available for the album_id picker
+  // Album/EP "shells" — parent rows with no audio file. These are the only valid
+  // album_id targets so the picker isn't polluted by every track that was tagged
+  // "album". Backwards compatible: legacy 'project' category is treated as 'ep'.
   const albumOptions = useMemo(
     () => songs
-      .filter((s) => (s.category || 'single').toLowerCase() !== 'single')
-      .map((s) => ({ id: s.id, label: `${s.title || 'Untitled'} · ${s.category}` })),
+      .filter((s) => {
+        const c = (s.category || '').toLowerCase();
+        return (c === 'album' || c === 'ep' || c === 'project') && !s.file_path;
+      })
+      .map((s) => {
+        const c = (s.category || '').toLowerCase();
+        const tag = c === 'album' ? 'Album' : 'EP';
+        return { id: s.id, label: `${s.title || 'Untitled'} · ${tag}` };
+      }),
     [songs],
   );
 
