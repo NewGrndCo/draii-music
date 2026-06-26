@@ -169,6 +169,7 @@ const Library: React.FC = () => {
       <audio ref={audioRef} onEnded={() => setPreviewId(null)} className="hidden" preload="none" />
 
       <AlbumManager songs={songs} onChanged={refresh} />
+      <BulkUploader onUploaded={refresh} />
 
       {/* Toolbar */}
       <div className="admin-glass rounded-2xl p-3 md:p-4 sticky top-12 z-10 backdrop-blur">
