@@ -11,6 +11,7 @@ interface Props {
   onSelectSong: (song: Song) => void;
   onClose: () => void;
   isVisible: boolean;
+  initialAlbumSlug?: string | null;
 }
 
 type Tab = 'songs' | 'albums' | 'singles' | 'collabs' | 'recent';
@@ -23,10 +24,17 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'recent', label: 'Recently Played' },
 ];
 
-const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isVisible }) => {
+const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isVisible, initialAlbumSlug }) => {
   const [tab, setTab] = useState<Tab>('albums');
   const [query, setQuery] = useState('');
   const [openAlbum, setOpenAlbum] = useState<Album | null>(null);
+
+  // Auto-open an album when arriving via a shared link (?a=<slug>).
+  React.useEffect(() => {
+    if (!isVisible || !initialAlbumSlug || openAlbum) return;
+    const match = albums.find((a) => a.slug === initialAlbumSlug || a.id === initialAlbumSlug);
+    if (match) setOpenAlbum(match);
+  }, [isVisible, initialAlbumSlug, albums, openAlbum]);
 
   // Flatten all songs across albums + standalone pool, dedup by id.
   const allSongs = useMemo(() => {
