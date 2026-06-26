@@ -82,15 +82,35 @@ const Library: React.FC = () => {
     });
   }, [songs, q, filter]);
 
-  // Group by category for visual organization
+  // Build a lookup of album shells (id → { title, type }) so tracks can be
+  // grouped under the actual album name instead of a generic bucket.
+  const albumLookup = useMemo(() => {
+    const m = new Map<string, { title: string; type: 'ALBUM' | 'EP' }>();
+    songs.forEach((s) => {
+      const c = (s.category || '').toLowerCase();
+      if ((c === 'album' || c === 'ep' || c === 'project') && !s.file_path) {
+        m.set(s.id, { title: s.title || 'Untitled', type: c === 'album' ? 'ALBUM' : 'EP' });
+      }
+    });
+    return m;
+  }, [songs]);
+
   const groups = useMemo(() => {
     const map = new Map<string, Song[]>();
     filtered.forEach((s) => {
-      const key = s.hidden ? 'Hidden' : ((s.category || 'single').toLowerCase() === 'single' ? 'Singles' : 'Projects & Albums');
+      let key: string;
+      if (s.hidden) key = 'Hidden';
+      else if (s.album_id && albumLookup.has(s.album_id)) key = albumLookup.get(s.album_id)!.title;
+      else key = (s.category || 'single').toLowerCase() === 'single' ? 'Singles' : 'Projects & Albums';
       const arr = map.get(key) || []; arr.push(s); map.set(key, arr);
     });
     return Array.from(map.entries());
-  }, [filtered]);
+  }, [filtered, albumLookup]);
+
+  const groupTypeFor = (name: string): 'ALBUM' | 'EP' | null => {
+    for (const v of albumLookup.values()) if (v.title === name) return v.type;
+    return null;
+  };
 
   // Album/EP "shells" — parent rows with no audio file. These are the only valid
   // album_id targets so the picker isn't polluted by every track that was tagged
@@ -169,7 +189,7 @@ const Library: React.FC = () => {
       <audio ref={audioRef} onEnded={() => setPreviewId(null)} className="hidden" preload="none" />
 
       <AlbumManager songs={songs} onChanged={refresh} />
-      <BulkUploader onUploaded={refresh} />
+      <BulkUploader onUploaded={refresh} albumOptions={albumOptions} />
 
       {/* Toolbar */}
       <div className="admin-glass rounded-2xl p-3 md:p-4 sticky top-12 z-10 backdrop-blur">
@@ -245,6 +265,9 @@ const Library: React.FC = () => {
                   className="w-full flex items-center gap-2 px-4 py-3 hover:bg-white/[0.03] transition text-left">
                   {isCollapsed ? <ChevronRight className="h-4 w-4 text-white/45" /> : <ChevronDown className="h-4 w-4 text-white/45" />}
                   <h3 className="font-display text-sm font-semibold text-white/85">{groupName}</h3>
+                  {groupTypeFor(groupName) && (
+                    <span className="text-[10px] uppercase tracking-widest text-white/40 border border-white/10 rounded-full px-1.5">{groupTypeFor(groupName)}</span>
+                  )}
                   <span className="text-xs text-white/45">{rows.length}</span>
                   <span
                     role="button"
@@ -474,8 +497,8 @@ const BatchEditDialog: React.FC<{ ids: string[]; albumOptions: { id: string; lab
 };
 
 // ─── Bulk uploader (unchanged behavior, kept compact) ─────────────────────────
-const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
-  const [items, setItems] = useState<{ file: File; title: string; artist: string; genre: string; status: 'pending' | 'uploading' | 'done' | 'error'; err?: string }[]>([]);
+const BulkUploader: React.FC<{ onUploaded: () => void; albumOptions: { id: string; label: string }[] }> = ({ onUploaded, albumOptions }) => {
+  const [items, setItems] = useState<{ file: File; title: string; artist: string; genre: string; albumId: string; status: 'pending' | 'uploading' | 'done' | 'error'; err?: string }[]>([]);
   const [drag, setDrag] = useState(false);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -483,7 +506,7 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
   const addFiles = (files: FileList | File[]) => {
     const arr = Array.from(files).filter((f) => /audio\/(mpeg|wav|x-wav|mp3)/i.test(f.type) || /\.(mp3|wav)$/i.test(f.name));
     if (!arr.length) { toast.error('Only MP3 and WAV files'); return; }
-    setItems((prev) => [...prev, ...arr.map((file) => ({ file, title: file.name.replace(/\.[^.]+$/, ''), artist: 'Draii Rynell', genre: 'R&B/Soul', status: 'pending' as const }))]);
+    setItems((prev) => [...prev, ...arr.map((file) => ({ file, title: file.name.replace(/\.[^.]+$/, ''), artist: 'Draii Rynell', genre: 'R&B/Soul', albumId: '', status: 'pending' as const }))]);
     setOpen(true);
   };
 
@@ -498,6 +521,7 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
         await adminInsert('songs', {
           id: crypto.randomUUID(), title: it.title, artist: it.artist, genre: it.genre,
           file_path: publicUrl, status: 'published', visibility: 'published', category: 'single',
+          album_id: it.albumId || null,
         });
         setItems((prev) => prev.map((x, idx) => idx === i ? { ...x, status: 'done' } : x));
       } catch (e: any) {
@@ -538,10 +562,18 @@ const BulkUploader: React.FC<{ onUploaded: () => void }> = ({ onUploaded }) => {
                 {items.map((it, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center bg-white/[0.03] rounded-lg p-2 text-sm">
                     <div className="col-span-12 md:col-span-3 truncate text-white/80 text-xs">{it.file.name}</div>
-                    <Input value={it.title} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x))} placeholder="Title" className="col-span-6 md:col-span-3 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <Input value={it.artist} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, artist: e.target.value } : x))} placeholder="Artist" className="col-span-6 md:col-span-3 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <Input value={it.genre} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, genre: e.target.value } : x))} placeholder="Genre" className="col-span-8 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
-                    <div className="col-span-4 md:col-span-1 text-right">
+                    <Input value={it.title} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x))} placeholder="Title" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <Input value={it.artist} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, artist: e.target.value } : x))} placeholder="Artist" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <Input value={it.genre} onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, genre: e.target.value } : x))} placeholder="Genre" className="col-span-6 md:col-span-2 h-8 bg-white/5 border-white/10 text-white text-xs" />
+                    <select
+                      value={it.albumId}
+                      onChange={(e) => setItems((p) => p.map((x, idx) => idx === i ? { ...x, albumId: e.target.value } : x))}
+                      className="col-span-6 md:col-span-2 h-8 bg-white/5 border border-white/10 rounded-md px-2 text-xs text-white"
+                    >
+                      <option value="">No album</option>
+                      {albumOptions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                    </select>
+                    <div className="col-span-12 md:col-span-1 text-right">
                       {it.status === 'pending' && <Plus className="h-4 w-4 ml-auto text-white/40" />}
                       {it.status === 'uploading' && <Loader2 className="h-4 w-4 ml-auto animate-spin text-purple-300" />}
                       {it.status === 'done' && <span className="text-xs text-emerald-300">Done</span>}
@@ -574,8 +606,8 @@ type AlbumShell = {
 
 const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ songs, onChanged }) => {
   const [open, setOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<AlbumShell | null>(null);
   const [creating, setCreating] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   // Shells = parent rows without an audio file (legacy 'project' shown as EP).
   const shells: AlbumShell[] = useMemo(() => {
@@ -611,6 +643,7 @@ const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ song
     try {
       await adminDelete('songs', shell.id);
       toast.success('Deleted');
+      if (expanded === shell.id) setExpanded(null);
       onChanged();
     } catch (e: any) { toast.error(e.message); }
   };
@@ -629,7 +662,7 @@ const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ song
       {open && (
         <div className="p-3 md:p-4 pt-0 space-y-3">
           <div className="flex justify-between items-center">
-            <p className="text-xs text-white/55">Create album/EP shells (cover + title). Then go to your tracks, select them, and use Batch edit → Set album/EP to attach them. Tracks inherit the cover automatically on the front-end.</p>
+            <p className="text-xs text-white/55">Tap any album to edit it and manage its tracks inline.</p>
             <Button size="sm" onClick={() => setCreating(true)} className="admin-gradient-bg text-white border-0 shrink-0 ml-3">
               <Plus className="h-4 w-4 mr-1" />New
             </Button>
@@ -638,24 +671,43 @@ const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ song
           {shells.length === 0 ? (
             <div className="text-sm text-white/45 text-center py-6">No albums or EPs yet. Click <span className="text-white/75">New</span> to create one.</div>
           ) : (
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <ul className="space-y-2">
               {shells.map((shell) => {
                 const cover = coverUrl(shell.thumbnail_path);
+                const isExpanded = expanded === shell.id;
                 return (
-                  <li key={shell.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition">
-                    <div className="h-12 w-12 rounded-md overflow-hidden bg-white/[0.04] shrink-0">
-                      {cover ? <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Music2 className="h-4 w-4 text-white/30 m-auto h-full" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-white font-medium truncate">{shell.title}</div>
-                      <div className="text-xs text-white/55 flex items-center gap-2">
-                        <span className="uppercase tracking-wide">{shell.category}</span>
-                        <span>·</span>
-                        <span>{shell.trackCount} track{shell.trackCount === 1 ? '' : 's'}</span>
+                  <li key={shell.id} className="rounded-lg bg-white/[0.03] border border-white/5 overflow-hidden">
+                    <button
+                      onClick={() => setExpanded(isExpanded ? null : shell.id)}
+                      className="w-full flex items-center gap-3 p-2 text-left hover:bg-white/[0.04] transition-colors"
+                    >
+                      <div className="h-12 w-12 rounded-md overflow-hidden bg-white/[0.04] shrink-0 flex items-center justify-center">
+                        {cover ? <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Music2 className="h-4 w-4 text-white/30" />}
                       </div>
-                    </div>
-                    <button onClick={() => setEditTarget(shell)} title="Edit" className="h-8 w-8 flex items-center justify-center rounded-md text-white/65 hover:text-white hover:bg-white/5"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => remove(shell)} title="Delete" className="h-8 w-8 flex items-center justify-center rounded-md text-rose-300/70 hover:text-rose-200 hover:bg-rose-500/10"><Trash2 className="h-4 w-4" /></button>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm text-white font-medium truncate">{shell.title}</div>
+                        <div className="text-xs text-white/55 flex items-center gap-2">
+                          <span className="uppercase tracking-wide">{shell.category}</span>
+                          <span>·</span>
+                          <span>{shell.trackCount} track{shell.trackCount === 1 ? '' : 's'}</span>
+                        </div>
+                      </div>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); remove(shell); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); remove(shell); } }}
+                        title="Delete"
+                        className="h-8 w-8 flex items-center justify-center rounded-md text-rose-300/70 hover:text-rose-200 hover:bg-rose-500/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </span>
+                      {isExpanded ? <ChevronDown className="h-4 w-4 text-white/45" /> : <ChevronRight className="h-4 w-4 text-white/45" />}
+                    </button>
+
+                    {isExpanded && (
+                      <AlbumTracksPanel shell={shell} songs={songs} onChanged={onChanged} />
+                    )}
                   </li>
                 );
               })}
@@ -664,16 +716,203 @@ const AlbumManager: React.FC<{ songs: Song[]; onChanged: () => void }> = ({ song
         </div>
       )}
 
-      {(creating || editTarget) && (
+      {creating && (
         <AlbumEditorDialog
-          target={editTarget}
-          onClose={() => { setCreating(false); setEditTarget(null); }}
-          onSaved={() => { setCreating(false); setEditTarget(null); onChanged(); }}
+          target={null}
+          onClose={() => setCreating(false)}
+          onSaved={() => { setCreating(false); onChanged(); }}
         />
       )}
     </div>
   );
 };
+
+// ─── Inline album editor + track manager ─────────────────────────────────────
+const AlbumTracksPanel: React.FC<{ shell: AlbumShell; songs: Song[]; onChanged: () => void }> = ({ shell, songs, onChanged }) => {
+  const [title, setTitle] = useState(shell.title);
+  const [artist, setArtist] = useState(shell.artist || 'Draii Rynell');
+  const [category, setCategory] = useState<'album' | 'ep'>(shell.category);
+  const [releaseDate, setReleaseDate] = useState((shell.release_date ?? '').toString().slice(0, 10));
+  const [coverPath, setCoverPath] = useState<string | null>(shell.thumbnail_path);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Reset local state when the underlying shell changes (e.g. after a refresh)
+  useEffect(() => {
+    setTitle(shell.title);
+    setArtist(shell.artist || 'Draii Rynell');
+    setCategory(shell.category);
+    setReleaseDate((shell.release_date ?? '').toString().slice(0, 10));
+    setCoverPath(shell.thumbnail_path);
+  }, [shell]);
+
+  const tracksInAlbum = useMemo(
+    () => songs.filter((s) => s.album_id === shell.id),
+    [songs, shell.id],
+  );
+
+  const availableTracks = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return songs.filter((s) => {
+      if (s.album_id) return false;
+      if (!s.file_path) return false;
+      if (!needle) return false;
+      return (s.title || '').toLowerCase().includes(needle) || (s.artist || '').toLowerCase().includes(needle);
+    }).slice(0, 8);
+  }, [songs, search]);
+
+  const onPickFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!/image\//.test(file.type)) { toast.error('Pick an image file'); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `albums/${crypto.randomUUID()}.${ext}`;
+      const publicUrl = await adminUploadFile('song-art', path, file);
+      setCoverPath(publicUrl);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setUploading(false); }
+  };
+
+  const save = async () => {
+    if (!title.trim()) { toast.error('Title required'); return; }
+    setSaving(true);
+    try {
+      await adminUpdate('songs', shell.id, {
+        title: title.trim(),
+        artist: artist.trim() || 'Unknown Artist',
+        category,
+        thumbnail_path: coverPath || null,
+        release_date: releaseDate || null,
+      });
+      toast.success('Album updated');
+      onChanged();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  };
+
+  const addTrack = async (songId: string) => {
+    try {
+      await adminUpdate('songs', songId, { album_id: shell.id });
+      toast.success('Track added');
+      setSearch('');
+      onChanged();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const removeTrack = async (songId: string) => {
+    try {
+      await adminUpdate('songs', songId, { album_id: null });
+      toast.success('Track removed');
+      onChanged();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  return (
+    <div className="border-t border-white/5 p-3 md:p-4 space-y-4 bg-black/20">
+      {/* Editor */}
+      <div className="grid grid-cols-12 gap-3">
+        <div className="col-span-12 md:col-span-3 flex items-start gap-3">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="h-24 w-24 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center hover:border-white/25 transition-colors"
+          >
+            {uploading ? <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+              : coverPath ? <img src={coverUrl(coverPath)} alt="" className="h-full w-full object-cover" />
+              : <Upload className="h-5 w-5 text-white/40" />}
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden"
+            onChange={(e) => onPickFile(e.target.files?.[0] ?? undefined)} />
+        </div>
+        <div className="col-span-12 md:col-span-9 grid grid-cols-2 gap-3">
+          <Field label="Title">
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+          </Field>
+          <Field label="Artist">
+            <Input value={artist} onChange={(e) => setArtist(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+          </Field>
+          <Field label="Type">
+            <select value={category} onChange={(e) => setCategory(e.target.value as 'album' | 'ep')}
+              className="w-full bg-white/5 border border-white/10 rounded-md h-9 px-2 text-sm text-white">
+              <option value="album">Album</option>
+              <option value="ep">EP</option>
+            </select>
+          </Field>
+          <Field label="Release date">
+            <Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+          </Field>
+          <div className="col-span-2 flex justify-end">
+            <Button onClick={save} disabled={saving || uploading} size="sm" className="admin-gradient-bg text-white border-0">
+              {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}Save album
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tracks list */}
+      <div>
+        <div className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Tracks in this album · {tracksInAlbum.length}</div>
+        {tracksInAlbum.length === 0 ? (
+          <div className="text-xs text-white/45 py-3">No tracks yet. Search below to add some.</div>
+        ) : (
+          <ul className="space-y-1">
+            {tracksInAlbum.map((s) => (
+              <li key={s.id} className="flex items-center gap-3 p-1.5 rounded-md bg-white/[0.03] border border-white/5">
+                <div className="h-10 w-10 rounded overflow-hidden bg-white/[0.04] shrink-0">
+                  {s.thumbnail_path ? <img src={coverUrl(s.thumbnail_path)} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Music2 className="h-3 w-3 text-white/30 m-auto h-full" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-white truncate">{s.title || 'Untitled'}</div>
+                  <div className="text-[11px] text-white/55 truncate">{s.artist || 'Unknown'} · {(s.play_count ?? 0).toLocaleString()} plays</div>
+                </div>
+                <button onClick={() => removeTrack(s.id)} title="Remove from album"
+                  className="h-7 w-7 flex items-center justify-center rounded-md text-rose-300/70 hover:text-rose-200 hover:bg-rose-500/10">
+                  <X className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Add track */}
+      <div>
+        <div className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Add track</div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search unassigned tracks by title or artist…"
+            className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9" />
+        </div>
+        {search.trim() && (
+          <ul className="mt-2 space-y-1 max-h-64 overflow-y-auto">
+            {availableTracks.length === 0 ? (
+              <li className="text-xs text-white/45 py-2 px-1">No unassigned tracks match.</li>
+            ) : availableTracks.map((s) => (
+              <li key={s.id}>
+                <button onClick={() => addTrack(s.id)}
+                  className="w-full flex items-center gap-3 p-1.5 rounded-md bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 text-left transition-colors">
+                  <div className="h-9 w-9 rounded overflow-hidden bg-white/[0.04] shrink-0">
+                    {s.thumbnail_path ? <img src={coverUrl(s.thumbnail_path)} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Music2 className="h-3 w-3 text-white/30 m-auto h-full" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs text-white truncate">{s.title || 'Untitled'}</div>
+                    <div className="text-[11px] text-white/55 truncate">{s.artist || 'Unknown'}</div>
+                  </div>
+                  <Plus className="h-4 w-4 text-purple-300" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
 
 const AlbumEditorDialog: React.FC<{
   target: AlbumShell | null;
