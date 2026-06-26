@@ -78,21 +78,31 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
 
   if (!isVisible) return null;
 
-  const AlbumRow: React.FC<{ album: Album }> = ({ album }) => (
-    <button
-      onClick={() => setOpenAlbum(album)}
-      className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-white/[0.06] transition-colors text-left border-b border-white/5 last:border-b-0"
-    >
-      <div className="h-14 w-14 rounded-md overflow-hidden bg-white/[0.04] shrink-0">
-        <img src={album.coverArt} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[15px] font-semibold text-white truncate">{album.title}</div>
-        <div className="text-xs text-white/55 truncate">{album.artist}{album.year ? ` · ${album.year}` : ''}</div>
-      </div>
-      <ChevronRight size={18} className="text-white/35 shrink-0" />
-    </button>
-  );
+  const AlbumCard: React.FC<{ album: Album }> = ({ album }) => {
+    const trackCount = album.songs?.length || 0;
+    return (
+      <button
+        onClick={() => setOpenAlbum(album)}
+        className="group text-left flex flex-col gap-2 focus:outline-none"
+      >
+        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white/[0.04] shadow-lg ring-1 ring-white/5 group-hover:ring-white/15 transition">
+          <img
+            src={album.coverArt}
+            alt={album.title}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+          />
+        </div>
+        <div className="min-w-0 px-0.5">
+          <div className="text-sm font-semibold text-white truncate">{album.title}</div>
+          <div className="text-[10px] text-white/55 uppercase tracking-widest truncate">
+            ALBUM · {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
+          </div>
+        </div>
+      </button>
+    );
+  };
 
   const songsView = (list: Song[]) => (
     <div className="space-y-0.5">
@@ -107,11 +117,13 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   );
 
   const albumsView = (
-    <div className="space-y-0">
+    <div>
       {filteredAlbums.length === 0 ? (
         <div className="text-sm text-white/45 px-3 py-12 text-center">No albums yet</div>
       ) : (
-        filteredAlbums.map((a) => <AlbumRow key={a.id} album={a} />)
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 px-1 pt-1">
+          {filteredAlbums.map((a) => <AlbumCard key={a.id} album={a} />)}
+        </div>
       )}
     </div>
   );
