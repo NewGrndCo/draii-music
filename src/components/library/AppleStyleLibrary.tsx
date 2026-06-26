@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Album, Song } from '../../data/musicData';
-import { Search, X, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Search, X, ArrowLeft } from 'lucide-react';
 import AppleStyleSongRow from './AppleStyleSongRow';
 import AlbumDetail from './AlbumDetail';
 import { ScrollArea } from '../ui/scroll-area';
