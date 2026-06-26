@@ -92,7 +92,7 @@ export const setSongGenres = (song_id: string, genre_ids: string[]) =>
 
 // ---- Helpers ----
 
-const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
+const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
 export const coverUrl = (path: string | null | undefined): string => {
   if (!path) return '';
