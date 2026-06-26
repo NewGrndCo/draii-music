@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v4';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v5';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const useMusicLibrary = () => {
