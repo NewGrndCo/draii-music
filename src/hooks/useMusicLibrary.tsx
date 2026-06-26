@@ -118,6 +118,7 @@ export const useMusicLibrary = () => {
 
           processed.push({
             id: rel.id,
+            slug: rel.slug,
             title: albumTitle,
             artist: rel.primary_artist || firstSong?.artist || 'Unknown Artist',
             coverArt: cover,

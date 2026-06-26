@@ -11,6 +11,7 @@ interface MusicLibraryProps {
   isLoading?: boolean;
   darkMode?: boolean;
   onToggleDarkMode?: () => void;
+  initialAlbumSlug?: string | null;
 }
 
 const MusicLibrary: React.FC<MusicLibraryProps> = ({
@@ -19,6 +20,7 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
   onClose,
   isVisible,
   isLoading = false,
+  initialAlbumSlug,
 }) => {
   if (!isVisible) return null;
   if (isLoading) {
@@ -34,6 +36,7 @@ const MusicLibrary: React.FC<MusicLibraryProps> = ({
       onSelectSong={onSelectSong}
       onClose={onClose}
       isVisible={isVisible}
+      initialAlbumSlug={initialAlbumSlug}
     />
   );
 };
