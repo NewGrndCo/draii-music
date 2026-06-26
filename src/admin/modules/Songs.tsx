@@ -147,8 +147,8 @@ const Songs: React.FC = () => {
         </div>
       )}
 
-      {edit && <SongEditor song={edit} onClose={() => setEdit(null)} onSaved={(u) => { setSongs((p) => p.map((s) => s.id === u.id ? { ...s, ...u } : s)); setEdit(null); }} />}
-      {uploadOpen && <SongUploader onClose={() => setUploadOpen(false)} onUploaded={(row) => { setSongs((p) => [row, ...p]); setUploadOpen(false); }} />}
+      {edit && <SongEditor song={edit} onClose={() => setEdit(null)} onSaved={(u) => { setSongs((p) => p.map((s) => s.id === u.id ? { ...s, ...u } : s)); setEdit(null); invalidateMusicLibraryCache(); }} />}
+      {uploadOpen && <BulkUploader onClose={() => setUploadOpen(false)} onDone={() => { setUploadOpen(false); invalidateMusicLibraryCache(); refresh(); }} />}
     </div>
   );
 };
