@@ -21,6 +21,7 @@ const items = [
   { key: 'genres',      label: 'Genres',        icon: Tag },
   { key: 'analytics',   label: 'Analytics',     icon: BarChart3 },
   { key: 'revenue',     label: 'Revenue',       icon: DollarSign },
+  { key: 'campaigns',   label: 'Campaigns',     icon: Megaphone },
   { key: 'events',      label: 'Events',        icon: CalendarDays },
   { key: 'merch',       label: 'Merch',         icon: ShoppingBag },
   { key: 'mailing',     label: 'Mailing',       icon: Mail },
