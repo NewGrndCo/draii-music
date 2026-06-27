@@ -40,6 +40,16 @@ const StatusPill: React.FC<{ label: string; ok?: boolean; icon: React.ElementTyp
 );
 
 const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
+  const [stripeOk, setStripeOk] = useState(false);
+  useEffect(() => {
+    adminList<any>('artist_profile')
+      .then((rows) => {
+        const link = (rows?.[0]?.stripe_payment_link || '').trim();
+        setStripeOk(/^https?:\/\/.+/i.test(link));
+      })
+      .catch(() => setStripeOk(false));
+  }, [active]);
+
   const handleLogout = () => {
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     window.location.reload();
