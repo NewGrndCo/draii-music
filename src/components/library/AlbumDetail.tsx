@@ -47,63 +47,72 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
   return (
     <div className="space-y-5">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/5">
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)]">
         {album.coverArt && (
           <img
             src={album.coverArt}
             alt=""
             aria-hidden
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-            className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-25"
+            className="absolute inset-0 w-full h-full object-cover scale-125 blur-3xl opacity-40"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="relative z-10 flex items-end gap-4 p-4 sm:p-5">
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/55 to-black/85" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.08),transparent_60%)]" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row gap-5 p-5 sm:p-7">
           <SmartCover
             src={album.coverArt}
             alt={album.title}
-            className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover shadow-2xl shrink-0"
-            iconClassName="h-10 w-10"
+            className="w-32 h-32 sm:w-44 sm:h-44 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10 shrink-0"
+            iconClassName="h-12 w-12"
           />
-          <div className="min-w-0 flex-1">
-            <h2 className="text-xl sm:text-2xl font-bold text-white truncate">{album.title}</h2>
-            <p className="text-sm text-white/75 truncate">{album.artist}</p>
-            <p className="text-[10px] sm:text-xs text-white/60 uppercase tracking-widest mt-1">
+          <div className="min-w-0 flex-1 flex flex-col">
+            <p className="text-[10px] sm:text-[11px] text-white/55 uppercase tracking-[0.2em] font-medium">
               {metaParts.join(' · ')}
             </p>
-            {album.label && (
-              <p className="text-[10px] sm:text-xs text-white/50 mt-1 truncate">
-                <span className="uppercase tracking-widest text-white/40">Label</span> · {album.label}
-              </p>
+            <h2 className="text-2xl sm:text-4xl font-bold text-white tracking-tight mt-1 leading-tight">{album.title}</h2>
+            <p className="text-sm sm:text-base text-white/80 mt-0.5">{album.artist}</p>
+
+            {(album.label || album.description) && (
+              <div className="mt-3 space-y-2">
+                {album.label && (
+                  <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/75 bg-white/[0.06] border border-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm w-fit">
+                    <span className="uppercase tracking-widest text-white/45 text-[9px] sm:text-[10px]">Label</span>
+                    <span className="font-medium">{album.label}</span>
+                  </div>
+                )}
+                {album.description && (
+                  <p className="text-xs sm:text-sm text-white/70 leading-relaxed whitespace-pre-line line-clamp-4 max-w-2xl">
+                    {album.description}
+                  </p>
+                )}
+              </div>
             )}
-            <div className="flex items-center gap-2 mt-3">
+
+            <div className="flex items-center gap-2 mt-4 flex-wrap">
               <button
                 onClick={playAll}
                 disabled={!tracks.length}
-                className="inline-flex items-center gap-1.5 bg-white text-black text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-white/90 transition-colors disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 bg-white text-black text-xs font-semibold px-5 py-2 rounded-full hover:bg-white/90 transition-colors disabled:opacity-40"
               >
                 <Play size={12} fill="currentColor" /> Play All
               </button>
               <button
                 onClick={shuffle}
                 disabled={!tracks.length}
-                className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-4 py-1.5 rounded-full border border-white/15 hover:bg-white/15 transition-colors disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-5 py-2 rounded-full border border-white/15 hover:bg-white/15 transition-colors disabled:opacity-40 backdrop-blur-sm"
               >
                 <Shuffle size={12} /> Shuffle
               </button>
               <button
                 onClick={share}
                 aria-label="Share album"
-                className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-4 py-1.5 rounded-full border border-white/15 hover:bg-white/15 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-white/10 text-white text-xs px-5 py-2 rounded-full border border-white/15 hover:bg-white/15 transition-colors backdrop-blur-sm"
               >
                 <Share2 size={12} /> Share
               </button>
             </div>
-            {album.description && (
-              <p className="text-xs sm:text-sm text-white/70 mt-3 leading-relaxed whitespace-pre-line line-clamp-4">
-                {album.description}
-              </p>
-            )}
           </div>
         </div>
       </div>
