@@ -1,7 +1,6 @@
 import React from 'react';
-import { Heart, Play } from 'lucide-react';
+import { Heart, Play, AudioLines } from 'lucide-react';
 import { Song } from '../../data/musicData';
-import { cn } from '@/lib/utils';
 import SmartCover from '@/components/shared/SmartCover';
 
 interface Props {
@@ -19,7 +18,7 @@ const formatCount = (n: number) => {
 const AppleStyleSongRow: React.FC<Props> = ({ song, index, onSelect }) => (
   <button
     onClick={() => onSelect(song)}
-    className="group w-full grid grid-cols-[28px_44px_1fr_auto] sm:grid-cols-[36px_48px_1fr_auto_auto_56px] items-center gap-3 px-2 sm:px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
+    className="group w-full grid grid-cols-[28px_44px_1fr_auto] sm:grid-cols-[36px_48px_1fr_auto] items-center gap-3 px-2 sm:px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
   >
     <span className="text-xs sm:text-sm text-white/40 tabular-nums text-center group-hover:hidden">{index + 1}</span>
     <Play size={14} className="hidden group-hover:block text-white/80 mx-auto" />
@@ -29,15 +28,17 @@ const AppleStyleSongRow: React.FC<Props> = ({ song, index, onSelect }) => (
       <div className="text-sm sm:text-[15px] text-white truncate">{song.title}</div>
       <div className="text-xs text-white/55 truncate">{song.artist}</div>
     </div>
-    <div className="hidden sm:flex items-center gap-1 text-xs text-white/55 tabular-nums">
-      <span>{formatCount(song.playCount || 0)}</span>
-      <span className="text-white/30">plays</span>
+
+    <div className="flex items-center gap-3 text-xs text-white/70 tabular-nums pr-1">
+      <span className="inline-flex items-center gap-1">
+        <AudioLines size={14} className="text-white/70" />
+        {formatCount(song.playCount || 0)}
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <Heart size={14} className="text-red-500" fill="currentColor" />
+        {formatCount(song.likesCount || 0)}
+      </span>
     </div>
-    <div className="hidden sm:flex items-center gap-1 text-xs text-white/55 tabular-nums">
-      <Heart size={12} className={cn(song.likesCount ? 'text-pink-500' : 'text-white/40')} fill={song.likesCount ? 'currentColor' : 'none'} />
-      <span>{formatCount(song.likesCount || 0)}</span>
-    </div>
-    <div className="text-xs text-white/45 tabular-nums text-right">{song.duration}</div>
   </button>
 );
 
