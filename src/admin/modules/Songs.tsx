@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { listTable, updateRow, deleteRow, coverUrl } from '../lib/musicApi';
 import BulkUploader from '../components/BulkUploader';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface SongRow {
   id: string;
@@ -32,6 +33,8 @@ interface SongRow {
 }
 
 const Songs: React.FC = () => {
+  const { profile } = useArtistProfile();
+  const defaultCover = profile?.default_cover_url || null;
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
@@ -108,7 +111,7 @@ const Songs: React.FC = () => {
           ) : (
             <ul className="divide-y divide-white/5">
               {filtered.map((s) => {
-                const cover = coverUrl(s.thumbnail_path);
+                const cover = coverUrl(s.thumbnail_path) || defaultCover;
                 return (
                   <li key={s.id} className="group flex items-center gap-3 px-3 md:px-4 py-2.5 hover:bg-white/[0.03]">
                     <div className="h-11 w-11 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 relative">
