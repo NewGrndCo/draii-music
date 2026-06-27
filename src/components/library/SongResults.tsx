@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAnimationContext } from '../../hooks/useAnimationContext';
 import { generateShareLink, copyToClipboard } from '../../utils/shareUtils';
 import { toast } from 'sonner';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface SongResultsProps {
   songs: Song[];
