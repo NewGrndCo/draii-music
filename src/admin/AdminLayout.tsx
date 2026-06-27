@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Music2, Disc3, Users, Tag, BarChart3, CalendarDays,
   ShoppingBag, Settings, LogOut, ShieldCheck, Database,
   ChevronLeft, Mail, DollarSign, Megaphone,
 } from 'lucide-react';
-import { ADMIN_TOKEN_KEY } from './lib/api';
+import { ADMIN_TOKEN_KEY, adminList } from './lib/api';
 
 interface Props {
   active: string;
@@ -40,6 +40,16 @@ const StatusPill: React.FC<{ label: string; ok?: boolean; icon: React.ElementTyp
 );
 
 const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
+  const [stripeOk, setStripeOk] = useState(false);
+  useEffect(() => {
+    adminList<any>('artist_profile')
+      .then((rows) => {
+        const link = (rows?.[0]?.stripe_payment_link || '').trim();
+        setStripeOk(/^https?:\/\/.+/i.test(link));
+      })
+      .catch(() => setStripeOk(false));
+  }, [active]);
+
   const handleLogout = () => {
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     window.location.reload();
@@ -121,7 +131,7 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
             </div>
             <div className="hidden md:flex items-center gap-2">
               <StatusPill label="Database" ok icon={Database} />
-              <StatusPill label="Stripe" ok={false} icon={ShieldCheck} />
+              <StatusPill label="Stripe" ok={stripeOk} icon={ShieldCheck} />
             </div>
           </header>
 
