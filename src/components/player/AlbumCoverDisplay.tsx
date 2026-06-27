@@ -79,7 +79,9 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
           className="w-full h-full object-cover pointer-events-none"
           loading="eager"
           draggable={false}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
         />
+
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           {loading ? (
