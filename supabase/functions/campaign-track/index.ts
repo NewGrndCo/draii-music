@@ -93,23 +93,12 @@ Deno.serve(async (req) => {
       (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
       "";
     const ua = req.headers.get("user-agent") || "";
-    const PROD_ORIGIN = "https://draiirynell.com";
-    const pickOrigin = (raw: string): string | null => {
-      try {
-        const o = new URL(raw).origin;
-        if (/supabase\.(co|in)$/.test(new URL(raw).hostname)) return null;
-        return o;
-      } catch { return null; }
-    };
-    const siteOrigin =
-      pickOrigin(site_origin) || pickOrigin(referrer) || PROD_ORIGIN;
 
     const destination_url = await resolveDestination(
       sb,
       campaign.destination_kind,
       campaign.destination_id,
       campaign.destination_url,
-      siteOrigin,
     );
 
     // Parse UA
