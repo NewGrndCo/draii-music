@@ -113,8 +113,8 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
               </div>
               <div className="min-w-0">
                 <h1 className="font-display text-base md:text-2xl font-semibold leading-tight truncate">
-                  <span className="admin-gradient-text">DR Admin</span>
-                  <span className="text-white/85 hidden sm:inline"> Control Center</span>
+                  <span className="admin-gradient-text">ArtistNode&nbsp;</span>
+                  <span className="text-white/85 hidden sm:inline">&nbsp;Dashboard</span>
                 </h1>
                 <p className="text-[10px] md:text-xs text-white/50 mt-0.5 truncate">Manage every surface of draiirynell.com in real time.</p>
               </div>
