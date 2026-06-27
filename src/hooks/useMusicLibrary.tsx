@@ -86,7 +86,7 @@ export const useMusicLibrary = () => {
         const [{ data: releasesData, error: relErr }, { data: songsData, error: songErr }, { data: profileData }] = await Promise.all([
           (supabase as any)
             .from('releases')
-            .select(`id,slug,title,type,primary_artist,cover_path,release_date,sort_order,visibility,
+            .select(`id,slug,title,type,primary_artist,cover_path,release_date,sort_order,visibility,label,description,
                      release_tracks(track_number,disc_number,hidden,song:songs(${SONG_FIELDS}))`)
             .neq('visibility', 'private')
             .order('sort_order', { ascending: true })
