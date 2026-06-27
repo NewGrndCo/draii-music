@@ -296,13 +296,12 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
           className="aspect-square w-full rounded-xl overflow-hidden object-cover border border-white/5"
           iconClassName="h-12 w-12"
         />
-        <div className="relative -mt-10 z-10 flex justify-end pr-2">
-          <label className="absolute bottom-2 right-2 bg-black/70 backdrop-blur text-[11px] px-2 py-1 rounded cursor-pointer hover:bg-black">
-            {uploadingCover ? 'Uploading…' : 'Change cover'}
-            <input type="file" accept="image/*" hidden disabled={uploadingCover}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
-          </label>
-        </div>
+        <label className="block text-center text-[11px] py-1.5 rounded cursor-pointer bg-white/5 hover:bg-white/10 text-white">
+          {uploadingCover ? 'Uploading…' : (draft.cover_path ? 'Replace cover' : 'Upload cover')}
+          <input type="file" accept="image/*" hidden disabled={uploadingCover}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); e.currentTarget.value = ''; }} />
+        </label>
+
         <Field label="Title"><Input value={draft.title} onChange={(e) => field('title', e.target.value)} /></Field>
         <Field label="Primary Artist"><Input value={draft.primary_artist} onChange={(e) => field('primary_artist', e.target.value)} /></Field>
         <Field label="Type">
