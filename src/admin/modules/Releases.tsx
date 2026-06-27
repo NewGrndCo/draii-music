@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, GripVertical, X, Search, Image as ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
