@@ -1,0 +1,1 @@
+GRANT INSERT ON public.donations TO anon, authenticated; GRANT ALL ON public.donations TO service_role;
