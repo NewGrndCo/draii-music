@@ -20,12 +20,14 @@ export const useMusicLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [defaultCover, setDefaultCover] = useState<string | null>(null);
+
   const getFullImageUrl = useCallback((path?: string | null): string => {
-    if (!path) return 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
+    if (!path) return defaultCover || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/lovable-uploads')) return path;
     return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
-  }, []);
+  }, [defaultCover]);
 
   const formatDuration = useCallback((seconds: number): string => {
     if (!seconds || isNaN(seconds)) return '0:00';
@@ -75,7 +77,7 @@ export const useMusicLibrary = () => {
         setLoading(true);
 
         // Pull releases + their tracks + song details in one go.
-        const [{ data: releasesData, error: relErr }, { data: songsData, error: songErr }] = await Promise.all([
+        const [{ data: releasesData, error: relErr }, { data: songsData, error: songErr }, { data: profileData }] = await Promise.all([
           (supabase as any)
             .from('releases')
             .select(`id,slug,title,type,primary_artist,cover_path,release_date,sort_order,visibility,
@@ -90,7 +92,23 @@ export const useMusicLibrary = () => {
             .eq('hidden', false)
             .order('created_at', { ascending: false })
             .limit(300),
+          (supabase as any)
+            .from('artist_profile')
+            .select('default_cover_url')
+            .limit(1)
+            .maybeSingle(),
         ]);
+
+        if (!cancelled && profileData?.default_cover_url) setDefaultCover(profileData.default_cover_url);
+        const fallback = profileData?.default_cover_url || null;
+        const resolveCover = (path?: string | null) => {
+          if (path) {
+            if (path.startsWith('http')) return path;
+            if (path.startsWith('/lovable-uploads')) return path;
+            return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+          }
+          return fallback || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
+        };
 
         if (cancelled) return;
         if (relErr) throw relErr;
