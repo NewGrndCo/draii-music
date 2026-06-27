@@ -11,6 +11,7 @@ import { adminUploadFile } from '../lib/api';
 import BulkUploader from '../components/BulkUploader';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface SongRow {
   id: string;
