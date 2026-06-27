@@ -130,9 +130,8 @@ export const useMusicLibrary = () => {
           if (!tracks.length) continue;
 
           const firstSong = tracks[0].song;
-          const cover = rel.cover_path
-            ? resolveCover(rel.cover_path)
-            : resolveCover(firstSong?.thumbnail_path);
+          const releaseCover = rel.cover_path ? resolveCover(rel.cover_path) : null;
+          const cover = releaseCover || resolveCover(firstSong?.thumbnail_path);
           const albumTitle = rel.title || 'Untitled';
           const relCategory = (rel.type || 'album').toLowerCase();
 
@@ -146,9 +145,13 @@ export const useMusicLibrary = () => {
             coverArt: cover,
             year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
             type: relCategory,
-            songs: tracks.map((t: any) =>
-              toSong(t.song, { album: albumTitle, coverArt: cover, category: relCategory })
-            ),
+            songs: tracks.map((t: any) => {
+              // Per-song cover: own thumbnail → release cover → default fallback.
+              const songCover = t.song.thumbnail_path
+                ? resolveCover(t.song.thumbnail_path)
+                : (releaseCover || resolveCover(null));
+              return toSong(t.song, { album: albumTitle, coverArt: songCover, category: relCategory });
+            }),
           });
         }
 
