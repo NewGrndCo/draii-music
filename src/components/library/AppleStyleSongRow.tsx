@@ -23,11 +23,8 @@ const AppleStyleSongRow: React.FC<Props> = ({ song, index, onSelect }) => (
   >
     <span className="text-xs sm:text-sm text-white/40 tabular-nums text-center group-hover:hidden">{index + 1}</span>
     <Play size={14} className="hidden group-hover:block text-white/80 mx-auto" />
-    <div className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-md overflow-hidden bg-white/[0.04] shrink-0">
-      {song.coverArt && (
-        <img src={song.coverArt} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-      )}
-    </div>
+    <SmartCover src={song.coverArt} className="h-11 w-11 sm:h-12 sm:w-12 rounded-md overflow-hidden object-cover shrink-0" iconClassName="h-4 w-4" />
+
     <div className="min-w-0">
       <div className="text-sm sm:text-[15px] text-white truncate">{song.title}</div>
       <div className="text-xs text-white/55 truncate">{song.artist}</div>
