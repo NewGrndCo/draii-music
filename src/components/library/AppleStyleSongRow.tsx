@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, Play } from 'lucide-react';
 import { Song } from '../../data/musicData';
 import { cn } from '@/lib/utils';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface Props {
   song: Song;
