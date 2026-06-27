@@ -155,12 +155,17 @@ export const useMusicLibrary = () => {
             year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
             type: relCategory,
             songs: tracks.map((t: any) => {
-              // Per-song cover: own thumbnail → release cover → default fallback.
-              const songCover = t.song.thumbnail_path
-                ? resolveCover(t.song.thumbnail_path)
-                : (releaseCover || resolveCover(null));
+              // Per-song cover: own thumbnail (if it points at a real file) →
+              // release cover → default fallback.
+              const ownCover =
+                t.song.thumbnail_path && (
+                  t.song.thumbnail_path.startsWith('http') ||
+                  isValidStoragePath(t.song.thumbnail_path)
+                ) ? resolveCover(t.song.thumbnail_path) : null;
+              const songCover = ownCover || releaseCover || resolveCover(null);
               return toSong(t.song, { album: albumTitle, coverArt: songCover, category: relCategory });
             }),
+
           });
         }
 
