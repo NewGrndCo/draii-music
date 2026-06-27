@@ -146,37 +146,37 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
       }).filter(Boolean) as any[];
     }
     if (level === 'country' && country && COUNTRY_COORDS[country]) {
-      // Spread region markers around the country centroid (we have no region coords)
       const [lon, lat] = COUNTRY_COORDS[country];
       return topRegions.slice(0, 20).map(([r, n], i) => {
-        const angle = (i / Math.max(1, topRegions.length)) * Math.PI * 2;
-        const radius = 4;
-        return {
-          key: r,
-          coords: [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius] as [number, number],
-          label: r,
-          n,
-          max: maxRegion,
-          onClick: () => goRegion(r),
-        };
+        const agg = regionAgg[r];
+        let coords: [number, number];
+        if (agg && agg.geoN > 0) {
+          coords = [agg.lngSum / agg.geoN, agg.latSum / agg.geoN];
+        } else {
+          const angle = (i / Math.max(1, topRegions.length)) * Math.PI * 2;
+          const radius = 4;
+          coords = [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius];
+        }
+        return { key: r, coords, label: r, n, max: maxRegion, onClick: () => goRegion(r) };
       });
     }
     if (level === 'region' && country && COUNTRY_COORDS[country]) {
       const [lon, lat] = COUNTRY_COORDS[country];
       return topCities.slice(0, 30).map(([city, n], i) => {
-        const angle = (i / Math.max(1, topCities.length)) * Math.PI * 2;
-        const radius = 2;
-        return {
-          key: city,
-          coords: [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius] as [number, number],
-          label: city,
-          n,
-          max: maxCity,
-        };
+        const agg = cityAgg[city];
+        let coords: [number, number];
+        if (agg && agg.geoN > 0) {
+          coords = [agg.lngSum / agg.geoN, agg.latSum / agg.geoN];
+        } else {
+          const angle = (i / Math.max(1, topCities.length)) * Math.PI * 2;
+          const radius = 2;
+          coords = [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius];
+        }
+        return { key: city, coords, label: city, n, max: maxCity };
       });
     }
     return [];
-  }, [level, country, focus, topCountries, topRegions, topCities, maxCountry, maxRegion, maxCity]);
+  }, [level, country, focus, topCountries, topRegions, topCities, maxCountry, maxRegion, maxCity, regionAgg, cityAgg]);
 
   // Bottom list — depends on level
   const list: { key: string; label: string; flag?: string; n: number; onClick?: () => void }[] = useMemo(() => {
