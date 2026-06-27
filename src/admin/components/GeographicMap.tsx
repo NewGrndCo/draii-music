@@ -9,6 +9,8 @@ type Listen = {
   country?: string | null;
   region?: string | null;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type FocusTarget = {
