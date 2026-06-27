@@ -53,15 +53,17 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
             src={album.coverArt}
             alt=""
             aria-hidden
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-25"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="relative z-10 flex items-end gap-4 p-4 sm:p-5">
-          <img
+          <SmartCover
             src={album.coverArt}
             alt={album.title}
             className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover shadow-2xl shrink-0"
+            iconClassName="h-10 w-10"
           />
           <div className="min-w-0 flex-1">
             <h2 className="text-xl sm:text-2xl font-bold text-white truncate">{album.title}</h2>
