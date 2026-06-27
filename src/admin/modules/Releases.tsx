@@ -291,10 +291,12 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
     <div className="border-t border-white/5 p-4 grid lg:grid-cols-[280px_1fr] gap-6">
       {/* Metadata column */}
       <div className="space-y-3">
-        <div className="aspect-square rounded-xl overflow-hidden bg-white/[0.04] border border-white/5 relative">
-          {draft.cover_path
-            ? <img src={coverUrl(draft.cover_path)} alt="" className="h-full w-full object-cover" />
-            : <Disc3 className="h-12 w-12 text-white/20 m-auto mt-20" />}
+        <SmartCover
+          src={draft.cover_path ? coverUrl(draft.cover_path) : null}
+          className="aspect-square w-full rounded-xl overflow-hidden object-cover border border-white/5"
+          iconClassName="h-12 w-12"
+        />
+        <div className="relative -mt-10 z-10 flex justify-end pr-2">
           <label className="absolute bottom-2 right-2 bg-black/70 backdrop-blur text-[11px] px-2 py-1 rounded cursor-pointer hover:bg-black">
             {uploadingCover ? 'Uploading…' : 'Change cover'}
             <input type="file" accept="image/*" hidden disabled={uploadingCover}
