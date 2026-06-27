@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { listTable, updateRow, deleteRow, coverUrl } from '../lib/musicApi';
 import BulkUploader from '../components/BulkUploader';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
+import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 interface SongRow {
   id: string;
@@ -32,6 +33,8 @@ interface SongRow {
 }
 
 const Songs: React.FC = () => {
+  const { profile } = useArtistProfile();
+  const defaultCover = profile?.default_cover_url || null;
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
