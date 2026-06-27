@@ -105,6 +105,31 @@ const Releases: React.FC = () => {
         </Button>
       </div>
 
+      <div className="admin-glass rounded-2xl p-4 flex flex-wrap items-center gap-4">
+        <div className="h-16 w-16 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center">
+          {defaultCover
+            ? <img src={defaultCover} alt="Default cover" className="h-full w-full object-cover" />
+            : <ImageIcon className="h-6 w-6 text-white/30" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium text-white">Default Cover</div>
+          <p className="text-xs text-white/50">Used automatically when a release or song has no cover uploaded.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className={`px-3 py-1.5 rounded-md text-xs cursor-pointer bg-white/5 hover:bg-white/10 text-white ${savingDefault ? 'opacity-60 pointer-events-none' : ''}`}>
+            {savingDefault ? 'Uploading…' : (defaultCover ? 'Replace' : 'Upload')}
+            <input type="file" accept="image/*" hidden disabled={savingDefault}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadDefault(f); e.currentTarget.value = ''; }} />
+          </label>
+          {defaultCover && (
+            <Button variant="ghost" size="sm" disabled={savingDefault} onClick={clearDefault}
+              className="text-rose-300/80 hover:text-rose-200 h-8 px-2">
+              <X className="h-3.5 w-3.5 mr-1" /> Remove
+            </Button>
+          )}
+        </div>
+      </div>
+
       <div className="admin-glass rounded-2xl p-3 sticky top-12 z-10 backdrop-blur flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
