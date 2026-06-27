@@ -1,0 +1,1 @@
+ALTER TABLE public.artist_profile ADD COLUMN IF NOT EXISTS default_cover_url text;

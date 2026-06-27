@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search, Image as ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -12,8 +12,9 @@ import {
   Release, ReleaseTrack, ReleaseType, ReleaseStatus, ReleaseVisibility,
   coverUrl, RELEASE_TYPES, slugify,
 } from '../lib/musicApi';
-import { adminUploadFile } from '../lib/api';
+import { adminCall, adminUploadFile } from '../lib/api';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
+import { supabase } from '@/integrations/supabase/client';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
@@ -22,6 +23,9 @@ const Releases: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<ReleaseType | 'all'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [defaultCover, setDefaultCover] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [savingDefault, setSavingDefault] = useState(false);
 
   const refresh = () => {
     setLoading(true);
@@ -31,6 +35,48 @@ const Releases: React.FC = () => {
       .finally(() => setLoading(false));
   };
   useEffect(refresh, []);
+
+  // Load artist_profile.default_cover_url so we can show & manage it here.
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase as any)
+        .from('artist_profile')
+        .select('id,default_cover_url')
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        setProfileId(data.id);
+        setDefaultCover(data.default_cover_url ?? null);
+      }
+    })();
+  }, []);
+
+  const uploadDefault = async (file: File) => {
+    if (!profileId) { toast.error('Profile not loaded'); return; }
+    setSavingDefault(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `defaults/cover-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      await adminCall({ op: 'update', table: 'artist_profile', id: profileId, payload: { default_cover_url: url } } as any);
+      setDefaultCover(url);
+      invalidateMusicLibraryCache();
+      toast.success('Default cover updated');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSavingDefault(false); }
+  };
+
+  const clearDefault = async () => {
+    if (!profileId) return;
+    setSavingDefault(true);
+    try {
+      await adminCall({ op: 'update', table: 'artist_profile', id: profileId, payload: { default_cover_url: null } } as any);
+      setDefaultCover(null);
+      invalidateMusicLibraryCache();
+      toast.success('Default cover removed');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSavingDefault(false); }
+  };
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -57,6 +103,31 @@ const Releases: React.FC = () => {
         <Button onClick={() => setCreating(true)} className="ml-auto admin-gradient-bg">
           <Plus className="h-4 w-4 mr-2" /> Create Release
         </Button>
+      </div>
+
+      <div className="admin-glass rounded-2xl p-4 flex flex-wrap items-center gap-4">
+        <div className="h-16 w-16 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center">
+          {defaultCover
+            ? <img src={defaultCover} alt="Default cover" className="h-full w-full object-cover" />
+            : <ImageIcon className="h-6 w-6 text-white/30" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium text-white">Default Cover</div>
+          <p className="text-xs text-white/50">Used automatically when a release or song has no cover uploaded.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className={`px-3 py-1.5 rounded-md text-xs cursor-pointer bg-white/5 hover:bg-white/10 text-white ${savingDefault ? 'opacity-60 pointer-events-none' : ''}`}>
+            {savingDefault ? 'Uploading…' : (defaultCover ? 'Replace' : 'Upload')}
+            <input type="file" accept="image/*" hidden disabled={savingDefault}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadDefault(f); e.currentTarget.value = ''; }} />
+          </label>
+          {defaultCover && (
+            <Button variant="ghost" size="sm" disabled={savingDefault} onClick={clearDefault}
+              className="text-rose-300/80 hover:text-rose-200 h-8 px-2">
+              <X className="h-3.5 w-3.5 mr-1" /> Remove
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="admin-glass rounded-2xl p-3 sticky top-12 z-10 backdrop-blur flex flex-col md:flex-row gap-3">
@@ -88,8 +159,12 @@ const Releases: React.FC = () => {
               <div key={r.id} className="admin-glass rounded-2xl overflow-hidden">
                 <button onClick={() => setExpanded(isOpen ? null : r.id)} className="w-full flex items-center gap-3 p-3 hover:bg-white/[0.03] text-left">
                   {isOpen ? <ChevronDown className="h-4 w-4 text-white/45" /> : <ChevronRight className="h-4 w-4 text-white/45" />}
-                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0">
-                    {r.cover_path ? <img src={coverUrl(r.cover_path)} alt="" loading="lazy" className="h-full w-full object-cover" /> : <Disc3 className="h-5 w-5 text-white/30 m-auto mt-3" />}
+                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 flex items-center justify-center">
+                    {r.cover_path
+                      ? <img src={coverUrl(r.cover_path)} alt="" loading="lazy" className="h-full w-full object-cover" />
+                      : defaultCover
+                        ? <img src={defaultCover} alt="" loading="lazy" className="h-full w-full object-cover opacity-80" />
+                        : <Disc3 className="h-5 w-5 text-white/30" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
