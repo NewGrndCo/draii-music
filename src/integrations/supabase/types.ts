@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           artist_image_url: string | null
           bio: string | null
+          default_cover_url: string | null
           detailed_bio: string | null
           footer_text: string | null
           frontend_sections: Json
@@ -35,6 +36,7 @@ export type Database = {
         Insert: {
           artist_image_url?: string | null
           bio?: string | null
+          default_cover_url?: string | null
           detailed_bio?: string | null
           footer_text?: string | null
           frontend_sections?: Json
@@ -52,6 +54,7 @@ export type Database = {
         Update: {
           artist_image_url?: string | null
           bio?: string | null
+          default_cover_url?: string | null
           detailed_bio?: string | null
           footer_text?: string | null
           frontend_sections?: Json
