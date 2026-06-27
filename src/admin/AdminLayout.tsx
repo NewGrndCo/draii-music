@@ -131,7 +131,7 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
             </div>
             <div className="hidden md:flex items-center gap-2">
               <StatusPill label="Database" ok icon={Database} />
-              <StatusPill label="Stripe" ok={false} icon={ShieldCheck} />
+              <StatusPill label="Stripe" ok={stripeOk} icon={ShieldCheck} />
             </div>
           </header>
 
