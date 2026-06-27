@@ -60,8 +60,8 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 shrink-0 admin-glass-strong m-3 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)]">
           <div className="flex items-center gap-2 px-2 py-3">
-            <div className="h-9 w-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-lg">
-              <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain p-0.5" />
+            <div className="h-9 w-9 flex items-center justify-center">
+              <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain" />
             </div>
             <div>
               <div className="font-display font-semibold text-base leading-none">Draii Rynell</div>
@@ -108,8 +108,8 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
           {/* Header */}
           <header className="admin-glass-strong rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 flex flex-wrap items-center gap-2 md:gap-3 mb-3 md:mb-6">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="md:hidden h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shrink-0">
-                <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain p-0.5" />
+              <div className="md:hidden h-8 w-8 flex items-center justify-center shrink-0">
+                <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0">
                 <h1 className="font-display text-base md:text-2xl font-semibold leading-tight truncate">
