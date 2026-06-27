@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         sb.from("events").select("id, status, event_date"),
         sb.from("merch").select("id, name, image_url, price_cents, stock, active"),
         sb.from("donations").select("amount_cents, source, created_at"),
-        sb.from("listens").select("song_id, country, region, city, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
+        sb.from("listens").select("song_id, country, region, city, latitude, longitude, device, source, created_at").order("created_at", { ascending: false }).limit(5000),
         sb.from("mailing_list").select("id, email, phone, country, region, city, created_at"),
         sb.from("release_plans").select("*").order("sort_order", { ascending: true }),
         sb.from("expenses").select("*").order("occurred_at", { ascending: false }),
