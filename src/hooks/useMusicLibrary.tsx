@@ -101,14 +101,23 @@ export const useMusicLibrary = () => {
 
         if (!cancelled && profileData?.default_cover_url) setDefaultCover(profileData.default_cover_url);
         const fallback = profileData?.default_cover_url || null;
+        // A path is only treated as a valid storage object if it lives under
+        // a known prefix in the song-art bucket. Stale paths from prior schema
+        // versions (e.g. `thumbnails/...`) point at files that no longer exist
+        // and would 404 — skip them so the release/default fallback wins.
+        const VALID_PREFIXES = ['covers/', 'defaults/', 'release-covers/'];
+        const isValidStoragePath = (p: string) => VALID_PREFIXES.some((pre) => p.startsWith(pre));
         const resolveCover = (path?: string | null) => {
           if (path) {
             if (path.startsWith('http')) return path;
             if (path.startsWith('/lovable-uploads')) return path;
-            return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+            if (isValidStoragePath(path)) {
+              return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+            }
           }
           return fallback || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
         };
+
 
         if (cancelled) return;
         if (relErr) throw relErr;
