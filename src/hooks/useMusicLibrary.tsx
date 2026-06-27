@@ -160,6 +160,8 @@ export const useMusicLibrary = () => {
             coverArt: cover,
             year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
             type: relCategory,
+            label: rel.label || undefined,
+            description: rel.description || undefined,
             songs: tracks.map((t: any) => {
               // Per-song cover: own thumbnail (if it points at a real file) →
               // release cover → default fallback.
