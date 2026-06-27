@@ -71,17 +71,19 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
 
   // Counts at each level
   const byCountry = useMemo(() => groupBy(normalised, (l) => l.code), [normalised]);
-  const byRegion = useMemo(
-    () => groupBy(normalised.filter((l) => l.code === country), (l) => l.region || null),
+  const regionAgg = useMemo(
+    () => groupWithCoords(normalised.filter((l) => l.code === country), (l) => l.region || null),
     [normalised, country],
   );
-  const byCity = useMemo(
-    () => groupBy(
+  const cityAgg = useMemo(
+    () => groupWithCoords(
       normalised.filter((l) => l.code === country && (l.region || null) === region),
       (l) => l.city || null,
     ),
     [normalised, country, region],
   );
+  const byRegion = useMemo(() => Object.fromEntries(Object.entries(regionAgg).map(([k, v]) => [k, v.n])), [regionAgg]);
+  const byCity = useMemo(() => Object.fromEntries(Object.entries(cityAgg).map(([k, v]) => [k, v.n])), [cityAgg]);
 
   const topCountries = Object.entries(byCountry).sort((a, b) => b[1] - a[1]);
   const topRegions = Object.entries(byRegion).sort((a, b) => b[1] - a[1]);
