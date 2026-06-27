@@ -91,8 +91,8 @@ export const updateCampaign = (id: string, payload: Partial<Campaign>) =>
 
 export const deleteCampaign = (id: string) => adminDelete('campaigns', id);
 
-export const CAMPAIGN_BASE_URL = 'https://draiirynell.com';
+import { SITE_URL } from '@/lib/siteUrl';
 
 export function campaignUrl(code: string): string {
-  return `${CAMPAIGN_BASE_URL}/c/${code}`;
+  return `${SITE_URL}/c/${code}`;
 }

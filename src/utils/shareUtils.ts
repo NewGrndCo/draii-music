@@ -1,11 +1,11 @@
 import { Song } from '../data/musicData';
+import { SITE_URL } from '../lib/siteUrl';
 
 // Generate a shareable link for a song. Prefers slug for short, readable URLs.
 export const generateShareLink = (song: Song, _useShortFormat = true): string => {
   if (!song) return '';
-  const host = window.location.origin;
   const key = (song as any).slug || song.id;
-  return `${host}?s=${key}`;
+  return `${SITE_URL}?s=${key}`;
 };
 
 // Extract shared song slug/id from URL
