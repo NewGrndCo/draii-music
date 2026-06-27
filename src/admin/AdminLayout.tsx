@@ -126,20 +126,24 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
           </header>
 
           {/* Mobile tab bar */}
-          <div className="md:hidden -mx-1 mb-3 overflow-x-auto scrollbar-hidden sticky top-0 z-10 py-1 backdrop-blur-md">
-            <div className="flex gap-1.5 px-1">
-              {items.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => onChange(key)}
-                  aria-label={label}
-                  className={`flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-full text-xs whitespace-nowrap active:scale-95 transition
-                    ${active === key ? 'admin-gradient-bg text-white' : 'admin-glass text-white/70'}`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </button>
-              ))}
+          <div className="md:hidden -mx-2 mb-3 sticky top-0 z-10 py-1 backdrop-blur-md">
+            <div className="flex gap-1.5 px-2 overflow-x-auto scrollbar-hidden snap-x snap-mandatory">
+              {items.map(({ key, label, icon: Icon }) => {
+                const isActive = active === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => onChange(key)}
+                    aria-label={label}
+                    title={label}
+                    className={`shrink-0 snap-start flex flex-col items-center justify-center gap-0.5 w-[64px] h-[56px] rounded-xl active:scale-95 transition
+                      ${isActive ? 'admin-gradient-bg text-white shadow-[0_0_18px_-6px_hsl(var(--admin-purple)/0.7)]' : 'admin-glass text-white/70'}`}
+                  >
+                    <Icon className="h-[18px] w-[18px] shrink-0" />
+                    <span className="text-[10px] leading-none font-medium truncate max-w-[60px]">{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
