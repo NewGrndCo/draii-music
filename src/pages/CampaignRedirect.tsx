@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { SITE_URL } from '@/lib/siteUrl';
 
 const CampaignRedirect: React.FC = () => {
   const { code } = useParams<{ code: string }>();
