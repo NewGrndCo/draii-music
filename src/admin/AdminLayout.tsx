@@ -119,10 +119,9 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
                 <p className="text-[10px] md:text-xs text-white/50 mt-0.5 truncate">Manage every surface of draiirynell.com in real time.</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hidden w-full md:w-auto">
+            <div className="hidden md:flex items-center gap-2">
               <StatusPill label="Database" ok icon={Database} />
               <StatusPill label="Stripe" ok={false} icon={ShieldCheck} />
-              <StatusPill label="Spotify API" ok={false} icon={Wifi} />
             </div>
           </header>
 
