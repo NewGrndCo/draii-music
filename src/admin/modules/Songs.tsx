@@ -218,11 +218,8 @@ const SongEditor: React.FC<{ song: SongRow; onClose: () => void; onSaved: (u: So
           <p className="text-xs text-white/50">Cover uploads auto-save. Other fields save with the Save button.</p>
         </DialogHeader>
         <div className="flex items-center gap-4">
-          <div className="h-20 w-20 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center">
-            {currentCover
-              ? <img src={currentCover} alt="" className="h-full w-full object-cover" />
-              : <Music2 className="h-6 w-6 text-white/30" />}
-          </div>
+          <SmartCover src={coverUrl(draft.thumbnail_path)} fallback={defaultCover} className="h-20 w-20 rounded-lg overflow-hidden object-cover border border-white/10 shrink-0" iconClassName="h-6 w-6" />
+
           <div className="flex flex-col gap-1.5">
             <div className="text-xs text-white/60">Cover Art</div>
             <div className="flex items-center gap-2">
