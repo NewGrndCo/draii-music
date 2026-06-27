@@ -427,9 +427,12 @@ const TrackList: React.FC<{ releaseId: string; primaryArtist: string }> = ({ rel
               className={`flex items-center gap-2 px-2 py-2 text-sm ${dragSong === t.song_id ? 'opacity-40' : ''} hover:bg-white/[0.04]`}>
               <GripVertical className="h-4 w-4 text-white/30 cursor-grab" />
               <span className="w-6 text-right text-xs text-white/45">{i + 1}</span>
-              {t.songs?.thumbnail_path
-                ? <img src={coverUrl(t.songs.thumbnail_path)} alt="" className="h-8 w-8 rounded object-cover" />
-                : <div className="h-8 w-8 rounded bg-white/[0.04] flex items-center justify-center"><Music2 className="h-3 w-3 text-white/30" /></div>}
+              <SmartCover
+                src={t.songs?.thumbnail_path ? coverUrl(t.songs.thumbnail_path) : null}
+                className="h-8 w-8 rounded overflow-hidden object-cover"
+                iconClassName="h-3 w-3"
+              />
+
               <div className="min-w-0 flex-1">
                 <div className="text-white truncate">{t.songs?.title || 'Untitled'}</div>
                 <div className="text-[10px] text-white/45 truncate">{t.songs?.artist}</div>
