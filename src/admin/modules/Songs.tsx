@@ -112,14 +112,11 @@ const Songs: React.FC = () => {
           ) : (
             <ul className="divide-y divide-white/5">
               {filtered.map((s) => {
-                const cover = coverUrl(s.thumbnail_path) || defaultCover;
+                const cover = coverUrl(s.thumbnail_path);
                 return (
                   <li key={s.id} className="group flex items-center gap-3 px-3 md:px-4 py-2.5 hover:bg-white/[0.03]">
-                    <div className="h-11 w-11 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 relative">
-                      {cover
-                        ? <img src={cover} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                        : <Music2 className="h-4 w-4 text-white/30 absolute inset-0 m-auto" />}
-                    </div>
+                    <SmartCover src={cover} fallback={defaultCover} className="h-11 w-11 rounded-lg overflow-hidden object-cover border border-white/5 shrink-0" iconClassName="h-4 w-4" />
+
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-white truncate">{s.title || 'Untitled'}</div>
                       <div className="text-[11px] text-white/50 truncate">{s.artist || '—'}</div>
