@@ -36,7 +36,7 @@ const CampaignRedirect: React.FC = () => {
     const t = setTimeout(() => go('/'), 2500);
 
     supabase.functions
-      .invoke('campaign-track', { body: { code, referrer, session_id } })
+      .invoke('campaign-track', { body: { code, referrer, session_id, site_origin: window.location.origin } })
       .then(({ data, error }) => {
         clearTimeout(t);
         if (error || !data?.destination_url) {

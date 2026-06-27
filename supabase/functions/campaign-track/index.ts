@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     new Response(JSON.stringify(d), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   try {
-    const { code, referrer = "", session_id = "" } = await req.json().catch(() => ({}));
+    const { code, referrer = "", session_id = "", site_origin = "" } = await req.json().catch(() => ({}));
     if (!code || typeof code !== "string" || code.length > 32) return json({ error: "Bad code" }, 400);
 
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
@@ -92,8 +92,16 @@ Deno.serve(async (req) => {
       (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
       "";
     const ua = req.headers.get("user-agent") || "";
-    const origin = new URL(req.url).origin.replace(/\/functions\/v1.*/, "");
-    const siteOrigin = referrer ? new URL(referrer).origin : origin;
+    const PROD_ORIGIN = "https://draiirynell.com";
+    const pickOrigin = (raw: string): string | null => {
+      try {
+        const o = new URL(raw).origin;
+        if (/supabase\.(co|in)$/.test(new URL(raw).hostname)) return null;
+        return o;
+      } catch { return null; }
+    };
+    const siteOrigin =
+      pickOrigin(site_origin) || pickOrigin(referrer) || PROD_ORIGIN;
 
     const destination_url = await resolveDestination(
       sb,
