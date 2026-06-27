@@ -37,6 +37,26 @@ const groupBy = <T,>(arr: T[], keyFn: (x: T) => string | null) => {
   return map;
 };
 
+type GeoAgg = Record<string, { n: number; latSum: number; lngSum: number; geoN: number }>;
+const groupWithCoords = <T extends { latitude?: number | null; longitude?: number | null }>(
+  arr: T[], keyFn: (x: T) => string | null,
+): GeoAgg => {
+  const map: GeoAgg = {};
+  arr.forEach((x) => {
+    const k = keyFn(x);
+    if (!k) return;
+    const row = (map[k] ||= { n: 0, latSum: 0, lngSum: 0, geoN: 0 });
+    row.n += 1;
+    if (typeof x.latitude === 'number' && typeof x.longitude === 'number') {
+      row.latSum += x.latitude;
+      row.lngSum += x.longitude;
+      row.geoN += 1;
+    }
+  });
+  return map;
+};
+
+
 const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
   const [level, setLevel] = useState<Level>('world');
   const [country, setCountry] = useState<string | null>(null); // ISO-2
