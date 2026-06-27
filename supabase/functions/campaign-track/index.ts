@@ -35,30 +35,31 @@ function isSafeUrl(raw: string): boolean {
   }
 }
 
+const PROD_ORIGIN = "https://draiirynell.com";
+
 async function resolveDestination(
   sb: ReturnType<typeof createClient>,
   kind: string,
   id: string | null,
   url: string | null,
-  origin: string,
-): Promise<string | null> {
-  if (kind === "external" && url) return isSafeUrl(url) ? url : null;
-  if (!id) return origin || "/";
+): Promise<string> {
+  const origin = PROD_ORIGIN;
+  if (kind === "external" && url) return isSafeUrl(url) ? url : `${origin}/`;
+  if (!id) return `${origin}/`;
 
   if (kind === "song") {
     const { data } = await sb.from("songs").select("slug, id").eq("id", id).maybeSingle();
-    if (!data) return origin;
+    if (!data) return `${origin}/`;
     return `${origin}/?s=${encodeURIComponent(data.slug || data.id)}`;
   }
   if (kind === "release" || kind === "album" || kind === "ep" || kind === "single") {
     const { data } = await sb.from("releases").select("slug, id").eq("id", id).maybeSingle();
-    if (!data) return origin;
+    if (!data) return `${origin}/`;
     return `${origin}/?a=${encodeURIComponent(data.slug || data.id)}`;
   }
   if (kind === "merch") return `${origin}/?m=${encodeURIComponent(id)}`;
   if (kind === "event") return `${origin}/?e=${encodeURIComponent(id)}`;
-  if (kind === "artist" || kind === "playlist") return origin;
-  return origin;
+  return `${origin}/`;
 }
 
 Deno.serve(async (req) => {
