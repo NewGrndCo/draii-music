@@ -159,8 +159,12 @@ const Releases: React.FC = () => {
               <div key={r.id} className="admin-glass rounded-2xl overflow-hidden">
                 <button onClick={() => setExpanded(isOpen ? null : r.id)} className="w-full flex items-center gap-3 p-3 hover:bg-white/[0.03] text-left">
                   {isOpen ? <ChevronDown className="h-4 w-4 text-white/45" /> : <ChevronRight className="h-4 w-4 text-white/45" />}
-                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0">
-                    {r.cover_path ? <img src={coverUrl(r.cover_path)} alt="" loading="lazy" className="h-full w-full object-cover" /> : <Disc3 className="h-5 w-5 text-white/30 m-auto mt-3" />}
+                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 flex items-center justify-center">
+                    {r.cover_path
+                      ? <img src={coverUrl(r.cover_path)} alt="" loading="lazy" className="h-full w-full object-cover" />
+                      : defaultCover
+                        ? <img src={defaultCover} alt="" loading="lazy" className="h-full w-full object-cover opacity-80" />
+                        : <Disc3 className="h-5 w-5 text-white/30" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
