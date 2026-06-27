@@ -111,7 +111,7 @@ const Songs: React.FC = () => {
           ) : (
             <ul className="divide-y divide-white/5">
               {filtered.map((s) => {
-                const cover = coverUrl(s.thumbnail_path);
+                const cover = coverUrl(s.thumbnail_path) || defaultCover;
                 return (
                   <li key={s.id} className="group flex items-center gap-3 px-3 md:px-4 py-2.5 hover:bg-white/[0.03]">
                     <div className="h-11 w-11 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 relative">
