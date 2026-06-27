@@ -71,6 +71,11 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
             <p className="text-[10px] sm:text-xs text-white/60 uppercase tracking-widest mt-1">
               {metaParts.join(' · ')}
             </p>
+            {album.label && (
+              <p className="text-[10px] sm:text-xs text-white/50 mt-1 truncate">
+                <span className="uppercase tracking-widest text-white/40">Label</span> · {album.label}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-3">
               <button
                 onClick={playAll}
@@ -94,6 +99,11 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
                 <Share2 size={12} /> Share
               </button>
             </div>
+            {album.description && (
+              <p className="text-xs sm:text-sm text-white/70 mt-3 leading-relaxed whitespace-pre-line line-clamp-4">
+                {album.description}
+              </p>
+            )}
           </div>
         </div>
       </div>
