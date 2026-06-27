@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
       user_agent: ua.slice(0, 500),
     });
 
-    return json({ destination_url: destination_url || siteOrigin });
+    return json({ destination_url: destination_url || `${PROD_ORIGIN}/` });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
