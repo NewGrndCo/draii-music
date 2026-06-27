@@ -36,6 +36,48 @@ const Releases: React.FC = () => {
   };
   useEffect(refresh, []);
 
+  // Load artist_profile.default_cover_url so we can show & manage it here.
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase as any)
+        .from('artist_profile')
+        .select('id,default_cover_url')
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        setProfileId(data.id);
+        setDefaultCover(data.default_cover_url ?? null);
+      }
+    })();
+  }, []);
+
+  const uploadDefault = async (file: File) => {
+    if (!profileId) { toast.error('Profile not loaded'); return; }
+    setSavingDefault(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `defaults/cover-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      await adminCall({ op: 'update', table: 'artist_profile', id: profileId, payload: { default_cover_url: url } } as any);
+      setDefaultCover(url);
+      invalidateMusicLibraryCache();
+      toast.success('Default cover updated');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSavingDefault(false); }
+  };
+
+  const clearDefault = async () => {
+    if (!profileId) return;
+    setSavingDefault(true);
+    try {
+      await adminCall({ op: 'update', table: 'artist_profile', id: profileId, payload: { default_cover_url: null } } as any);
+      setDefaultCover(null);
+      invalidateMusicLibraryCache();
+      toast.success('Default cover removed');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSavingDefault(false); }
+  };
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return releases.filter((r) => {
