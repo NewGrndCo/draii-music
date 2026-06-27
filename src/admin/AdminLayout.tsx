@@ -108,8 +108,8 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
           {/* Header */}
           <header className="admin-glass-strong rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 flex flex-wrap items-center gap-2 md:gap-3 mb-3 md:mb-6">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="md:hidden h-8 w-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shrink-0">
-                <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain p-0.5" />
+              <div className="md:hidden h-8 w-8 flex items-center justify-center shrink-0">
+                <img src="/lovable-uploads/5ae7ab3a-8c2b-4cbe-9d1d-322b4912ca63.png" alt="Draii" className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0">
                 <h1 className="font-display text-base md:text-2xl font-semibold leading-tight truncate">
