@@ -17,7 +17,22 @@ const Dashboard: React.FC = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [merch, setMerch] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const liveListeners = useLiveListenerCount();
+
+  const [order, setOrder] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
+      if (Array.isArray(saved) && saved.length) {
+        // merge in any missing defaults (e.g. new cards added later)
+        const merged = [...saved.filter((k: string) => DEFAULT_ORDER.includes(k))];
+        DEFAULT_ORDER.forEach((k) => { if (!merged.includes(k)) merged.push(k); });
+        return merged;
+      }
+    } catch {}
+    return DEFAULT_ORDER;
+  });
+  const [dragKey, setDragKey] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -25,16 +40,36 @@ const Dashboard: React.FC = () => {
       adminList('songs'),
       adminList('events'),
       adminList('merch'),
+      adminList('campaigns').catch(() => []),
     ])
-      .then(([stats, s, e, m]) => {
+      .then(([stats, s, e, m, c]) => {
         setData(stats);
         setSongs(s as any[]);
         setEvents(e as any[]);
         setMerch(m as any[]);
+        setCampaigns(c as any[]);
       })
       .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const persistOrder = (next: string[]) => {
+    setOrder(next);
+    try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(next)); } catch {}
+  };
+  const resetOrder = () => {
+    setOrder(DEFAULT_ORDER);
+    try { localStorage.removeItem(LAYOUT_KEY); } catch {}
+  };
+  const onDragStart = (key: string) => setDragKey(key);
+  const onDragOver = (e: React.DragEvent, key: string) => {
+    e.preventDefault();
+    if (!dragKey || dragKey === key) return;
+    const next = order.filter((k) => k !== dragKey);
+    next.splice(next.indexOf(key), 0, dragKey);
+    setOrder(next);
+  };
+  const onDragEnd = () => { persistOrder(order); setDragKey(null); };
 
   if (loading) {
     return (
