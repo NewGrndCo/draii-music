@@ -35,30 +35,31 @@ function isSafeUrl(raw: string): boolean {
   }
 }
 
+const PROD_ORIGIN = "https://draiirynell.com";
+
 async function resolveDestination(
   sb: ReturnType<typeof createClient>,
   kind: string,
   id: string | null,
   url: string | null,
-  origin: string,
-): Promise<string | null> {
-  if (kind === "external" && url) return isSafeUrl(url) ? url : null;
-  if (!id) return origin || "/";
+): Promise<string> {
+  const origin = PROD_ORIGIN;
+  if (kind === "external" && url) return isSafeUrl(url) ? url : `${origin}/`;
+  if (!id) return `${origin}/`;
 
   if (kind === "song") {
     const { data } = await sb.from("songs").select("slug, id").eq("id", id).maybeSingle();
-    if (!data) return origin;
+    if (!data) return `${origin}/`;
     return `${origin}/?s=${encodeURIComponent(data.slug || data.id)}`;
   }
   if (kind === "release" || kind === "album" || kind === "ep" || kind === "single") {
     const { data } = await sb.from("releases").select("slug, id").eq("id", id).maybeSingle();
-    if (!data) return origin;
+    if (!data) return `${origin}/`;
     return `${origin}/?a=${encodeURIComponent(data.slug || data.id)}`;
   }
   if (kind === "merch") return `${origin}/?m=${encodeURIComponent(id)}`;
   if (kind === "event") return `${origin}/?e=${encodeURIComponent(id)}`;
-  if (kind === "artist" || kind === "playlist") return origin;
-  return origin;
+  return `${origin}/`;
 }
 
 Deno.serve(async (req) => {
@@ -92,23 +93,12 @@ Deno.serve(async (req) => {
       (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
       "";
     const ua = req.headers.get("user-agent") || "";
-    const PROD_ORIGIN = "https://draiirynell.com";
-    const pickOrigin = (raw: string): string | null => {
-      try {
-        const o = new URL(raw).origin;
-        if (/supabase\.(co|in)$/.test(new URL(raw).hostname)) return null;
-        return o;
-      } catch { return null; }
-    };
-    const siteOrigin =
-      pickOrigin(site_origin) || pickOrigin(referrer) || PROD_ORIGIN;
 
     const destination_url = await resolveDestination(
       sb,
       campaign.destination_kind,
       campaign.destination_id,
       campaign.destination_url,
-      siteOrigin,
     );
 
     // Parse UA
@@ -156,7 +146,7 @@ Deno.serve(async (req) => {
       user_agent: ua.slice(0, 500),
     });
 
-    return json({ destination_url: destination_url || siteOrigin });
+    return json({ destination_url: destination_url || `${PROD_ORIGIN}/` });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
