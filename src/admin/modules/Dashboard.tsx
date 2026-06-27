@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { adminStats, adminList } from '../lib/api';
 import StatCard from '../components/StatCard';
 import {
   Music2, Heart, PlayCircle, DollarSign, CalendarDays, ShoppingBag,
-  Loader2, Users, Radio, MapPin, Trophy,
+  Loader2, Users, Radio, MapPin, Trophy, Megaphone, GripVertical, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLiveListenerCount } from '@/hooks/useLivePresence';
+
+const LAYOUT_KEY = 'admin.dashboard.layout.v1';
+const DEFAULT_ORDER = ['top-songs', 'next-events', 'active-merch', 'top-countries', 'live-listeners', 'campaigns'];
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
