@@ -328,6 +328,8 @@ export type Database = {
           created_at: string
           device: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
           region: string | null
           song_id: string | null
           source: string | null
@@ -338,6 +340,8 @@ export type Database = {
           created_at?: string
           device?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           region?: string | null
           song_id?: string | null
           source?: string | null
@@ -348,6 +352,8 @@ export type Database = {
           created_at?: string
           device?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           region?: string | null
           song_id?: string | null
           source?: string | null
