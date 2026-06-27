@@ -131,8 +131,8 @@ export const useMusicLibrary = () => {
 
           const firstSong = tracks[0].song;
           const cover = rel.cover_path
-            ? getFullImageUrl(rel.cover_path)
-            : getFullImageUrl(firstSong?.thumbnail_path);
+            ? resolveCover(rel.cover_path)
+            : resolveCover(firstSong?.thumbnail_path);
           const albumTitle = rel.title || 'Untitled';
           const relCategory = (rel.type || 'album').toLowerCase();
 
@@ -159,10 +159,10 @@ export const useMusicLibrary = () => {
             id: 'singles-pool',
             title: 'Singles',
             artist: 'Various',
-            coverArt: getFullImageUrl(orphans[0]?.thumbnail_path),
+            coverArt: resolveCover(orphans[0]?.thumbnail_path),
             year: '',
             type: 'single',
-            songs: orphans.map((r) => toSong(r, { category: 'single' })),
+            songs: orphans.map((r) => toSong(r, { category: 'single', coverArt: resolveCover(r.thumbnail_path) })),
           });
         }
 
