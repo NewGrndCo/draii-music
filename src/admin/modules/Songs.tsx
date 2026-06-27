@@ -217,8 +217,31 @@ const SongEditor: React.FC<{ song: SongRow; onClose: () => void; onSaved: (u: So
       <DialogContent className="max-w-2xl bg-black/85 border-white/10 text-white">
         <DialogHeader>
           <DialogTitle>Edit Song</DialogTitle>
-          <p className="text-xs text-white/50">Recording metadata only. Cover art, track number, and release date live on the release.</p>
+          <p className="text-xs text-white/50">Cover uploads auto-save. Other fields save with the Save button.</p>
         </DialogHeader>
+        <div className="flex items-center gap-4">
+          <div className="h-20 w-20 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center">
+            {currentCover
+              ? <img src={currentCover} alt="" className="h-full w-full object-cover" />
+              : <Music2 className="h-6 w-6 text-white/30" />}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-xs text-white/60">Cover Art</div>
+            <div className="flex items-center gap-2">
+              <label className={`px-3 py-1.5 rounded-md text-xs cursor-pointer bg-white/5 hover:bg-white/10 text-white ${uploadingCover ? 'opacity-60 pointer-events-none' : ''}`}>
+                {uploadingCover ? 'Uploading…' : (draft.thumbnail_path ? 'Replace' : 'Upload')}
+                <input type="file" accept="image/*" hidden disabled={uploadingCover}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); e.currentTarget.value = ''; }} />
+              </label>
+              {draft.thumbnail_path && (
+                <Button variant="ghost" size="sm" disabled={uploadingCover} onClick={clearCover}
+                  className="text-rose-300/80 hover:text-rose-200 h-8 px-2 text-xs">Remove</Button>
+              )}
+            </div>
+            <p className="text-[10px] text-white/40">Leave empty to fall back to release / default cover.</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Lbl label="Title"><Input value={draft.title || ''} onChange={(e) => field('title', e.target.value)} /></Lbl>
           <Lbl label="Primary Artist"><Input value={draft.artist || ''} onChange={(e) => field('artist', e.target.value)} /></Lbl>
