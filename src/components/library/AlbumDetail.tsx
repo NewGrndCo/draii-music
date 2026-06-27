@@ -5,6 +5,7 @@ import AppleStyleSongRow from './AppleStyleSongRow';
 import { copyToClipboard } from '../../utils/shareUtils';
 import { toast } from 'sonner';
 import { SITE_URL } from '@/lib/siteUrl';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface AlbumDetailProps {
   album: Album;
