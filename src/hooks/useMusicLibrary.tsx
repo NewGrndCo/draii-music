@@ -26,8 +26,14 @@ export const useMusicLibrary = () => {
     if (!path) return defaultCover || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/lovable-uploads')) return path;
-    return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+    // Only trust paths that live under known storage prefixes; older paths
+    // (e.g. `thumbnails/...`) point at deleted files and would 404.
+    if (path.startsWith('covers/') || path.startsWith('defaults/') || path.startsWith('release-covers/')) {
+      return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+    }
+    return defaultCover || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
   }, [defaultCover]);
+
 
   const formatDuration = useCallback((seconds: number): string => {
     if (!seconds || isNaN(seconds)) return '0:00';
