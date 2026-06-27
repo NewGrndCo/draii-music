@@ -9,6 +9,8 @@ type Listen = {
   country?: string | null;
   region?: string | null;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type FocusTarget = {
@@ -35,6 +37,26 @@ const groupBy = <T,>(arr: T[], keyFn: (x: T) => string | null) => {
   return map;
 };
 
+type GeoAgg = Record<string, { n: number; latSum: number; lngSum: number; geoN: number }>;
+const groupWithCoords = <T extends { latitude?: number | null; longitude?: number | null }>(
+  arr: T[], keyFn: (x: T) => string | null,
+): GeoAgg => {
+  const map: GeoAgg = {};
+  arr.forEach((x) => {
+    const k = keyFn(x);
+    if (!k) return;
+    const row = (map[k] ||= { n: 0, latSum: 0, lngSum: 0, geoN: 0 });
+    row.n += 1;
+    if (typeof x.latitude === 'number' && typeof x.longitude === 'number') {
+      row.latSum += x.latitude;
+      row.lngSum += x.longitude;
+      row.geoN += 1;
+    }
+  });
+  return map;
+};
+
+
 const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
   const [level, setLevel] = useState<Level>('world');
   const [country, setCountry] = useState<string | null>(null); // ISO-2
@@ -49,17 +71,19 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
 
   // Counts at each level
   const byCountry = useMemo(() => groupBy(normalised, (l) => l.code), [normalised]);
-  const byRegion = useMemo(
-    () => groupBy(normalised.filter((l) => l.code === country), (l) => l.region || null),
+  const regionAgg = useMemo(
+    () => groupWithCoords(normalised.filter((l) => l.code === country), (l) => l.region || null),
     [normalised, country],
   );
-  const byCity = useMemo(
-    () => groupBy(
+  const cityAgg = useMemo(
+    () => groupWithCoords(
       normalised.filter((l) => l.code === country && (l.region || null) === region),
       (l) => l.city || null,
     ),
     [normalised, country, region],
   );
+  const byRegion = useMemo(() => Object.fromEntries(Object.entries(regionAgg).map(([k, v]) => [k, v.n])), [regionAgg]);
+  const byCity = useMemo(() => Object.fromEntries(Object.entries(cityAgg).map(([k, v]) => [k, v.n])), [cityAgg]);
 
   const topCountries = Object.entries(byCountry).sort((a, b) => b[1] - a[1]);
   const topRegions = Object.entries(byRegion).sort((a, b) => b[1] - a[1]);
@@ -122,37 +146,37 @@ const GeographicMap: React.FC<Props> = ({ listens, focus, onClearFocus }) => {
       }).filter(Boolean) as any[];
     }
     if (level === 'country' && country && COUNTRY_COORDS[country]) {
-      // Spread region markers around the country centroid (we have no region coords)
       const [lon, lat] = COUNTRY_COORDS[country];
       return topRegions.slice(0, 20).map(([r, n], i) => {
-        const angle = (i / Math.max(1, topRegions.length)) * Math.PI * 2;
-        const radius = 4;
-        return {
-          key: r,
-          coords: [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius] as [number, number],
-          label: r,
-          n,
-          max: maxRegion,
-          onClick: () => goRegion(r),
-        };
+        const agg = regionAgg[r];
+        let coords: [number, number];
+        if (agg && agg.geoN > 0) {
+          coords = [agg.lngSum / agg.geoN, agg.latSum / agg.geoN];
+        } else {
+          const angle = (i / Math.max(1, topRegions.length)) * Math.PI * 2;
+          const radius = 4;
+          coords = [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius];
+        }
+        return { key: r, coords, label: r, n, max: maxRegion, onClick: () => goRegion(r) };
       });
     }
     if (level === 'region' && country && COUNTRY_COORDS[country]) {
       const [lon, lat] = COUNTRY_COORDS[country];
       return topCities.slice(0, 30).map(([city, n], i) => {
-        const angle = (i / Math.max(1, topCities.length)) * Math.PI * 2;
-        const radius = 2;
-        return {
-          key: city,
-          coords: [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius] as [number, number],
-          label: city,
-          n,
-          max: maxCity,
-        };
+        const agg = cityAgg[city];
+        let coords: [number, number];
+        if (agg && agg.geoN > 0) {
+          coords = [agg.lngSum / agg.geoN, agg.latSum / agg.geoN];
+        } else {
+          const angle = (i / Math.max(1, topCities.length)) * Math.PI * 2;
+          const radius = 2;
+          coords = [lon + Math.cos(angle) * radius, lat + Math.sin(angle) * radius];
+        }
+        return { key: city, coords, label: city, n, max: maxCity };
       });
     }
     return [];
-  }, [level, country, focus, topCountries, topRegions, topCities, maxCountry, maxRegion, maxCity]);
+  }, [level, country, focus, topCountries, topRegions, topCities, maxCountry, maxRegion, maxCity, regionAgg, cityAgg]);
 
   // Bottom list — depends on level
   const list: { key: string; label: string; flag?: string; n: number; onClick?: () => void }[] = useMemo(() => {

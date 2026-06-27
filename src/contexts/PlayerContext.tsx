@@ -77,11 +77,35 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!currentSong || lastTrackedRef.current === currentSong.id) return;
     lastTrackedRef.current = currentSong.id;
     const source = document.referrer ? new URL(document.referrer).hostname : 'direct';
-    let geo: any = {};
-    try { const c = sessionStorage.getItem('live-presence-geo-v1'); if (c) geo = JSON.parse(c); } catch {}
-    supabase.functions.invoke('track-listen', {
-      body: { songId: currentSong.id, source, country: geo.country, region: geo.region, city: geo.city },
-    }).catch(() => {});
+    const trackedSongId = currentSong.id;
+    (async () => {
+      let geo: any = {};
+      try { const c = sessionStorage.getItem('live-presence-geo-v1'); if (c) geo = JSON.parse(c); } catch {}
+      // Fetch real geo once per session (with lat/lng) if not cached
+      if (geo.latitude == null || geo.longitude == null) {
+        try {
+          const r = await fetch('https://ipapi.co/json/');
+          if (r.ok) {
+            const j = await r.json();
+            geo = {
+              country: j.country_name || j.country || geo.country,
+              region: j.region || geo.region,
+              city: j.city || geo.city,
+              latitude: typeof j.latitude === 'number' ? j.latitude : geo.latitude,
+              longitude: typeof j.longitude === 'number' ? j.longitude : geo.longitude,
+            };
+            try { sessionStorage.setItem('live-presence-geo-v1', JSON.stringify(geo)); } catch {}
+          }
+        } catch {}
+      }
+      supabase.functions.invoke('track-listen', {
+        body: {
+          songId: trackedSongId, source,
+          country: geo.country, region: geo.region, city: geo.city,
+          latitude: geo.latitude, longitude: geo.longitude,
+        },
+      }).catch(() => {});
+    })();
   }, [currentSong]);
 
   useEffect(() => {

@@ -7,6 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const finiteNum = (v: any): number | null => {
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+  return Number.isFinite(n) ? n : null;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -18,11 +23,27 @@ Deno.serve(async (req) => {
     const songId = typeof body.songId === "string" ? body.songId : null;
     const source = typeof body.source === "string" ? body.source.slice(0, 64) : null;
 
-    // Geo + device hints (best effort) — prefer client-supplied (ipapi) values, fall back to edge headers
+    // Netlify edge geo header fallback: base64-encoded JSON
+    let nfGeo: any = {};
+    const nfRaw = req.headers.get("x-nf-geo");
+    if (nfRaw) {
+      try { nfGeo = JSON.parse(atob(nfRaw)); } catch { nfGeo = {}; }
+    }
+
     const cleanStr = (v: any) => (typeof v === "string" && v.trim()) ? v.trim().slice(0, 120) : null;
-    const country = cleanStr(body.country) || req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
-    const region  = cleanStr(body.region)  || req.headers.get("cf-region")     || req.headers.get("x-vercel-ip-country-region") || null;
-    const city    = cleanStr(body.city)    || req.headers.get("cf-ipcity")     || req.headers.get("x-vercel-ip-city") || null;
+    const country = cleanStr(body.country)
+      || cleanStr(nfGeo?.country?.name) || cleanStr(nfGeo?.country?.code)
+      || req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
+    const region = cleanStr(body.region)
+      || cleanStr(nfGeo?.subdivision?.name) || cleanStr(nfGeo?.subdivision?.code)
+      || req.headers.get("cf-region") || req.headers.get("x-vercel-ip-country-region") || null;
+    const city = cleanStr(body.city)
+      || cleanStr(nfGeo?.city)
+      || req.headers.get("cf-ipcity") || req.headers.get("x-vercel-ip-city") || null;
+
+    const latitude = finiteNum(body.latitude) ?? finiteNum(nfGeo?.latitude);
+    const longitude = finiteNum(body.longitude) ?? finiteNum(nfGeo?.longitude);
+
     const ua = req.headers.get("user-agent") || "";
     const device = /mobile|iphone|android/i.test(ua) ? "mobile" : "desktop";
 
@@ -30,12 +51,10 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
     const { error } = await sb.from("listens").insert({
-      song_id: songId, country, region, city, device, source,
+      song_id: songId, country, region, city, latitude, longitude, device, source,
     });
     if (error) return json({ error: error.message }, 400);
 
-    // Tally a play immediately so totals reflect every started listen,
-    // not only songs that play through to the end.
     if (songId) {
       const { data: cur } = await sb.from("songs").select("play_count").eq("id", songId).single();
       const next = (cur?.play_count ?? 0) + 1;

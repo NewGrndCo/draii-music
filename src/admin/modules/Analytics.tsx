@@ -70,14 +70,21 @@ const Analytics: React.FC = () => {
   // Click a live listener → focus the map on their location
   const focusOnListener = (l: any) => {
     const code = toCountryCode(l.country);
-    const coords = code ? COUNTRY_COORDS[code] : null;
+    const label = [l.city, l.region, code].filter(Boolean).join(', ') || 'Listener';
+    let coords: [number, number] | null = null;
+    let zoom = 4;
+    if (typeof l.latitude === 'number' && typeof l.longitude === 'number') {
+      coords = [l.longitude, l.latitude];
+      zoom = l.city ? 8 : l.region ? 6 : 4;
+    } else if (code && COUNTRY_COORDS[code]) {
+      coords = COUNTRY_COORDS[code];
+      zoom = l.city ? 6 : 4;
+    }
     if (!coords) {
       toast.info('No coordinates available for this listener.');
       return;
     }
-    const label = [l.city, l.region, code].filter(Boolean).join(', ');
-    setFocus({ coords, zoom: l.city ? 6 : 4, label: label || 'Listener' });
-    // Smooth scroll to the map
+    setFocus({ coords, zoom, label });
     requestAnimationFrame(() => {
       document.getElementById('analytics-geo-map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
