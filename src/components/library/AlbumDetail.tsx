@@ -4,6 +4,7 @@ import { Play, Shuffle, Share2 } from 'lucide-react';
 import AppleStyleSongRow from './AppleStyleSongRow';
 import { copyToClipboard } from '../../utils/shareUtils';
 import { toast } from 'sonner';
+import { SITE_URL } from '@/lib/siteUrl';
 
 interface AlbumDetailProps {
   album: Album;
@@ -25,7 +26,7 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
 
   const share = async () => {
     const key = album.slug || album.id;
-    const url = `${window.location.origin}?a=${encodeURIComponent(key)}`;
+    const url = `${SITE_URL}?a=${encodeURIComponent(key)}`;
     const data = { title: album.title, text: `${album.title} — ${album.artist}`, url };
     try {
       if (navigator.share) await navigator.share(data);
