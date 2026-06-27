@@ -276,8 +276,12 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
       const ext = file.name.split('.').pop() || 'jpg';
       const path = `covers/${release.id}-${Date.now()}.${ext}`;
       const url = await adminUploadFile('song-art', path, file);
+      // Persist immediately so the upload survives without an extra Save click.
+      const u = await updateRow<Release>('releases', release.id, { cover_path: url });
       field('cover_path', url);
-      toast.success('Cover uploaded — click Save to apply');
+      onSaved(u);
+      invalidateMusicLibraryCache();
+      toast.success('Cover updated');
     } catch (e: any) { toast.error(e.message); }
     finally { setUploadingCover(false); }
   };
