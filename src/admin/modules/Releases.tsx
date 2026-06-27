@@ -15,6 +15,7 @@ import {
 import { adminCall, adminUploadFile } from '../lib/api';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 import { supabase } from '@/integrations/supabase/client';
+import SmartCover from '@/components/shared/SmartCover';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
