@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v9';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v10';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const invalidateMusicLibraryCache = () => {
@@ -127,6 +127,7 @@ export const useMusicLibrary = () => {
             artist: rel.primary_artist || firstSong?.artist || 'Unknown Artist',
             coverArt: cover,
             year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
+            type: relCategory,
             songs: tracks.map((t: any) =>
               toSong(t.song, { album: albumTitle, coverArt: cover, category: relCategory })
             ),
@@ -142,6 +143,7 @@ export const useMusicLibrary = () => {
             artist: 'Various',
             coverArt: getFullImageUrl(orphans[0]?.thumbnail_path),
             year: '',
+            type: 'single',
             songs: orphans.map((r) => toSong(r, { category: 'single' })),
           });
         }

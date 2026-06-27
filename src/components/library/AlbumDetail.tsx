@@ -38,7 +38,7 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
     }
   };
 
-  const metaParts = ['ALBUM'];
+  const metaParts = [(album.type || 'album').toUpperCase()];
   if (album.year) metaParts.push(album.year);
   metaParts.push(`${tracks.length} TRACK${tracks.length === 1 ? '' : 'S'}`);
 
