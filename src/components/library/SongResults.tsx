@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAnimationContext } from '../../hooks/useAnimationContext';
 import { generateShareLink, copyToClipboard } from '../../utils/shareUtils';
 import { toast } from 'sonner';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface SongResultsProps {
   songs: Song[];
@@ -162,12 +163,13 @@ const SongResults: React.FC<SongResultsProps> = ({
             onClick={(e) => handleSongSelect(song, e)}
             onTouchStart={(e) => handleTouchStart(song.id, e)}
           >
-            <img 
-              src={song.coverArt} 
-              alt={song.title} 
+            <SmartCover
+              src={song.coverArt}
+              alt={song.title}
               className="w-12 h-12 rounded-md object-cover shadow-md"
-              loading="lazy"
+              iconClassName="h-4 w-4"
             />
+
             <div className="flex-1 overflow-hidden">
               <p className="text-sm text-white font-medium truncate">{song.title}</p>
               <p className="text-xs text-white/70 truncate">{song.artist}</p>

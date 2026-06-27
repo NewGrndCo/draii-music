@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Search, Pencil, Trash2, Music2, EyeOff, Eye, Upload } from 'lucide-react';
+import { Loader2, Search, Pencil, Trash2, EyeOff, Eye, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { adminUploadFile } from '../lib/api';
 import BulkUploader from '../components/BulkUploader';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import SmartCover from '@/components/shared/SmartCover';
 
 interface SongRow {
   id: string;
@@ -112,14 +113,11 @@ const Songs: React.FC = () => {
           ) : (
             <ul className="divide-y divide-white/5">
               {filtered.map((s) => {
-                const cover = coverUrl(s.thumbnail_path) || defaultCover;
+                const cover = coverUrl(s.thumbnail_path);
                 return (
                   <li key={s.id} className="group flex items-center gap-3 px-3 md:px-4 py-2.5 hover:bg-white/[0.03]">
-                    <div className="h-11 w-11 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 relative">
-                      {cover
-                        ? <img src={cover} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                        : <Music2 className="h-4 w-4 text-white/30 absolute inset-0 m-auto" />}
-                    </div>
+                    <SmartCover src={cover} fallback={defaultCover} className="h-11 w-11 rounded-lg overflow-hidden object-cover border border-white/5 shrink-0" iconClassName="h-4 w-4" />
+
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-white truncate">{s.title || 'Untitled'}</div>
                       <div className="text-[11px] text-white/50 truncate">{s.artist || '—'}</div>
@@ -220,11 +218,8 @@ const SongEditor: React.FC<{ song: SongRow; onClose: () => void; onSaved: (u: So
           <p className="text-xs text-white/50">Cover uploads auto-save. Other fields save with the Save button.</p>
         </DialogHeader>
         <div className="flex items-center gap-4">
-          <div className="h-20 w-20 rounded-lg overflow-hidden bg-white/[0.04] border border-white/10 shrink-0 flex items-center justify-center">
-            {currentCover
-              ? <img src={currentCover} alt="" className="h-full w-full object-cover" />
-              : <Music2 className="h-6 w-6 text-white/30" />}
-          </div>
+          <SmartCover src={coverUrl(draft.thumbnail_path)} fallback={defaultCover} className="h-20 w-20 rounded-lg overflow-hidden object-cover border border-white/10 shrink-0" iconClassName="h-6 w-6" />
+
           <div className="flex flex-col gap-1.5">
             <div className="text-xs text-white/60">Cover Art</div>
             <div className="flex items-center gap-2">

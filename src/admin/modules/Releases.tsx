@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, GripVertical, X, Search, Image as ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -15,6 +15,7 @@ import {
 import { adminCall, adminUploadFile } from '../lib/api';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
 import { supabase } from '@/integrations/supabase/client';
+import SmartCover from '@/components/shared/SmartCover';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
@@ -159,13 +160,13 @@ const Releases: React.FC = () => {
               <div key={r.id} className="admin-glass rounded-2xl overflow-hidden">
                 <button onClick={() => setExpanded(isOpen ? null : r.id)} className="w-full flex items-center gap-3 p-3 hover:bg-white/[0.03] text-left">
                   {isOpen ? <ChevronDown className="h-4 w-4 text-white/45" /> : <ChevronRight className="h-4 w-4 text-white/45" />}
-                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/5 shrink-0 flex items-center justify-center">
-                    {r.cover_path
-                      ? <img src={coverUrl(r.cover_path)} alt="" loading="lazy" className="h-full w-full object-cover" />
-                      : defaultCover
-                        ? <img src={defaultCover} alt="" loading="lazy" className="h-full w-full object-cover opacity-80" />
-                        : <Disc3 className="h-5 w-5 text-white/30" />}
-                  </div>
+                  <SmartCover
+                    src={r.cover_path ? coverUrl(r.cover_path) : null}
+                    fallback={defaultCover}
+                    className="h-12 w-12 rounded-lg overflow-hidden object-cover border border-white/5 shrink-0"
+                    iconClassName="h-5 w-5"
+                  />
+
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-white font-medium truncate">{r.title}</span>
@@ -290,16 +291,17 @@ const ReleaseEditor: React.FC<{ release: Release; onSaved: (u: Release) => void 
     <div className="border-t border-white/5 p-4 grid lg:grid-cols-[280px_1fr] gap-6">
       {/* Metadata column */}
       <div className="space-y-3">
-        <div className="aspect-square rounded-xl overflow-hidden bg-white/[0.04] border border-white/5 relative">
-          {draft.cover_path
-            ? <img src={coverUrl(draft.cover_path)} alt="" className="h-full w-full object-cover" />
-            : <Disc3 className="h-12 w-12 text-white/20 m-auto mt-20" />}
-          <label className="absolute bottom-2 right-2 bg-black/70 backdrop-blur text-[11px] px-2 py-1 rounded cursor-pointer hover:bg-black">
-            {uploadingCover ? 'Uploading…' : 'Change cover'}
-            <input type="file" accept="image/*" hidden disabled={uploadingCover}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
-          </label>
-        </div>
+        <SmartCover
+          src={draft.cover_path ? coverUrl(draft.cover_path) : null}
+          className="aspect-square w-full rounded-xl overflow-hidden object-cover border border-white/5"
+          iconClassName="h-12 w-12"
+        />
+        <label className="block text-center text-[11px] py-1.5 rounded cursor-pointer bg-white/5 hover:bg-white/10 text-white">
+          {uploadingCover ? 'Uploading…' : (draft.cover_path ? 'Replace cover' : 'Upload cover')}
+          <input type="file" accept="image/*" hidden disabled={uploadingCover}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); e.currentTarget.value = ''; }} />
+        </label>
+
         <Field label="Title"><Input value={draft.title} onChange={(e) => field('title', e.target.value)} /></Field>
         <Field label="Primary Artist"><Input value={draft.primary_artist} onChange={(e) => field('primary_artist', e.target.value)} /></Field>
         <Field label="Type">
@@ -425,9 +427,12 @@ const TrackList: React.FC<{ releaseId: string; primaryArtist: string }> = ({ rel
               className={`flex items-center gap-2 px-2 py-2 text-sm ${dragSong === t.song_id ? 'opacity-40' : ''} hover:bg-white/[0.04]`}>
               <GripVertical className="h-4 w-4 text-white/30 cursor-grab" />
               <span className="w-6 text-right text-xs text-white/45">{i + 1}</span>
-              {t.songs?.thumbnail_path
-                ? <img src={coverUrl(t.songs.thumbnail_path)} alt="" className="h-8 w-8 rounded object-cover" />
-                : <div className="h-8 w-8 rounded bg-white/[0.04] flex items-center justify-center"><Music2 className="h-3 w-3 text-white/30" /></div>}
+              <SmartCover
+                src={t.songs?.thumbnail_path ? coverUrl(t.songs.thumbnail_path) : null}
+                className="h-8 w-8 rounded overflow-hidden object-cover"
+                iconClassName="h-3 w-3"
+              />
+
               <div className="min-w-0 flex-1">
                 <div className="text-white truncate">{t.songs?.title || 'Untitled'}</div>
                 <div className="text-[10px] text-white/45 truncate">{t.songs?.artist}</div>
@@ -492,9 +497,12 @@ const SongPicker: React.FC<{ existingIds: Set<string>; primaryArtist: string; on
           {filtered.map((s) => (
             <button key={s.id} onClick={() => { onPick(s.id); onClose(); }}
               className="w-full flex items-center gap-3 p-2 hover:bg-white/[0.05] text-left">
-              {s.thumbnail_path
-                ? <img src={coverUrl(s.thumbnail_path)} alt="" className="h-9 w-9 rounded object-cover" />
-                : <div className="h-9 w-9 rounded bg-white/[0.04]" />}
+              <SmartCover
+                src={s.thumbnail_path ? coverUrl(s.thumbnail_path) : null}
+                className="h-9 w-9 rounded overflow-hidden object-cover"
+                iconClassName="h-3 w-3"
+              />
+
               <div className="min-w-0 flex-1">
                 <div className="text-sm text-white truncate">{s.title}</div>
                 <div className="text-[11px] text-white/50 truncate">{s.artist}</div>
