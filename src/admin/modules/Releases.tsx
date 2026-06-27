@@ -497,9 +497,12 @@ const SongPicker: React.FC<{ existingIds: Set<string>; primaryArtist: string; on
           {filtered.map((s) => (
             <button key={s.id} onClick={() => { onPick(s.id); onClose(); }}
               className="w-full flex items-center gap-3 p-2 hover:bg-white/[0.05] text-left">
-              {s.thumbnail_path
-                ? <img src={coverUrl(s.thumbnail_path)} alt="" className="h-9 w-9 rounded object-cover" />
-                : <div className="h-9 w-9 rounded bg-white/[0.04]" />}
+              <SmartCover
+                src={s.thumbnail_path ? coverUrl(s.thumbnail_path) : null}
+                className="h-9 w-9 rounded overflow-hidden object-cover"
+                iconClassName="h-3 w-3"
+              />
+
               <div className="min-w-0 flex-1">
                 <div className="text-sm text-white truncate">{s.title}</div>
                 <div className="text-[11px] text-white/50 truncate">{s.artist}</div>
