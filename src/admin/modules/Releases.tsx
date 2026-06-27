@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, X, Disc3, Music2, Search, Image as ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -12,8 +12,9 @@ import {
   Release, ReleaseTrack, ReleaseType, ReleaseStatus, ReleaseVisibility,
   coverUrl, RELEASE_TYPES, slugify,
 } from '../lib/musicApi';
-import { adminUploadFile } from '../lib/api';
+import { adminCall, adminUploadFile } from '../lib/api';
 import { invalidateMusicLibraryCache } from '@/hooks/useMusicLibrary';
+import { supabase } from '@/integrations/supabase/client';
 
 const Releases: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
@@ -22,6 +23,9 @@ const Releases: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<ReleaseType | 'all'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [defaultCover, setDefaultCover] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [savingDefault, setSavingDefault] = useState(false);
 
   const refresh = () => {
     setLoading(true);
