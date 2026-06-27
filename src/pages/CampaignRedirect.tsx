@@ -25,19 +25,24 @@ const CampaignRedirect: React.FC = () => {
       if (done) return;
       done = true;
       try {
-        const u = new URL(url, window.location.origin);
+        const u = new URL(url, SITE_URL);
         if (!/^https?:$/.test(u.protocol)) throw new Error('bad scheme');
+        // Never bounce the user to the Supabase functions origin.
+        if (/supabase\.(co|in)$/.test(u.hostname)) {
+          window.location.replace(SITE_URL);
+          return;
+        }
         window.location.replace(u.toString());
       } catch {
-        window.location.replace('/');
+        window.location.replace(SITE_URL);
       }
     };
 
     // Safety fallback — if function hangs, send them home after 2.5s
-    const t = setTimeout(() => go('/'), 2500);
+    const t = setTimeout(() => go(SITE_URL), 2500);
 
     supabase.functions
-      .invoke('campaign-track', { body: { code, referrer, session_id, site_origin: window.location.origin } })
+      .invoke('campaign-track', { body: { code, referrer, session_id, site_origin: SITE_URL } })
       .then(({ data, error }) => {
         clearTimeout(t);
         if (error || !data?.destination_url) {
