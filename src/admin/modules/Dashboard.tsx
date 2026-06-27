@@ -291,6 +291,10 @@ const Dashboard: React.FC = () => {
           </div>
         );
       })()}
+    </div>
+  );
+};
+
 
 const fmtHour12 = (d: Date) =>
   d.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true }).replace(/\s/, '');
