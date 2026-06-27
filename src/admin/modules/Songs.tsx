@@ -157,8 +157,11 @@ const Songs: React.FC = () => {
 };
 
 const SongEditor: React.FC<{ song: SongRow; onClose: () => void; onSaved: (u: SongRow) => void }> = ({ song, onClose, onSaved }) => {
+  const { profile } = useArtistProfile();
+  const defaultCover = profile?.default_cover_url || null;
   const [draft, setDraft] = useState<SongRow>(song);
   const [saving, setSaving] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   const save = async () => {
     setSaving(true);
@@ -177,6 +180,37 @@ const SongEditor: React.FC<{ song: SongRow; onClose: () => void; onSaved: (u: So
   };
 
   const field = (k: keyof SongRow, v: any) => setDraft((d) => ({ ...d, [k]: v }));
+
+  const uploadCover = async (file: File) => {
+    setUploadingCover(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `songs/${song.id}-${Date.now()}.${ext}`;
+      const url = await adminUploadFile('song-art', path, file);
+      // Persist immediately so the upload survives without a Save click.
+      const u = await updateRow<SongRow>('songs', song.id, { thumbnail_path: url });
+      setDraft((d) => ({ ...d, thumbnail_path: url }));
+      onSaved(u);
+      invalidateMusicLibraryCache();
+      toast.success('Cover updated');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setUploadingCover(false); }
+  };
+
+  const clearCover = async () => {
+    setUploadingCover(true);
+    try {
+      const u = await updateRow<SongRow>('songs', song.id, { thumbnail_path: null });
+      setDraft((d) => ({ ...d, thumbnail_path: null }));
+      onSaved(u);
+      invalidateMusicLibraryCache();
+      toast.success('Cover removed');
+    } catch (e: any) { toast.error(e.message); }
+    finally { setUploadingCover(false); }
+  };
+
+  const currentCover = coverUrl(draft.thumbnail_path) || defaultCover;
+
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
