@@ -24,6 +24,8 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'recent', label: 'Recently Played' },
 ];
 
+const ALBUM_TAB_TYPES = ['album', 'ep', 'compilation', 'collaboration', 'mixtape'];
+
 const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isVisible, initialAlbumSlug }) => {
   const [tab, setTab] = useState<Tab>('albums');
   const [query, setQuery] = useState('');
@@ -50,13 +52,13 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
     return out;
   }, [albums]);
 
-  // Albums tab = real albums/EPs only (exclude singles + virtual pool).
+  // Albums tab = all multi-track release types (exclude singles + virtual pool).
   const realAlbums = useMemo(
     () => albums.filter((a) => {
       if (a.id === 'singles-pool') return false;
       if (!(a.songs?.length)) return false;
-      const cat = (a.songs[0]?.category || '').toLowerCase();
-      return cat === 'album' || cat === 'ep';
+      const t = (a.type || a.songs[0]?.category || '').toLowerCase();
+      return ALBUM_TAB_TYPES.includes(t);
     }),
     [albums]
   );
@@ -110,7 +112,7 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
         <div className="min-w-0 px-0.5">
           <div className="text-sm font-semibold text-white truncate">{album.title}</div>
           <div className="text-[10px] text-white/55 uppercase tracking-widest truncate">
-            ALBUM · {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
+            {(album.type || 'album').toUpperCase()} · {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
           </div>
         </div>
       </button>
