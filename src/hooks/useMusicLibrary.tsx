@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v13';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v14';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const invalidateMusicLibraryCache = () => {
@@ -26,8 +26,14 @@ export const useMusicLibrary = () => {
     if (!path) return defaultCover || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/lovable-uploads')) return path;
-    return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+    // Only trust paths that live under known storage prefixes; older paths
+    // (e.g. `thumbnails/...`) point at deleted files and would 404.
+    if (path.startsWith('covers/') || path.startsWith('defaults/') || path.startsWith('release-covers/')) {
+      return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+    }
+    return defaultCover || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
   }, [defaultCover]);
+
 
   const formatDuration = useCallback((seconds: number): string => {
     if (!seconds || isNaN(seconds)) return '0:00';
@@ -101,14 +107,23 @@ export const useMusicLibrary = () => {
 
         if (!cancelled && profileData?.default_cover_url) setDefaultCover(profileData.default_cover_url);
         const fallback = profileData?.default_cover_url || null;
+        // A path is only treated as a valid storage object if it lives under
+        // a known prefix in the song-art bucket. Stale paths from prior schema
+        // versions (e.g. `thumbnails/...`) point at files that no longer exist
+        // and would 404 — skip them so the release/default fallback wins.
+        const VALID_PREFIXES = ['covers/', 'defaults/', 'release-covers/'];
+        const isValidStoragePath = (p: string) => VALID_PREFIXES.some((pre) => p.startsWith(pre));
         const resolveCover = (path?: string | null) => {
           if (path) {
             if (path.startsWith('http')) return path;
             if (path.startsWith('/lovable-uploads')) return path;
-            return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+            if (isValidStoragePath(path)) {
+              return `${SUPABASE_PUBLIC_BASE}/storage/v1/object/public/song-art/${path}`;
+            }
           }
           return fallback || 'https://images.unsplash.com/photo-1577985051167-0d49eec21977?w=500';
         };
+
 
         if (cancelled) return;
         if (relErr) throw relErr;
@@ -146,12 +161,17 @@ export const useMusicLibrary = () => {
             year: rel.release_date ? new Date(rel.release_date).getFullYear().toString() : '',
             type: relCategory,
             songs: tracks.map((t: any) => {
-              // Per-song cover: own thumbnail → release cover → default fallback.
-              const songCover = t.song.thumbnail_path
-                ? resolveCover(t.song.thumbnail_path)
-                : (releaseCover || resolveCover(null));
+              // Per-song cover: own thumbnail (if it points at a real file) →
+              // release cover → default fallback.
+              const ownCover =
+                t.song.thumbnail_path && (
+                  t.song.thumbnail_path.startsWith('http') ||
+                  isValidStoragePath(t.song.thumbnail_path)
+                ) ? resolveCover(t.song.thumbnail_path) : null;
+              const songCover = ownCover || releaseCover || resolveCover(null);
               return toSong(t.song, { album: albumTitle, coverArt: songCover, category: relCategory });
             }),
+
           });
         }
 
