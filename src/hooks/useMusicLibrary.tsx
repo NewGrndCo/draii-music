@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const SUPABASE_PUBLIC_BASE = import.meta.env.VITE_SUPABASE_URL as string;
 
-const LIBRARY_CACHE_KEY = 'music-library-cache-v11';
+const LIBRARY_CACHE_KEY = 'music-library-cache-v12';
 const LIBRARY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const invalidateMusicLibraryCache = () => {
