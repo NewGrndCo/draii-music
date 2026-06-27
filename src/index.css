@@ -78,37 +78,42 @@
 
 /* === Admin CMS glass tokens === */
 :root {
-  --admin-bg: 240 30% 4%;
-  --admin-surface: 250 40% 10%;
-  --admin-glass: 250 40% 14%;
-  --admin-glass-border: 260 60% 60%;
+  --admin-bg: 240 35% 3.5%;
+  --admin-surface: 250 40% 9%;
+  --admin-glass: 250 42% 13%;
+  --admin-glass-border: 260 60% 65%;
   --admin-text: 220 30% 96%;
   --admin-muted: 230 15% 70%;
-  --admin-purple: 270 90% 65%;
-  --admin-blue: 220 95% 65%;
+  --admin-purple: 268 92% 66%;
+  --admin-blue: 215 95% 65%;
+  --admin-cyan: 188 95% 60%;
   --admin-pink: 320 90% 70%;
   --admin-success: 150 70% 55%;
   --admin-warn: 35 95% 60%;
   --admin-danger: 0 80% 65%;
-  --admin-gradient: linear-gradient(135deg, hsl(var(--admin-purple)) 0%, hsl(var(--admin-blue)) 100%);
-  --admin-gradient-soft: linear-gradient(135deg, hsl(var(--admin-purple) / 0.18) 0%, hsl(var(--admin-blue) / 0.18) 100%);
-  --admin-glow: 0 10px 40px -12px hsl(var(--admin-purple) / 0.55);
-  --admin-shadow: 0 8px 32px hsl(240 50% 2% / 0.6);
+  --admin-gradient: linear-gradient(135deg, hsl(var(--admin-purple)) 0%, hsl(var(--admin-blue)) 55%, hsl(var(--admin-cyan)) 100%);
+  --admin-gradient-soft: linear-gradient(135deg, hsl(var(--admin-purple) / 0.22) 0%, hsl(var(--admin-blue) / 0.18) 60%, hsl(var(--admin-cyan) / 0.16) 100%);
+  --admin-glow: 0 12px 48px -16px hsl(var(--admin-purple) / 0.55);
+  --admin-shadow: 0 10px 40px hsl(240 60% 2% / 0.6), 0 1px 0 hsl(0 0% 100% / 0.04) inset;
 }
 
 @layer components {
   .admin-glass {
-    background: hsl(var(--admin-glass) / 0.55);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    border: 1px solid hsl(var(--admin-glass-border) / 0.18);
+    background:
+      linear-gradient(180deg, hsl(0 0% 100% / 0.04) 0%, hsl(0 0% 100% / 0) 60%),
+      hsl(var(--admin-glass) / 0.55);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid hsl(0 0% 100% / 0.08);
     box-shadow: var(--admin-shadow);
   }
   .admin-glass-strong {
-    background: hsl(var(--admin-glass) / 0.78);
+    background:
+      linear-gradient(180deg, hsl(0 0% 100% / 0.06) 0%, hsl(0 0% 100% / 0) 50%),
+      hsl(var(--admin-glass) / 0.82);
     backdrop-filter: blur(28px) saturate(160%);
     -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border: 1px solid hsl(var(--admin-glass-border) / 0.24);
+    border: 1px solid hsl(0 0% 100% / 0.1);
     box-shadow: var(--admin-glow), var(--admin-shadow);
   }
   .admin-gradient-text {
@@ -119,6 +124,68 @@
   }
   .admin-gradient-bg { background: var(--admin-gradient); }
   .admin-gradient-soft-bg { background: var(--admin-gradient-soft); }
+
+  /* Section heading helpers */
+  .admin-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: hsl(0 0% 100% / 0.5);
+    font-weight: 600;
+  }
+  .admin-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: hsl(0 0% 100% / 0.95);
+  }
+
+  /* Status badges */
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    border: 1px solid hsl(0 0% 100% / 0.08);
+    background: hsl(0 0% 100% / 0.05);
+    color: hsl(0 0% 100% / 0.75);
+  }
+  .admin-badge-success { color: hsl(var(--admin-success)); background: hsl(var(--admin-success) / 0.1); border-color: hsl(var(--admin-success) / 0.25); }
+  .admin-badge-warn    { color: hsl(var(--admin-warn));    background: hsl(var(--admin-warn) / 0.1);    border-color: hsl(var(--admin-warn) / 0.25); }
+  .admin-badge-danger  { color: hsl(var(--admin-danger));  background: hsl(var(--admin-danger) / 0.1);  border-color: hsl(var(--admin-danger) / 0.25); }
+  .admin-badge-info    { color: hsl(var(--admin-cyan));    background: hsl(var(--admin-cyan) / 0.12);   border-color: hsl(var(--admin-cyan) / 0.28); }
+
+  /* Premium primary button */
+  .admin-btn-primary {
+    background: var(--admin-gradient);
+    color: white;
+    border: 1px solid hsl(0 0% 100% / 0.16);
+    box-shadow: 0 8px 24px -10px hsl(var(--admin-purple) / 0.75), 0 1px 0 hsl(0 0% 100% / 0.18) inset;
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .admin-btn-primary:hover { filter: brightness(1.08); box-shadow: 0 12px 32px -10px hsl(var(--admin-purple) / 0.85), 0 1px 0 hsl(0 0% 100% / 0.22) inset; }
+  .admin-btn-primary:active { transform: translateY(1px); }
+
+  /* Scoped polish — applies inside [data-admin] without touching modules */
+  [data-admin] input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):focus-visible,
+  [data-admin] select:focus-visible,
+  [data-admin] textarea:focus-visible {
+    border-color: hsl(0 0% 100% / 0.28) !important;
+    box-shadow: 0 0 0 3px hsl(var(--admin-purple) / 0.22) !important;
+    outline: none;
+  }
+
+  /* Scrollbar polish inside admin */
+  [data-admin] *::-webkit-scrollbar { width: 10px; height: 10px; }
+  [data-admin] *::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 100% / 0.08);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  [data-admin] *::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 100% / 0.18); background-clip: padding-box; }
+  [data-admin] *::-webkit-scrollbar-track { background: transparent; }
 }
  
 @layer base {

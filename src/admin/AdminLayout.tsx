@@ -47,10 +47,12 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
 
   return (
     <div
+      data-admin
       className="min-h-screen w-full text-white relative"
       style={{
-        background: `radial-gradient(1200px 600px at 10% -10%, hsl(var(--admin-purple) / 0.18), transparent 60%),
+        background: `radial-gradient(1200px 600px at 10% -10%, hsl(var(--admin-purple) / 0.22), transparent 60%),
                      radial-gradient(900px 600px at 110% 10%, hsl(var(--admin-blue) / 0.18), transparent 60%),
+                     radial-gradient(800px 500px at 50% 110%, hsl(var(--admin-cyan) / 0.10), transparent 60%),
                      hsl(var(--admin-bg))`,
       }}
     >
