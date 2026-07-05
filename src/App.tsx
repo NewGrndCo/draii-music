@@ -19,6 +19,26 @@ const App = () => {
   const { currentSong } = useAudio();
   const isMobile = useIsMobile();
 
+  const home = (
+    <AppBackground currentSong={currentSong}>
+      <Suspense fallback={null}><MailingListModal /></Suspense>
+
+      <Suspense fallback={
+        <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      }>
+        <main className="relative z-10 w-full h-full flex items-center justify-center">
+          <div className="w-full max-w-6xl py-0 px-0 my-0">
+            <MusicPlayer />
+          </div>
+        </main>
+      </Suspense>
+
+      <Toaster position={isMobile ? "bottom-center" : "bottom-right"} />
+    </AppBackground>
+  );
+
   return (
     <ErrorBoundary>
       <AnimationProvider>
@@ -34,25 +54,8 @@ const App = () => {
                 <CampaignRedirect />
               </Suspense>
             } />
-            <Route path="/" element={
-              <AppBackground currentSong={currentSong}>
-                <Suspense fallback={null}><MailingListModal /></Suspense>
-                
-                <Suspense fallback={
-                  <div className="relative z-10 bg-black min-h-screen min-w-full flex items-center justify-center">
-                    <div className="text-white">Loading...</div>
-                  </div>
-                }>
-                  <main className="relative z-10 w-full h-full flex items-center justify-center">
-                    <div className="w-full max-w-6xl py-0 px-0 my-0">
-                      <MusicPlayer />
-                    </div>
-                  </main>
-                </Suspense>
-                
-                <Toaster position={isMobile ? "bottom-center" : "bottom-right"} />
-              </AppBackground>
-            } />
+            <Route path="/" element={home} />
+            <Route path="/:slug" element={home} />
             <Route path="*" element={
               <Suspense fallback={<div className="min-h-screen bg-black" />}>
                 <NotFound />
