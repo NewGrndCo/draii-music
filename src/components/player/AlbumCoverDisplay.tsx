@@ -78,6 +78,8 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
           alt={currentSong.title}
           className="w-full h-full object-cover pointer-events-none"
           loading="eager"
+          {...({ fetchpriority: 'high' } as any)}
+          decoding="async"
           draggable={false}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
         />

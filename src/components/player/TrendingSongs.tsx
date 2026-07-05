@@ -15,6 +15,7 @@ const TrendingSongs: React.FC<Props> = ({ songs, onSelectSong }) => {
       .slice(0, 5);
   }, [songs]);
 
+  if (songs.length === 0) return <div aria-hidden className="px-2 h-[240px]" style={{ contain: 'layout paint' }} />;
   if (top.length === 0) return null;
 
   return (

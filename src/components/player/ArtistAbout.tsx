@@ -2,9 +2,10 @@ import React from 'react';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
 const ArtistAbout: React.FC = () => {
-  const { profile } = useArtistProfile();
+  const { profile, loading } = useArtistProfile();
   const bio = profile?.detailed_bio?.trim();
   const img = profile?.artist_image_url;
+  if (loading) return <div aria-hidden className="mt-4 rounded-xl bg-white/[0.02] border border-white/5 h-[180px]" style={{ contain: 'layout paint' }} />;
   if (!bio && !img) return null;
 
   return (
