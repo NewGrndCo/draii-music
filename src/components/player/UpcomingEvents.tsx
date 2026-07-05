@@ -14,6 +14,7 @@ interface EventRow {
 
 const UpcomingEvents: React.FC = () => {
   const [events, setEvents] = useState<EventRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -26,9 +27,11 @@ const UpcomingEvents: React.FC = () => {
         .order('event_date', { ascending: true })
         .limit(6);
       setEvents((data as EventRow[]) ?? []);
+      setLoaded(true);
     })();
   }, []);
 
+  if (!loaded) return <div aria-hidden className="mt-2 rounded-2xl border border-white/5 bg-white/[0.02] h-[112px]" style={{ contain: 'layout paint' }} />;
   if (events.length === 0) return null;
 
   return (
