@@ -27,7 +27,7 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, onSelectSong }) => {
 
   const share = async () => {
     const key = album.slug || album.id;
-    const url = `${SITE_URL}?a=${encodeURIComponent(key)}`;
+    const url = `${SITE_URL}/${encodeURIComponent(key)}`;
     const data = { title: album.title, text: `${album.title} — ${album.artist}`, url };
     try {
       if (navigator.share) await navigator.share(data);
