@@ -12,6 +12,7 @@ interface MerchRow {
 
 const UpcomingMerch: React.FC = () => {
   const [items, setItems] = useState<MerchRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -22,9 +23,11 @@ const UpcomingMerch: React.FC = () => {
         .order('sort_order', { ascending: true })
         .limit(12);
       setItems((data as MerchRow[]) ?? []);
+      setLoaded(true);
     })();
   }, []);
 
+  if (!loaded) return <div aria-hidden className="mt-2 rounded-2xl border border-white/5 bg-white/[0.02] h-[180px]" style={{ contain: 'layout paint' }} />;
   if (items.length === 0) return null;
 
   return (
