@@ -3,25 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { Song } from '../../data/musicData';
 import { AudioPlayerState } from './useAudioState';
 import { toast } from 'sonner';
-
-const LEGACY_PUBLIC_BASE = 'https://iextgszxpxeurbpncapv.supabase.co';
-
-const getAudioSourceCandidates = (audioSrc: string): string[] => {
-  if (!audioSrc) return [];
-  if (/^https?:\/\//i.test(audioSrc)) return [audioSrc];
-
-  const currentBase = import.meta.env.VITE_SUPABASE_URL;
-  const cleanPath = audioSrc.replace(/^\/+/, '');
-  const objectPath = cleanPath.replace(/^(song-audio|songs)\//, '');
-  const isBucketQualified = cleanPath !== objectPath;
-
-  return Array.from(new Set([
-    isBucketQualified && `${currentBase}/storage/v1/object/public/${cleanPath}`,
-    `${LEGACY_PUBLIC_BASE}/storage/v1/object/public/songs/${objectPath}`,
-    `${currentBase}/storage/v1/object/public/song-audio/${objectPath}`,
-    `${currentBase}/storage/v1/object/public/songs/${objectPath}`,
-  ].filter(Boolean) as string[]));
-};
+import { resolveAudioSource } from './audioSource';
 
 export const useAudioElement = (
   currentSong: Song | null,
@@ -37,6 +19,7 @@ export const useAudioElement = (
   const isPlayingRef = useRef(playerState.isPlaying);
   const audioSourceCandidatesRef = useRef<string[]>([]);
   const audioSourceIndexRef = useRef(0);
+  const sourceRequestIdRef = useRef(0);
 
   useEffect(() => {
     isPlayingRef.current = playerState.isPlaying;
@@ -180,7 +163,15 @@ export const useAudioElement = (
   // Handle song changes
   useEffect(() => {
     if (audioRef.current && currentSong && currentSong.id !== currentSongRef.current?.id) {
+      const audio = audioRef.current;
+      const sourceRequestId = ++sourceRequestIdRef.current;
+      const controller = new AbortController();
       currentSongRef.current = currentSong;
+      playRequestIdRef.current += 1;
+      audio.pause();
+      audio.removeAttribute('src');
+      audioSourceCandidatesRef.current = [];
+      audioSourceIndexRef.current = 0;
       
       // Cancel any pending play promise
       if (playPromiseRef.current) {
@@ -200,24 +191,28 @@ export const useAudioElement = (
         return;
       }
       
-      const candidates = getAudioSourceCandidates(audioSrc);
-      audioSourceCandidatesRef.current = candidates;
-      audioSourceIndexRef.current = 0;
-      playRequestIdRef.current += 1;
+      void resolveAudioSource(audioSrc, controller.signal).then((resolvedSource) => {
+        if (sourceRequestIdRef.current !== sourceRequestId || audioRef.current !== audio) return;
 
-      audioRef.current.src = candidates[0];
-      // Streaming strategy:
-      //  - Supabase public Storage serves objects via its global CDN
-      //    with HTTP Range support, so the browser will stream the file
-      //    in partial chunks instead of downloading it whole.
-      //  - We start with preload="metadata" so we only fetch the file
-      //    header (a few KB) until the user actually plays. When playback
-      //    is requested we bump to "auto" to let the browser buffer ahead.
-      audioRef.current.preload = isPlayingRef.current ? 'auto' : 'metadata';
-      audioRef.current.load();
-      if (isPlayingRef.current) {
-        window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
-      }
+        audioSourceCandidatesRef.current = [resolvedSource];
+        audioSourceIndexRef.current = 0;
+        audio.src = resolvedSource;
+        // Load metadata until playback is requested, then allow buffering.
+        audio.preload = isPlayingRef.current ? 'auto' : 'metadata';
+        audio.load();
+        if (isPlayingRef.current) {
+          window.setTimeout(() => attemptPlay(playRequestIdRef.current), 0);
+        }
+      }).catch((error: unknown) => {
+        if (controller.signal.aborted || sourceRequestIdRef.current !== sourceRequestId) return;
+
+        console.error('Error resolving audio source:', error);
+        toast.error(`Can't play "${currentSong.title}"`, {
+          description: 'Audio is temporarily unavailable',
+          duration: 2000,
+        });
+        setPlayerState(prev => ({ ...prev, isPlaying: false, isReady: true }));
+      });
       
       // Update media session metadata
       if ('mediaSession' in navigator) {
@@ -236,6 +231,8 @@ export const useAudioElement = (
         detail: { coverArt: currentSong.coverArt }
       });
       document.dispatchEvent(songChangeEvent);
+
+      return () => controller.abort();
     }
   }, [currentSong, setPlayerState, eventHandlers, attemptPlay]);
 
