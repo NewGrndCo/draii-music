@@ -61,6 +61,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const ADMIN_PASSWORD = Deno.env.get("ADMIN_PASSWORD");
   const SIGNING_SECRET = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");

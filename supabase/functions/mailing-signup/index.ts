@@ -29,6 +29,7 @@ async function geo(ip: string | null) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   try {
@@ -45,12 +46,18 @@ Deno.serve(async (req) => {
     const ua = req.headers.get("user-agent")?.slice(0, 500) ?? null;
     const location = await geo(ip);
 
-    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return json({ error: "Signup is not configured" }, 500);
+    const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
     const { error } = await sb.from("mailing_list").insert({
       email, phone, ip_address: ip, user_agent: ua, ...location,
       zip_code: userZip || (location as any).zip_code || null,
     });
-    if (error) return json({ error: error.message }, 400);
+    if (error) {
+      if (error.code === "23505") return json({ error: "This email is already subscribed" }, 409);
+      return json({ error: "Signup could not be completed" }, 500);
+    }
     return json({ ok: true });
   } catch (e) {
     return json({ error: String(e) }, 500);

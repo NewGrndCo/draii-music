@@ -86,14 +86,17 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   const json = (data: unknown, status = 200) =>
     new Response(JSON.stringify(data), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (!SUPABASE_URL || !SERVICE_ROLE) return json({ error: "Admin service is not configured" }, 500);
 
   try {
     const body = await req.json().catch(() => ({} as any));
