@@ -24,7 +24,7 @@ const AlbumResults: React.FC<AlbumResultsProps> = ({
   const rusdAlbumIndex = albums.findIndex(album => album.id === 'rusd-album');
   
   // Reorganize the albums to put RUSD first if it exists
-  let displayAlbums = [...albums];
+  const displayAlbums = [...albums];
   if (rusdAlbumIndex !== -1) {
     const [rusdAlbum] = displayAlbums.splice(rusdAlbumIndex, 1);
     displayAlbums.unshift(rusdAlbum);

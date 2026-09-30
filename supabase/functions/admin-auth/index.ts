@@ -14,7 +14,7 @@ const TOKEN_TTL_SECONDS = 60 * 60 * 8; // 8 hours
 const enc = new TextEncoder();
 
 function b64url(bytes: Uint8Array): string {
-  let s = btoa(String.fromCharCode(...bytes));
+  const s = btoa(String.fromCharCode(...bytes));
   return s.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
