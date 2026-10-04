@@ -2,9 +2,10 @@ import React, { useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Album, Disc2 } from 'lucide-react';
 import { usePlayer } from '../../contexts/PlayerContext';
+import type { Song } from '@/data/musicData';
 
 interface AlbumCoverDisplayProps {
-  currentSong: any;
+  currentSong: Song | null;
   loading: boolean;
   horizontalMode?: boolean;
 }
@@ -65,7 +66,7 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
     <div
       className={cn(
         'relative overflow-hidden select-none cursor-pointer touch-pan-y',
-        horizontalMode ? 'min-w-[240px] w-[240px] h-[240px]' : 'w-full aspect-square'
+        horizontalMode ? 'w-full aspect-square sm:aspect-auto sm:w-[240px] sm:min-w-[240px] sm:h-[240px]' : 'w-full aspect-square'
       )}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -78,7 +79,7 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
           alt={currentSong.title}
           className="w-full h-full object-cover pointer-events-none"
           loading="eager"
-          {...({ fetchpriority: 'high' } as any)}
+          fetchPriority="high"
           decoding="async"
           draggable={false}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}

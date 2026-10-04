@@ -57,28 +57,27 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
       "relative",
       inFullscreen 
         ? "text-center w-full mb-4" 
-        : "text-center mb-6 p-4"
+        : "text-center mb-6 px-4"
     )}>
       {/* Glowing effect behind logo */}
       <div className={cn(
-        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-xl animate-pulse-slow",
+        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-xl animate-pulse-slow pointer-events-none",
         inFullscreen
           ? "w-16 h-16 bg-purple-500/10"
           : "w-32 h-32 bg-purple-500/20"
       )}></div>
       
       {/* Logo image instead of text */}
-      <div className="flex justify-center mb-2 relative">
+      <button type="button" onClick={handleLogoClick} aria-label="Toggle player theme" className="flex justify-center mb-3 relative mx-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
         <img 
           src={logoUrl} 
-          alt="Artist Logo" 
+          alt="Draii Rynell"
           className={cn(
-            "relative z-10 animate-scale drop-shadow-lg cursor-pointer object-contain",
-            inFullscreen ? "h-12" : "h-24"
+            "relative z-10 drop-shadow-lg object-contain",
+            inFullscreen ? "h-12" : "h-20 sm:h-24"
           )}
-          onClick={handleLogoClick}
         />
-      </div>
+      </button>
       
       {/* Location with icon */}
       <div className="flex items-center justify-center mb-1">
@@ -87,27 +86,27 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ inFullscreen = false }) => {
       </div>
       
       {/* Bio from artist profile (admin-editable) */}
-      <p className={cn("text-white/70 mb-1 italic whitespace-pre-line", inFullscreen ? "text-[8px]" : "text-xs")}>
+      <p className={cn("text-white/70 mb-1 italic whitespace-pre-line max-w-md mx-auto leading-relaxed", inFullscreen ? "text-xs" : "text-xs sm:text-sm")}>
         {bioText || '[𝐚 𝐦𝐢𝐱] : between 𝒏𝒐𝒔𝒕𝒂𝒍𝒈𝒊𝒄 melodies and αмвιєηт progressions..'}
       </p>
 
-      <p className={cn("text-white/50 mt-1", inFullscreen ? "text-[8px]" : "text-xs")}>
+      <p className={cn("text-white/50 mt-1", inFullscreen ? "text-xs" : "text-xs")}>
         R&B/Soul/Hip-Hop/Reggae
       </p>
 
       {!inFullscreen && (
         <div className="flex items-center justify-center mt-3 gap-4 flex-wrap">
           {[
-            { url: socials.instagram || 'https://instagram.com/draiirynell', Icon: Instagram },
-            { url: socials.twitter   || 'https://x.com/ruseriousdraii',     Icon: Twitter },
-            { url: socials.facebook,                                         Icon: Facebook },
-            { url: socials.youtube   || 'https://youtube.com/@draiirynell',  Icon: Youtube },
-            { url: socials.tiktok,                                           Icon: Music2 },
-            { url: socials.spotify,                                          Icon: Music2 },
-            { url: socials.apple,                                            Icon: Music2 },
-          ].filter(s => s.url && s.url.trim()).map(({ url, Icon }, i) => (
-            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors">
-              <Icon size={20} />
+            { url: socials.instagram || 'https://instagram.com/draiirynell', Icon: Instagram, label: 'Instagram' },
+            { url: socials.twitter   || 'https://x.com/ruseriousdraii', Icon: Twitter, label: 'X' },
+            { url: socials.facebook, Icon: Facebook, label: 'Facebook' },
+            { url: socials.youtube   || 'https://youtube.com/@draiirynell', Icon: Youtube, label: 'YouTube' },
+            { url: socials.tiktok, Icon: Music2, label: 'TikTok' },
+            { url: socials.spotify, Icon: Music2, label: 'Spotify' },
+            { url: socials.apple, Icon: Music2, label: 'Apple Music' },
+          ].filter(s => s.url && s.url.trim()).map(({ url, Icon, label }) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer" aria-label={label} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-full text-white/65 hover:text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white transition-colors">
+              <Icon size={19} aria-hidden="true" />
             </a>
           ))}
         </div>

@@ -1,17 +1,15 @@
 
 #root {
-  max-width: 1280px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2.5rem);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  /* Improve performance with GPU acceleration */
-  transform: translateZ(0);
-  will-change: transform;
+  min-height: 100dvh;
   font-family: var(--font-sans);
 }
 
@@ -113,7 +111,7 @@ code, pre {
 /* Improved mobile dialog styles */
 @media (max-width: 640px) {
   #root {
-    padding: 1rem;
+    padding: 1rem 0.875rem 2rem;
   }
   
   /* Make buttons more tappable on mobile */
@@ -136,26 +134,9 @@ code, pre {
     font-family: var(--font-sans) !important;
   }
   
-  /* Ensure proper centering for all modals */
-  [data-radix-popper-content-wrapper], 
-  [data-state="open"] {
-    z-index: 999 !important;
-  }
-
-  /* Center all dialog content properly */
-  [class*="DialogContent"],
-  [class*="PopoverContent"],
-  [class*="HoverCardContent"],
-  [class*="AlertDialogContent"],
-  [class*="TooltipContent"] {
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 90vw !important;
-    max-width: 90vw !important;
-    max-height: 85vh !important;
-    overflow-y: auto !important;
+  [role="dialog"] {
+    max-height: min(85dvh, 48rem);
+    overflow-y: auto;
   }
 }
 

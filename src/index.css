@@ -397,24 +397,17 @@
     touch-action: manipulation;
   }
   
-  /* Better dialog positioning on mobile */
-  [data-radix-popper-content-wrapper], 
-  [data-state="open"] {
-    z-index: 999 !important;
-  }
-
   /* Improved text contrast for small screens */
   h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   }
   
-  /* Better spacing for mobile */
-  .space-y-1 > * + * {
-    margin-top: 0.5rem;
-  }
-  
-  .space-y-2 > * + * {
-    margin-top: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-first, .animate-second, .animate-third, .animate-fourth, .animate-fifth,
+  .animate-scale, .animate-pulse-slow {
+    animation: none !important;
   }
 }
 
