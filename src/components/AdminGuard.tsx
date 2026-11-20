@@ -19,6 +19,8 @@ const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    const expire = () => { setAuthed(false); setPassword(''); };
+    window.addEventListener('admin-session-expired', expire);
     const verify = async () => {
       const token = sessionStorage.getItem(TOKEN_KEY);
       if (!token) {
@@ -41,6 +43,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
       }
     };
     verify();
+    return () => window.removeEventListener('admin-session-expired', expire);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {

@@ -30,8 +30,20 @@ export async function adminCall<T = any>(args: AdminCallArgs): Promise<T> {
   const { data, error } = await supabase.functions.invoke('admin-mutate', {
     body: { token, ...args },
   });
-  if (error) throw new Error(error.message || 'Request failed');
-  if (data?.error) throw new Error(data.error);
+  if (error) {
+    if (error.context instanceof Response && error.context.status === 401) {
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      window.dispatchEvent(new Event('admin-session-expired'));
+    }
+    throw new Error(error.message || 'Request failed');
+  }
+  if (data?.error) {
+    if (data.error === 'Unauthorized') {
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      window.dispatchEvent(new Event('admin-session-expired'));
+    }
+    throw new Error(data.error);
+  }
   return data as T;
 }
 

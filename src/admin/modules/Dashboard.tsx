@@ -78,7 +78,11 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-  if (!data) return null;
+  if (!data) return (
+    <div role="alert" className="admin-glass rounded-2xl p-8 text-center text-white/80">
+      Dashboard data could not be loaded. Refresh to try again.
+    </div>
+  );
 
   const totalPlays = data.songs.reduce((s, x: any) => s + (x.play_count || 0), 0);
   const totalLikes = data.songs.reduce((s, x: any) => s + (x.likes_count || 0), 0);

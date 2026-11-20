@@ -88,7 +88,9 @@ const MailingList: React.FC = () => {
     const lines = [head.join(',')].concat(
       filtered.map(r => head.map(k => {
         const v = (r as any)[k] ?? '';
-        const s = String(v).replace(/"/g, '""');
+        // Spreadsheet apps interpret leading =, +, -, and @ as formulas.
+        const safe = /^[\s\u0000-\u001f]*[=+@-]/.test(String(v)) ? `'${v}` : String(v);
+        const s = safe.replace(/"/g, '""');
         return /[",\n]/.test(s) ? `"${s}"` : s;
       }).join(','))
     );

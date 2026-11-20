@@ -41,13 +41,15 @@ const StatusPill: React.FC<{ label: string; ok?: boolean; icon: React.ElementTyp
 
 const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
   const [stripeOk, setStripeOk] = useState(false);
+  const [databaseOk, setDatabaseOk] = useState(false);
   useEffect(() => {
     adminList<any>('artist_profile')
       .then((rows) => {
+        setDatabaseOk(true);
         const link = (rows?.[0]?.stripe_payment_link || '').trim();
         setStripeOk(/^https?:\/\/.+/i.test(link));
       })
-      .catch(() => setStripeOk(false));
+      .catch(() => { setDatabaseOk(false); setStripeOk(false); });
   }, [active]);
 
   const handleLogout = () => {
@@ -130,7 +132,7 @@ const AdminLayout: React.FC<Props> = ({ active, onChange, children }) => {
               </div>
             </div>
             <div className="hidden md:flex items-center gap-2">
-              <StatusPill label="Database" ok icon={Database} />
+              <StatusPill label="Database" ok={databaseOk} icon={Database} />
               <StatusPill label="Stripe" ok={stripeOk} icon={ShieldCheck} />
             </div>
           </header>
