@@ -45,6 +45,11 @@ export const useAudioElement = (
   const attemptPlay = useCallback(async (requestId = playRequestIdRef.current) => {
     const audio = audioRef.current;
     if (!audio || !currentSongRef.current || !isPlayingRef.current) return;
+    if (document.body.dataset.audioSignupBlocked === 'true') {
+      audio.pause();
+      setPlayerState(prev => ({ ...prev, isPlaying: false }));
+      return;
+    }
 
     try {
       if (playPromiseRef.current) {

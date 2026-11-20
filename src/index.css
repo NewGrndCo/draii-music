@@ -330,6 +330,17 @@
   animation: fifth 22s infinite linear;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-first, .animate-second, .animate-third, .animate-fourth, .animate-fifth,
+  .animate-glow, .animate-spin-slow, .animate-pulse-slow {
+    animation: none !important;
+  }
+  .player-container, .player-container * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Removing scale animation and replacing with a simpler static class */
 .static-scale {
   transform: scale(1);

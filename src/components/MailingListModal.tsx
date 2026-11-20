@@ -54,19 +54,15 @@ const MailingListModal: React.FC = () => {
     }
   }, [profile, required, modalEnabled, hasSeen, isSharedLink]);
 
-  // Block audio playback while a required signup is pending
+  // Keep the required gate in one place so the audio player can reject new play requests.
   useEffect(() => {
-    if (isSharedLink) return;
-    if (!required || hasSeen) return;
-    const pauseAll = () => {
-      document.querySelectorAll('audio').forEach((a) => {
-        try { (a as HTMLAudioElement).pause(); } catch {}
-      });
-    };
-    pauseAll();
-    const id = window.setInterval(pauseAll, 400);
-    return () => window.clearInterval(id);
-  }, [required, hasSeen, open, isSharedLink]);
+    const blocked = required && !hasSeen && !success && !isSharedLink;
+    document.body.dataset.audioSignupBlocked = String(blocked);
+    if (blocked) {
+      document.querySelectorAll('audio').forEach((audio) => audio.pause());
+    }
+    return () => { delete document.body.dataset.audioSignupBlocked; };
+  }, [required, hasSeen, success, isSharedLink]);
 
   const dismiss = () => {
     if (required && !success) return; // cannot dismiss when required

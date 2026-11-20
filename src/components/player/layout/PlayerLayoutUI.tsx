@@ -45,11 +45,11 @@ const PlayerLayoutUI: React.FC<PlayerLayoutUIProps> = ({
       
       <div ref={playerContainerRef} className={cn("player-container backdrop-blur-sm transition-all duration-300 static-scale relative overflow-hidden", darkMode ? "bg-transparent border border-white/5 shadow-lg" : simpleTheme ? "bg-transparent border border-white/5 shadow-lg" : "bg-transparent border border-white/10 shadow-lg", horizontalMode ? "max-w-3xl w-full mx-auto rounded-lg overflow-hidden flex music-library-fullscreen" : isMobile ? "max-w-[95vw] w-full mx-auto rounded-lg overflow-hidden" : "max-w-sm w-full mx-auto rounded-lg overflow-hidden")}>
         {/* Dark mode toggle using logo/album art */}
-        <div onClick={onToggleDarkMode} className="absolute top-2 left-2 z-10 cursor-pointer opacity-0 hover:opacity-100 transition-opacity">
-          <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white/70 hover:text-white">
+        <button type="button" onClick={onToggleDarkMode} aria-label={darkMode ? 'Switch to color theme' : 'Switch to dark theme'} aria-pressed={darkMode} className="absolute top-2 left-2 z-10 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+          <span className="w-11 h-11 rounded-full bg-black/50 flex items-center justify-center text-white/80 hover:text-white">
             {darkMode ? "☀️" : "🌙"}
-          </div>
-        </div>
+          </span>
+        </button>
         
         {/* Fullscreen button for horizontal mode */}
         {horizontalMode && <button onClick={onToggleFullscreen} className="absolute top-2 right-2 z-10 rounded-full p-1.5 transition-colors bg-black/40 hover:bg-black/60 text-white/70 hover:text-white" title="Toggle fullscreen">

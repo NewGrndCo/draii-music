@@ -168,13 +168,14 @@ const AppBackground: React.FC<AppBackgroundProps> = ({
         secondColor={gradientColors.secondColor}
         thirdColor={gradientColors.thirdColor}
         blendingValue="soft-light"
+        interactive={false}
         className="fixed top-0 left-0 w-full h-full z-0"
         containerClassName="fixed top-0 left-0 w-full h-full"
       >
         {backgroundImage && !darkMode && (
           <div className="absolute inset-0 z-0 overflow-hidden">
             <div 
-              className="absolute inset-0 bg-cover bg-center opacity-20 scale-110 bg-fixed"
+              className="absolute inset-0 bg-cover bg-center opacity-20 scale-110"
               style={{ backgroundImage: `url(${backgroundImage})` }}
             >
               <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-black"></div>

@@ -98,7 +98,7 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
     return (
       <button
         onClick={() => setOpenAlbum(album)}
-        className="group text-left flex flex-col gap-2 focus:outline-none"
+        className="group text-left flex flex-col gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white/[0.04] shadow-lg ring-1 ring-white/5 group-hover:ring-white/15 transition">
           <img
@@ -111,7 +111,7 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
         </div>
         <div className="min-w-0 px-0.5">
           <div className="text-sm font-semibold text-white truncate">{album.title}</div>
-          <div className="text-[10px] text-white/55 uppercase tracking-widest truncate">
+          <div className="text-xs text-white/70 uppercase tracking-wide truncate">
             {(album.type || 'album').toUpperCase()} · {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
           </div>
         </div>
@@ -122,7 +122,10 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   const songsView = (list: Song[]) => (
     <div className="space-y-0.5">
       {list.length === 0 ? (
-        <div className="text-sm text-white/45 px-3 py-12 text-center">No songs found</div>
+        <div className="text-sm text-white/70 px-3 py-12 text-center">
+          {query.trim() ? `No matches for “${query.trim()}”` : 'No songs available in this section yet'}
+          {query.trim() && <button className="block mx-auto mt-3 underline focus-visible:outline-white" onClick={() => setQuery('')}>Clear search</button>}
+        </div>
       ) : (
         list.map((s, i) => (
           <AppleStyleSongRow key={s.id} song={s} index={i} onSelect={(song) => { onSelectSong(song); onClose(); }} />
@@ -134,7 +137,10 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   const albumsView = (
     <div>
       {filteredAlbums.length === 0 ? (
-        <div className="text-sm text-white/45 px-3 py-12 text-center">No albums yet</div>
+        <div className="text-sm text-white/70 px-3 py-12 text-center">
+          {query.trim() ? `No matches for “${query.trim()}”` : 'No albums available yet'}
+          {query.trim() && <button className="block mx-auto mt-3 underline focus-visible:outline-white" onClick={() => setQuery('')}>Clear search</button>}
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 px-1 pt-1">
           {filteredAlbums.map((a) => <AlbumCard key={a.id} album={a} />)}
@@ -179,10 +185,11 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search songs, albums, artists"
-                  className="w-full bg-white/[0.08] border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25"
+                  aria-label="Search songs, albums, artists"
+                  className="w-full bg-white/[0.08] border border-white/20 rounded-xl pl-9 pr-9 py-3 text-sm text-white placeholder:text-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 />
                 {query && (
-                  <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-1">
+                  <button onClick={() => setQuery('')} aria-label="Clear search" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
                     <X size={14} />
                   </button>
                 )}

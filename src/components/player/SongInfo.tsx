@@ -54,7 +54,7 @@ const SongInfo: React.FC<SongInfoProps> = ({
   return <div className="text-center relative">
       {currentSong ? <>
           <div className="absolute right-0 top-0 flex items-center">
-            <button onClick={handleShare} aria-label="Share song" title="Share song link" className="text-white/60 hover:text-white transition-colors p-1 rounded-full text-base mx-0 px-[29px] py-[91px]">
+            <button onClick={handleShare} aria-label="Share song" title="Share song link" className="text-white/70 hover:text-white transition-colors w-11 h-11 inline-flex items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
               <Share2 size={18} />
             </button>
           </div>
