@@ -58,6 +58,7 @@ const MailingListModal: React.FC = () => {
   useEffect(() => {
     const blocked = required && !hasSeen && !success && !isSharedLink;
     document.body.dataset.audioSignupBlocked = String(blocked);
+    document.dispatchEvent(new CustomEvent('audio-signup-gate-change', { detail: { blocked } }));
     if (blocked) {
       document.querySelectorAll('audio').forEach((audio) => audio.pause());
     }

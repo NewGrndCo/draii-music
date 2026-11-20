@@ -42,6 +42,17 @@ export const useAudioElement = (
     isPlayingRef.current = playerState.isPlaying;
   }, [playerState.isPlaying]);
 
+  useEffect(() => {
+    const handleSignupGate = (event: Event) => {
+      if (!(event as CustomEvent<{ blocked: boolean }>).detail.blocked) return;
+      audioRef.current?.pause();
+      isPlayingRef.current = false;
+      setPlayerState(prev => ({ ...prev, isPlaying: false }));
+    };
+    document.addEventListener('audio-signup-gate-change', handleSignupGate);
+    return () => document.removeEventListener('audio-signup-gate-change', handleSignupGate);
+  }, [setPlayerState]);
+
   const attemptPlay = useCallback(async (requestId = playRequestIdRef.current) => {
     const audio = audioRef.current;
     if (!audio || !currentSongRef.current || !isPlayingRef.current) return;
