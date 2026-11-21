@@ -1,5 +1,5 @@
 import type { Config, Context } from '@netlify/edge-functions';
-import { supabaseUrl, supabaseKey } from './song-preview-config.ts';
+import { supabaseUrl, supabaseKey } from '../song-preview-config.ts';
 
 type Song = { id: string; slug: string | null; title: string; artist: string; thumbnail_path: string | null; hidden: boolean };
 type ReleaseTrack = { release: { cover_path: string | null; visibility: string } | null };
