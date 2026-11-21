@@ -4,13 +4,13 @@ import { useAudio } from '../hooks/useAudio';
 import { useMusicLibrary } from '../hooks/useMusicLibrary';
 import { usePlaybackHandlers } from '../components/player/hooks/usePlaybackHandlers';
 import { usePlayerEffects } from '../components/player/hooks/usePlayerEffects';
-import { Song } from '../data/musicData';
+import { Album, Song } from '../data/musicData';
 import { AudioPlayerState } from '../hooks/audio/useAudioState';
 
 interface PlayerContextValue {
   currentSong: Song | null;
   playerState: AudioPlayerState;
-  albums: any[];
+  albums: Album[];
   loading: boolean;
 
   playSong: (song: Song) => void;
@@ -31,13 +31,14 @@ interface PlayerContextValue {
   likesCount: number;
   gradientColor: string;
   showLibrary: boolean;
+  libraryAlbumSlug: string | null;
   heartAnimation: boolean;
   playNextSong: () => void;
   playPreviousSong: () => void;
   toggleLike: () => void;
   handleSelectSong: (song: Song) => void;
   toggleLayout: () => void;
-  openLibrary: (showAllCovers: boolean) => void;
+  openLibrary: (showAllCovers: boolean, albumSlug?: string) => void;
   closeLibrary: () => void;
   handleVolumeChange: (values: number[]) => void;
 

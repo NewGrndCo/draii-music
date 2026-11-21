@@ -1,9 +1,10 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { Square, DollarSign, ExternalLink } from 'lucide-react';
+import { Square, DollarSign, ExternalLink, Moon, Sun } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 const DonateDialog = lazy(() => import('./DonateDialog'));
 import { usePlayer } from '../../contexts/PlayerContext';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import { useDarkMode } from './theme/DarkModeProvider';
 
 interface VolumeControlProps {
   volume?: number;
@@ -15,6 +16,7 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ toggleLayout }) => {
   const [donateOpen, setDonateOpen] = useState(false);
   const { currentSong } = usePlayer();
   const { profile } = useArtistProfile();
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   const supportEnabled = profile?.support_fund_enabled !== false;
 
@@ -55,6 +57,9 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ toggleLayout }) => {
       </div>
 
       <div className="flex items-center gap-3">
+        <button type="button" onClick={toggleDarkMode} aria-label={darkMode ? 'Switch to color theme' : 'Switch to dark theme'} aria-pressed={darkMode} className="text-white/80 hover:text-white p-2 touch-manipulation" style={{ minHeight: '44px', minWidth: '44px' }}>
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
         {supportEnabled && (
           <TooltipProvider>

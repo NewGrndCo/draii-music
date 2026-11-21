@@ -52,9 +52,9 @@ const PlayerGlowEffects: React.FC<PlayerGlowEffectsProps> = ({
           <>
             {/* Animated gradient blobs */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-              <div className="absolute top-[10%] left-[20%] w-32 h-32 rounded-full bg-music-blue/20 blur-2xl mix-blend-screen animate-spin-slow"></div>
-              <div className="absolute bottom-[20%] right-[10%] w-48 h-48 rounded-full bg-music-purple/20 blur-2xl mix-blend-screen animate-spin-slow" style={{ animationDirection: 'reverse' }}></div>
-              <div className="absolute top-[40%] right-[30%] w-24 h-24 rounded-full bg-music-pink/20 blur-2xl mix-blend-screen animate-spin-slow" style={{ animationDuration: '15s' }}></div>
+              <div className="absolute top-[10%] left-[20%] w-32 h-32 rounded-full bg-music-blue/20 blur-2xl mix-blend-screen"></div>
+              <div className="absolute bottom-[20%] right-[10%] w-48 h-48 rounded-full bg-music-purple/20 blur-2xl mix-blend-screen"></div>
+              <div className="absolute top-[40%] right-[30%] w-24 h-24 rounded-full bg-music-pink/20 blur-2xl mix-blend-screen"></div>
             </div>
           </>
         )}
@@ -76,16 +76,6 @@ const PlayerGlowEffects: React.FC<PlayerGlowEffectsProps> = ({
         />
       )}
       
-      {/* Sleek sci-fi border glow effect */}
-      {!simpleTheme && !darkMode && (
-        <div 
-          className={cn(
-            "absolute inset-0 rounded-lg z-0",
-            "animate-glow",
-            "pointer-events-none"
-          )}
-        />
-      )}
     </>
   );
 };

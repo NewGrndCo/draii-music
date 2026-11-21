@@ -5,21 +5,20 @@ import SocialLinks from '../SocialLinks';
 import PlayerGlowEffects from '../PlayerGlowEffects';
 import AlbumCoverDisplay from '../AlbumCoverDisplay';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Song } from '../../../data/musicData';
 interface PlayerLayoutUIProps {
   gradientColor: string;
   lightPosition: {
     x: number;
     y: number;
   };
-  currentSong: any;
+  currentSong: Song | null;
   loading: boolean;
   horizontalMode: boolean;
   isFullscreen: boolean;
   simpleTheme: boolean;
-  darkMode?: boolean;
   onShowLibrary: () => void;
   onToggleFullscreen: () => void;
-  onToggleDarkMode: () => void;
   playerContainerRef: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
 }
@@ -31,10 +30,8 @@ const PlayerLayoutUI: React.FC<PlayerLayoutUIProps> = ({
   horizontalMode,
   isFullscreen,
   simpleTheme,
-  darkMode = false,
   onShowLibrary,
   onToggleFullscreen,
-  onToggleDarkMode,
   playerContainerRef,
   children
 }) => {
@@ -43,13 +40,7 @@ const PlayerLayoutUI: React.FC<PlayerLayoutUIProps> = ({
       {/* Only render SocialLinks outside player in non-fullscreen mode */}
       {!isFullscreen && <SocialLinks />}
       
-      <div ref={playerContainerRef} className={cn("player-container backdrop-blur-sm transition-all duration-300 static-scale relative overflow-hidden", darkMode ? "bg-transparent border border-white/5 shadow-lg" : simpleTheme ? "bg-transparent border border-white/5 shadow-lg" : "bg-transparent border border-white/10 shadow-lg", horizontalMode ? "max-w-3xl w-full mx-auto rounded-lg overflow-hidden flex music-library-fullscreen" : isMobile ? "max-w-[95vw] w-full mx-auto rounded-lg overflow-hidden" : "max-w-sm w-full mx-auto rounded-lg overflow-hidden")}>
-        {/* Dark mode toggle using logo/album art */}
-        <button type="button" onClick={onToggleDarkMode} aria-label={darkMode ? 'Switch to color theme' : 'Switch to dark theme'} aria-pressed={darkMode} className="absolute top-2 left-2 z-10 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
-          <span className="w-11 h-11 rounded-full bg-black/50 flex items-center justify-center text-white/80 hover:text-white">
-            {darkMode ? "☀️" : "🌙"}
-          </span>
-        </button>
+      <div ref={playerContainerRef} className={cn("player-container static-scale relative overflow-hidden bg-transparent", horizontalMode ? "max-w-3xl w-full mx-auto rounded-lg overflow-hidden flex music-library-fullscreen" : isMobile ? "max-w-[95vw] w-full mx-auto rounded-lg overflow-hidden" : "max-w-sm w-full mx-auto rounded-lg overflow-hidden")}>
         
         {/* Fullscreen button for horizontal mode */}
         {horizontalMode && <button onClick={onToggleFullscreen} className="absolute top-2 right-2 z-10 rounded-full p-1.5 transition-colors bg-black/40 hover:bg-black/60 text-white/70 hover:text-white" title="Toggle fullscreen">

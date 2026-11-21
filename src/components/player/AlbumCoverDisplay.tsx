@@ -1,10 +1,11 @@
 import React, { useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Album, Disc2 } from 'lucide-react';
+import { Song } from '../../data/musicData';
 import { usePlayer } from '../../contexts/PlayerContext';
 
 interface AlbumCoverDisplayProps {
-  currentSong: any;
+  currentSong: Song | null;
   loading: boolean;
   horizontalMode?: boolean;
 }
@@ -14,7 +15,13 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
   loading,
   horizontalMode = false,
 }) => {
-  const { playNextSong, playPreviousSong, openLibrary } = usePlayer();
+  const { playNextSong, playPreviousSong, openLibrary, albums } = usePlayer();
+  const openCurrentRelease = useCallback(() => {
+    if (!currentSong) return;
+    const releases = albums.filter((album) => album.id !== 'singles-pool' && album.songs?.some((song: Song) => song.id === currentSong.id));
+    const release = releases.find((album) => album.coverArt === currentSong.coverArt) || releases[0];
+    openLibrary(horizontalMode, release?.slug || release?.id || 'singles-pool');
+  }, [albums, currentSong, horizontalMode, openLibrary]);
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -49,17 +56,17 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
     if (absX < 10 && absY < 10) {
       const now = Date.now();
       if (now - lastTap.current < 300) {
-        openLibrary(horizontalMode);
+        openCurrentRelease();
         lastTap.current = 0;
       } else {
         lastTap.current = now;
       }
     }
-  }, [playNextSong, playPreviousSong, openLibrary, horizontalMode]);
+  }, [playNextSong, playPreviousSong, openCurrentRelease]);
 
   const onDoubleClick = useCallback(() => {
-    openLibrary(horizontalMode);
-  }, [openLibrary, horizontalMode]);
+    openCurrentRelease();
+  }, [openCurrentRelease]);
 
   return (
     <div
@@ -78,7 +85,7 @@ const AlbumCoverDisplay: React.FC<AlbumCoverDisplayProps> = ({
           alt={currentSong.title}
           className="w-full h-full object-cover pointer-events-none"
           loading="eager"
-          {...({ fetchpriority: 'high' } as any)}
+          fetchPriority="high"
           decoding="async"
           draggable={false}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}

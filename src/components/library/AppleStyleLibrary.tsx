@@ -26,6 +26,23 @@ const TABS: { key: Tab; label: string }[] = [
 
 const ALBUM_TAB_TYPES = ['album', 'ep', 'compilation', 'collaboration', 'mixtape'];
 
+const AlbumCard = React.memo(({ album, onOpen }: { album: Album; onOpen: (album: Album) => void }) => (
+  <button
+    onClick={() => onOpen(album)}
+    className="group text-left flex flex-col gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+  >
+    <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white/[0.04] group-hover:bg-white/[0.08] transition-colors">
+      <img src={album.coverArt} alt={album.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+    </div>
+    <div className="min-w-0 px-0.5">
+      <div className="text-sm font-semibold text-white truncate">{album.title}</div>
+      <div className="text-xs text-white/70 uppercase tracking-wide truncate">
+        {(album.type || 'album').toUpperCase()} · {album.songs?.length || 0} {(album.songs?.length || 0) === 1 ? 'track' : 'tracks'}
+      </div>
+    </div>
+  </button>
+));
+
 const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isVisible, initialAlbumSlug }) => {
   const [tab, setTab] = useState<Tab>('albums');
   const [query, setQuery] = useState('');
@@ -33,10 +50,10 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
 
   // Auto-open an album when arriving via a shared link (?a=<slug>).
   React.useEffect(() => {
-    if (!isVisible || !initialAlbumSlug || openAlbum) return;
+    if (!isVisible || !initialAlbumSlug) return;
     const match = albums.find((a) => a.slug === initialAlbumSlug || a.id === initialAlbumSlug);
     if (match) setOpenAlbum(match);
-  }, [isVisible, initialAlbumSlug, albums, openAlbum]);
+  }, [isVisible, initialAlbumSlug, albums]);
 
   // Flatten all songs across albums + standalone pool, dedup by id.
   const allSongs = useMemo(() => {
@@ -81,7 +98,8 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   };
   const filteredAlbums = useMemo(() => {
     if (!query.trim()) return realAlbums;
-    return realAlbums.filter((a) => matchesQuery(a.title) || matchesQuery(a.artist));
+    const search = query.trim().toLowerCase();
+    return realAlbums.filter((a) => a.title.toLowerCase().includes(search) || a.artist.toLowerCase().includes(search));
   }, [realAlbums, query]);
 
   React.useEffect(() => {
@@ -92,32 +110,6 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   }, [isVisible]);
 
   if (!isVisible) return null;
-
-  const AlbumCard: React.FC<{ album: Album }> = ({ album }) => {
-    const trackCount = album.songs?.length || 0;
-    return (
-      <button
-        onClick={() => setOpenAlbum(album)}
-        className="group text-left flex flex-col gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-      >
-        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white/[0.04] shadow-lg ring-1 ring-white/5 group-hover:ring-white/15 transition">
-          <img
-            src={album.coverArt}
-            alt={album.title}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-          />
-        </div>
-        <div className="min-w-0 px-0.5">
-          <div className="text-sm font-semibold text-white truncate">{album.title}</div>
-          <div className="text-xs text-white/70 uppercase tracking-wide truncate">
-            {(album.type || 'album').toUpperCase()} · {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
-          </div>
-        </div>
-      </button>
-    );
-  };
 
   const songsView = (list: Song[]) => (
     <div className="space-y-0.5">
@@ -143,7 +135,7 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 px-1 pt-1">
-          {filteredAlbums.map((a) => <AlbumCard key={a.id} album={a} />)}
+          {filteredAlbums.map((a) => <AlbumCard key={a.id} album={a} onOpen={setOpenAlbum} />)}
         </div>
       )}
     </div>
@@ -160,7 +152,7 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/95" onClick={onClose}>
       <div className="max-w-3xl mx-auto h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3">
@@ -236,4 +228,4 @@ const AppleStyleLibrary: React.FC<Props> = ({ albums, onSelectSong, onClose, isV
   );
 };
 
-export default AppleStyleLibrary;
+export default React.memo(AppleStyleLibrary);

@@ -12,7 +12,6 @@ import RecentlyPlayed from './RecentlyPlayed';
 import ArtistAbout from './ArtistAbout';
 import TrendingSongs from './TrendingSongs';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
-import { useMusicLibrary } from '@/hooks/useMusicLibrary';
 import { useLivePresence } from '@/hooks/useLivePresence';
 
 const PlayerContentView: React.FC = () => {
@@ -22,11 +21,10 @@ const PlayerContentView: React.FC = () => {
     formatTime, toggleLike, togglePlayPause,
     toggleRepeat, playNextSong, playPreviousSong, skipForward,
     skipBackward, seekTo, handleVolumeChange, toggleLayout,
-    handleSelectSong, openLibrary
+    handleSelectSong, openLibrary, albums
   } = usePlayer();
 
   const { profile } = useArtistProfile();
-  const { albums } = useMusicLibrary();
   const allSongs = React.useMemo(() => albums.flatMap((a) => a.songs || []), [albums]);
   // Track this listener as live for the admin dashboard, including now-playing
   useLivePresence(!!currentSong, currentSong ? {

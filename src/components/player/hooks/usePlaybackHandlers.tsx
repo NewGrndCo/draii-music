@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useMemo } from 'react';
-import { Song } from '../../../data/musicData';
+import { Album, Song } from '../../../data/musicData';
 import { useNextSongs } from './useNextSongs';
 import { useSongStats } from './useSongStats';
 import { useGradientColor } from './useGradientColor';
@@ -8,7 +8,7 @@ import { usePlayerUI } from './usePlayerUI';
 
 export const usePlaybackHandlers = (
   currentSong: Song | null,
-  albums: any[],
+  albums: Album[],
   playSong: (song: Song) => void,
   seekTo: (time: number) => void,
   skipForward: () => void,
@@ -22,6 +22,7 @@ export const usePlaybackHandlers = (
     horizontalMode,
     showLibrary,
     showAllCovers,
+    libraryAlbumSlug,
     toggleLayout,
     openLibrary,
     closeLibrary,
@@ -31,9 +32,9 @@ export const usePlaybackHandlers = (
   const currentSongCoverArt = currentSong?.coverArt;
 
   useEffect(() => {
-    if (currentSong && currentSongCoverArt) {
+    if (currentSongId && currentSongCoverArt) {
       updateGradientColor(currentSongCoverArt);
-      updatePlayHistory(currentSong.id);
+      updatePlayHistory(currentSongId);
     }
   }, [currentSongId, currentSongCoverArt, updateGradientColor, updatePlayHistory]);
 
@@ -92,6 +93,7 @@ export const usePlaybackHandlers = (
     gradientColor,
     showLibrary,
     showAllCovers,
+    libraryAlbumSlug,
     heartAnimation,
     playNextSong,
     playPreviousSong,
@@ -103,7 +105,7 @@ export const usePlaybackHandlers = (
     handleVolumeChange,
   }), [
     nextSongs, recentSongs, liked, horizontalMode, playCount, likesCount, gradientColor,
-    showLibrary, showAllCovers, heartAnimation, playNextSong, playPreviousSong,
+    showLibrary, showAllCovers, libraryAlbumSlug, heartAnimation, playNextSong, playPreviousSong,
     toggleLike, handleSelectSong, toggleLayout, openLibrary, closeLibrary, handleVolumeChange,
   ]);
 };

@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Song } from '../../data/musicData';
 import { cn } from '@/lib/utils';
 import PlayerLayoutUI from './layout/PlayerLayoutUI';
-import { useDarkMode } from './theme/DarkModeProvider';
 
 interface PlayerLayoutProps {
   children: React.ReactNode;
@@ -27,7 +26,6 @@ const PlayerLayout: React.FC<PlayerLayoutProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [simpleTheme, setSimpleTheme] = useState(false);
   const playerContainerRef = useRef<HTMLDivElement>(null);
-  const { darkMode, toggleDarkMode } = useDarkMode();
   
   // Handle fullscreen toggle
   const toggleFullscreen = () => {
@@ -76,10 +74,8 @@ const PlayerLayout: React.FC<PlayerLayoutProps> = ({
       horizontalMode={horizontalMode}
       isFullscreen={isFullscreen}
       simpleTheme={simpleTheme}
-      darkMode={darkMode}
       onShowLibrary={showLibrary}
       onToggleFullscreen={toggleFullscreen}
-      onToggleDarkMode={toggleDarkMode}
       playerContainerRef={playerContainerRef}
     >
       {children}

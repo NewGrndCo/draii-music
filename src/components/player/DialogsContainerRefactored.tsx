@@ -1,12 +1,11 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../contexts/PlayerContext';
 
 const MusicLibrary = lazy(() => import('../MusicLibrary'));
 
 const DialogsContainer: React.FC = () => {
-  const { albums, loading, showLibrary, closeLibrary, handleSelectSong, openLibrary } = usePlayer();
-  const [sharedAlbumSlug, setSharedAlbumSlug] = useState<string | null>(null);
+  const { albums, loading, showLibrary, closeLibrary, handleSelectSong, openLibrary, libraryAlbumSlug } = usePlayer();
   const handledRef = useRef(false);
   const { slug } = useParams<{ slug?: string }>();
   const navigate = useNavigate();
@@ -20,9 +19,8 @@ const DialogsContainer: React.FC = () => {
     const match = albums.find((a) => a.slug === key || a.id === key);
     if (!match) return;
     handledRef.current = true;
-    setSharedAlbumSlug(key);
-    openLibrary(true);
     if (match.songs?.[0]) handleSelectSong(match.songs[0]);
+    openLibrary(true, key);
     // Clean the URL back to root without a full navigation.
     if (params.get('a')) {
       const url = new URL(window.location.href);
@@ -44,7 +42,7 @@ const DialogsContainer: React.FC = () => {
         isLoading={loading}
         darkMode={false}
         onToggleDarkMode={() => {}}
-        initialAlbumSlug={sharedAlbumSlug}
+        initialAlbumSlug={libraryAlbumSlug}
       />
     </Suspense>
   );
